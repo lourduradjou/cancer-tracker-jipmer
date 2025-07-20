@@ -127,7 +127,7 @@ export default function PatientTable({
 						<TableHead className='border-r border-border'>
 							Diseases
 						</TableHead>
-						<TableHead>Actions</TableHead>
+						<TableHead className='text-center'>Actions</TableHead>
 					</TableRow>
 				</TableHeader>
 

@@ -11,6 +11,7 @@ import PatientFilter from './PatientFilter'
 import AddPatientDialog from './AddPatientDialog'
 import { Patient } from '@/types/patient'
 import { exportToCSV, exportToExcel } from '@/lib/exportUtils'
+import { usePathname } from 'next/navigation'
 
 export default function PatientToolbar({
 	searchTerm,
@@ -31,9 +32,14 @@ export default function PatientToolbar({
 	exportData: any[]
 	setPatients: React.Dispatch<React.SetStateAction<Patient[]>>
 }) {
+	const pathname = usePathname()
+	const userRole = pathname.includes('/nurse')
+		? 'Nurse Dashboard'
+		: 'Doctor Dashboard'
+
 	return (
 		<div className='flex justify-between items-center mb-4'>
-			<h1 className='text-2xl font-bold'>👨‍⚕️ Doctor Dashboard</h1>
+			<h1 className='text-2xl font-bold'>{userRole}</h1>
 			<div className='flex gap-2 items-center'>
 				<PatientFilter
 					searchTerm={searchTerm}

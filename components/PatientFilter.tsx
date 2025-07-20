@@ -59,14 +59,14 @@ export default function PatientFilter({
 
 	return (
 		<div className="flex flex-col md:flex-row md:items-center gap-4">
-			<div className="relative w-full md:w-[250px]">
+			<div className="relative w-full md:w-[450px]">
 				<Keyboard className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 				<Input
 					ref={searchRef}
 					value={searchTerm}
 					onChange={(e) => setSearchTerm(e.target.value)}
-					placeholder="Search (Ctrl + K)"
-					className="pl-8 bg-sidebar"
+					placeholder="Search via name, aadhaar, aabha number (shortcut: Ctrl + K)"
+					className="pl-8 bg-sidebar w-full"
 				/>
 			</div>
 

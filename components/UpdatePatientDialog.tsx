@@ -88,25 +88,25 @@ export default function UpdatePatientDialog({
 					<DialogTitle>Update Patient</DialogTitle>
 				</DialogHeader>
 				<div className="grid grid-cols-2 gap-6 mt-4">
-					{/* LEFT COLUMN */}
-					<div className="space-y-4">
-						{[
-							{ label: 'Name', field: 'name' },
-							{ label: 'Phone Number', field: 'phoneNumber' },
-							{ label: 'Sex', field: 'sex' },
-							{ label: 'DOB', field: 'dob' },
-							{ label: 'Address', field: 'address' },
-						].map(({ label, field }) => (
-							<div key={field}>
-								<Label className="mb-1 block">{label}</Label>
-								<Input
-									value={(patient[field as keyof Patient] as string) || ''}
-									onChange={(e) => handleChange(field as keyof Patient, e.target.value)}
-									placeholder={label}
-								/>
-							</div>
-						))}
-					</div>
+						{/* LEFT COLUMN */}
+						<div className="space-y-4">
+							{[
+								{ label: 'Name', field: 'name' },
+								{ label: 'Phone Number', field: 'phoneNumber' },
+								{ label: 'Sex', field: 'sex' },
+								{ label: 'DOB', field: 'dob' },
+								{ label: 'Address', field: 'address' },
+							].map(({ label, field }) => (
+								<div key={field}>
+									<Label className="mb-1 block">{label}</Label>
+									<Input
+										value={(patient[field as keyof Patient] as string) || ''}
+										onChange={(e) => handleChange(field as keyof Patient, e.target.value)}
+										placeholder={label}
+									/>
+								</div>
+							))}
+						</div>
 
 					{/* RIGHT COLUMN */}
 					<div className="space-y-4">
@@ -155,8 +155,8 @@ export default function UpdatePatientDialog({
 						</div>
 					</div>
 				</div>
-				<DialogFooter className="pt-6">
-					<Button onClick={handleUpdate}>Save Changes</Button>
+				<DialogFooter className="pt-6 w-full">
+					<Button onClick={handleUpdate} className='w-full'>Save Changes</Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
