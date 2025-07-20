@@ -113,7 +113,9 @@ export default function AshaPage() {
 
 	return (
 		<main className='p-4 mt-4'>
-			<h1 className='text-xl font-bold text-center mb-4'>👩‍⚕️ Your Work</h1>
+			<h1 className='text-xl font-bold text-center mb-4'>
+				Your Assigned Patients
+			</h1>
 
 			{patients.length === 0 ? (
 				<p className='text-center text-gray-500 text-sm'>
