@@ -1,28 +1,28 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { addDoc, collection } from 'firebase/firestore'
-import { db } from '@/firebase'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
 	Dialog,
-	DialogTrigger,
 	DialogContent,
+	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-	DialogFooter,
+	DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import {
 	Popover,
-	PopoverTrigger,
 	PopoverContent,
+	PopoverTrigger,
 } from '@/components/ui/popover'
-import { Checkbox } from '@/components/ui/checkbox'
+import { db } from '@/firebase'
 import { cn } from '@/lib/utils'
-import { Plus, X } from 'lucide-react'
 import { Patient } from '@/types/patient'
 import { format, isFuture } from 'date-fns'
+import { addDoc, collection } from 'firebase/firestore'
+import { Plus, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
 	Select,
@@ -31,17 +31,31 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from './ui/select'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs' // add this import if missing
+import InsuranceInfo from './InsuranceInfo'
 
-const DISEASES = [
-	'breast cancer',
-	'lung cancer',
-	'colorectal cancer',
-	'prostate cancer',
-	'stomach cancer',
-	'cervical cancer',
-	'thyroid cancer',
-	'brain cancer',
-]
+const DISEASES = {
+	solid: [
+		{ label: 'Breast cancer' },
+		{ label: 'Lung cancer' },
+		{ label: 'Oral cavity (mouth) cancer' },
+		{ label: 'Cervix cancer', gender: 'female' },
+		{ label: 'Prostate cancer', gender: 'male' },
+		{ label: 'Tongue cancer' },
+		{ label: 'Stomach cancer' },
+		{ label: 'Ovary cancer', gender: 'female' },
+		{ label: 'Liver cancer' },
+		{ label: 'Uterus cancer', gender: 'female' },
+		{ label: 'Gallbladder cancer' },
+		{ label: 'Oesophagus cancer' },
+		{ label: 'Thyroid cancer' },
+		{ label: 'Colorectal cancer' },
+	],
+	blood: [
+		{ label: 'Non-Hodgkin lymphoma cancer' },
+		{ label: 'Leukemia cancer' },
+	],
+}
 
 export default function AddPatientDialog({
 	setPatients,
@@ -62,9 +76,55 @@ export default function AddPatientDialog({
 		sex: '',
 		rationCardColor: '',
 		aabhaId: '',
+		status: 'Alive',
 	})
 
 	const [rawPhoneNumber, setRawPhoneNumber] = useState('')
+
+	// Load saved form data from localStorage when dialog opens
+	useEffect(() => {
+		if (open) {
+			const saved = localStorage.getItem('addPatientFormData')
+			if (saved) {
+				try {
+					const parsed = JSON.parse(saved)
+					setFormData(parsed.formData || {})
+					setRawPhoneNumber(parsed.rawPhoneNumber || '')
+					setAadhaar(
+						parsed.aadhaar || { part1: '', part2: '', part3: '' }
+					)
+					setDob(parsed.dob || '')
+					setSelectedPhc(parsed.selectedPhc || '')
+					setSelectedDiseases(parsed.selectedDiseases || [])
+				} catch (err) {
+					console.warn('Failed to parse saved form data:', err)
+				}
+			}
+		}
+	}, [open])
+
+	// Save to localStorage whenever any field changes
+	useEffect(() => {
+		const dataToSave = {
+			formData,
+			rawPhoneNumber,
+			aadhaar,
+			dob,
+			selectedPhc,
+			selectedDiseases,
+		}
+		localStorage.setItem('addPatientFormData', JSON.stringify(dataToSave))
+	}, [formData, rawPhoneNumber, aadhaar, dob, selectedPhc, selectedDiseases])
+
+	useEffect(() => {
+		setSelectedDiseases((prev) =>
+			prev.filter((disease) => {
+				const allDiseases = [...DISEASES.solid, ...DISEASES.blood]
+				const match = allDiseases.find((d) => d.label === disease)
+				return !match?.gender || match.gender === formData.sex
+			})
+		)
+	}, [formData.sex])
 
 	useEffect(() => {
 		const handler = (e: KeyboardEvent) => {
@@ -90,7 +150,7 @@ export default function AddPatientDialog({
 		e: React.ChangeEvent<HTMLInputElement>,
 		part: 'part1' | 'part2' | 'part3'
 	) => {
-		let value = e.target.value.replace(/\D/g, '').slice(0, 4)
+		const value = e.target.value.replace(/\D/g, '').slice(0, 4)
 		setAadhaar((prev) => ({ ...prev, [part]: value }))
 
 		if (value.length === 4) {
@@ -115,8 +175,10 @@ export default function AddPatientDialog({
 			sex: '',
 			rationCardColor: '',
 			aabhaId: '',
+			status: 'Alive',
 		})
 		setRawPhoneNumber('')
+		localStorage.removeItem('addPatientFormData')
 		nameRef.current?.focus()
 	}
 
@@ -161,6 +223,11 @@ export default function AddPatientDialog({
 			return
 		}
 
+		if (!formData.status) {
+			toast.error('Please select patient status.')
+			return
+		}
+
 		try {
 			const fullData = {
 				name,
@@ -173,6 +240,7 @@ export default function AddPatientDialog({
 				rationCardColor,
 				assignedPhc: selectedPhc,
 				diseases: selectedDiseases,
+				status: formData.status,
 			}
 			const docRef = await addDoc(collection(db, 'patients'), fullData)
 			setPatients((prev) => [
@@ -191,8 +259,11 @@ export default function AddPatientDialog({
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button className='bg-primary'>
-					<Plus className=' h-4 w-4' />
+				<Button
+					variant='outline'
+					className='!border-green-400 border-2 cursor-pointer'
+				>
+					<Plus className='h-4 w-4' />
 					Add Patient
 				</Button>
 			</DialogTrigger>
@@ -222,7 +293,7 @@ export default function AddPatientDialog({
 								onChange={(e) => {
 									let val = e.target.value.replace(/\D/g, '')
 									if (val.length > 10) val = val.slice(0, 10)
-									let formatted = val.replace(
+									const formatted = val.replace(
 										/^(\d{4})(\d{0,4})(\d{0,2})$/,
 										(_, g1, g2, g3) =>
 											[g1, g2, g3]
@@ -243,7 +314,7 @@ export default function AddPatientDialog({
 											<Input
 												key={part}
 												name={part}
-												placeholder='XXXX'
+												placeholder='_ _ _ _'
 												value={aadhaar[part]}
 												onChange={(e) =>
 													handleAadhaarChange(e, part)
@@ -267,6 +338,8 @@ export default function AddPatientDialog({
 								value={formData.address}
 								onChange={handleChange}
 							/>
+
+							<InsuranceInfo />
 						</div>
 
 						<div className='flex flex-col gap-4 md:w-1/2'>
@@ -300,6 +373,65 @@ export default function AddPatientDialog({
 									<SelectItem value='other'>Other</SelectItem>
 								</SelectContent>
 							</Select>
+							{/* Status Dropdown */}
+							<Select
+								defaultValue='Alive'
+								onValueChange={(val) =>
+									setFormData((p) => ({
+										...p,
+										status: val,
+									}))
+								}
+							>
+								<SelectTrigger className='w-full'>
+									<SelectValue>
+										{formData.status ? (
+											<span
+												className={cn('font-medium', {
+													'text-green-600':
+														formData.status ===
+														'Alive',
+													'text-red-600':
+														formData.status ===
+														'Death',
+													'text-blue-600':
+														formData.status ===
+														'Ongoing',
+													'text-yellow-600':
+														formData.status ===
+														'Followup',
+												})}
+											>
+												{formData.status}
+											</span>
+										) : (
+											'Select Status'
+										)}
+									</SelectValue>
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value='Alive'>
+										<span className='text-green-600'>
+											Alive
+										</span>
+									</SelectItem>
+									<SelectItem value='Death'>
+										<span className='text-red-600'>
+											Death
+										</span>
+									</SelectItem>
+									<SelectItem value='Ongoing'>
+										<span className='text-blue-600'>
+											Ongoing
+										</span>
+									</SelectItem>
+									<SelectItem value='Followup'>
+										<span className='text-yellow-600'>
+											Followup
+										</span>
+									</SelectItem>
+								</SelectContent>
+							</Select>
 
 							{/* Diseases Multi-Select */}
 							<Popover>
@@ -318,43 +450,134 @@ export default function AddPatientDialog({
 										</div>
 									</Button>
 								</PopoverTrigger>
-								<PopoverContent className='w-full'>
-									<div className='grid gap-2'>
-										{DISEASES.map((disease) => (
-											<label
-												key={disease}
-												className='flex items-center gap-2 cursor-pointer'
-											>
-												<Checkbox
-													checked={selectedDiseases.includes(
-														disease
-													)}
-													onCheckedChange={(
-														checked
-													) => {
-														setSelectedDiseases(
-															(prev) =>
-																checked
-																	? [
-																			...prev,
-																			disease,
-																	  ]
-																	: prev.filter(
-																			(
-																				d
-																			) =>
-																				d !==
-																				disease
-																	  )
+								<PopoverContent className='flex justify-center w-full'>
+									<Tabs
+										defaultValue='solid'
+										className='w-full'
+									>
+										<TabsList className='grid w-full grid-cols-2 mb-2'>
+											<TabsTrigger value='solid'>
+												Solid Tumors
+											</TabsTrigger>
+											<TabsTrigger value='blood'>
+												Blood-Related
+											</TabsTrigger>
+										</TabsList>
+
+										<TabsContent value='solid'>
+											<div className='h-[250px] overflow-y-auto'>
+												<div
+													className={`grid space-x-6 space-y-2 px-4 ${
+														DISEASES.solid.length >
+														5
+															? 'grid-cols-2'
+															: 'grid-cols-1'
+													}`}
+												>
+													{DISEASES.solid
+														.filter(
+															(d) =>
+																!d.gender ||
+																d.gender ===
+																	formData.sex
 														)
-													}}
-												/>
-												<span className='text-sm'>
-													{disease}
-												</span>
-											</label>
-										))}
-									</div>
+														.map(({ label }) => (
+															<label
+																key={label}
+																className='flex items-center gap-1 cursor-pointer'
+															>
+																<Checkbox
+																	checked={selectedDiseases.includes(
+																		label
+																	)}
+																	onCheckedChange={(
+																		checked
+																	) => {
+																		setSelectedDiseases(
+																			(
+																				prev
+																			) =>
+																				checked
+																					? [
+																							...prev,
+																							label,
+																					  ]
+																					: prev.filter(
+																							(
+																								d
+																							) =>
+																								d !==
+																								label
+																					  )
+																		)
+																	}}
+																/>
+																<span className='text-sm ml-1'>
+																	{label}
+																</span>
+															</label>
+														))}
+												</div>
+											</div>
+										</TabsContent>
+
+										<TabsContent value='blood'>
+											<div className='h-[250px] overflow-y-auto'>
+												<div
+													className={`grid space-x-4 space-y-2 px-4 ${
+														DISEASES.blood.length >
+														5
+															? 'grid-cols-2'
+															: 'grid-cols-1'
+													}`}
+												>
+													{DISEASES.blood
+														.filter(
+															(d) =>
+																!d.gender ||
+																d.gender ===
+																	formData.sex
+														)
+														.map(({ label }) => (
+															<label
+																key={label}
+																className='flex items-center gap-1 cursor-pointer'
+															>
+																<Checkbox
+																	checked={selectedDiseases.includes(
+																		label
+																	)}
+																	onCheckedChange={(
+																		checked
+																	) => {
+																		setSelectedDiseases(
+																			(
+																				prev
+																			) =>
+																				checked
+																					? [
+																							...prev,
+																							label,
+																					  ]
+																					: prev.filter(
+																							(
+																								d
+																							) =>
+																								d !==
+																								label
+																					  )
+																		)
+																	}}
+																/>
+																<span className='text-sm ml-1'>
+																	{label}
+																</span>
+															</label>
+														))}
+												</div>
+											</div>
+										</TabsContent>
+									</Tabs>
 								</PopoverContent>
 							</Popover>
 

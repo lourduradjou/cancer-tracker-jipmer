@@ -1,7 +1,7 @@
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
 
-export const exportToCSV = (data: any[], fileName: string) => {
+export const exportToCSV = <T extends Record<string, unknown>>(data: T[], fileName: string) => {
 	if (!data || data.length === 0) return
 
 	const csvContent = [
@@ -17,7 +17,7 @@ export const exportToCSV = (data: any[], fileName: string) => {
 	saveAs(blob, `${fileName}.csv`)
 }
 
-export const exportToExcel = (data: any[], fileName: string) => {
+export const exportToExcel = <T extends Record<string, unknown>>(data: T[], fileName: string) => {
 	if (!data || data.length === 0) return
 
 	const worksheet = XLSX.utils.json_to_sheet(data)

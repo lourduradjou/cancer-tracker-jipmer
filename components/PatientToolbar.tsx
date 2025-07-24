@@ -3,15 +3,15 @@
 import { Button } from '@/components/ui/button'
 import {
 	DropdownMenu,
-	DropdownMenuTrigger,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import PatientFilter from './PatientFilter'
-import AddPatientDialog from './AddPatientDialog'
-import { Patient } from '@/types/patient'
 import { exportToCSV, exportToExcel } from '@/lib/exportUtils'
+import { Patient } from '@/types/patient'
 import { usePathname } from 'next/navigation'
+import AddPatientDialog from './AddPatientDialog'
+import PatientFilter from './PatientFilter'
 
 export default function PatientToolbar({
 	searchTerm,
@@ -20,6 +20,16 @@ export default function PatientToolbar({
 	setFilterSexes,
 	filterDiseases,
 	setFilterDiseases,
+	filterStatuses,
+	setFilterStatuses,
+	ageFilter,
+	setAgeFilter,
+	minAge,
+	setMinAge,
+	maxAge,
+	setMaxAge,
+	filterRationColors,
+	setFilterRationColors,
 	exportData,
 	setPatients,
 }: {
@@ -29,7 +39,17 @@ export default function PatientToolbar({
 	setFilterSexes: (sexes: string[]) => void
 	filterDiseases: string[]
 	setFilterDiseases: (diseases: string[]) => void
-	exportData: any[]
+	filterStatuses: string[]
+	setFilterStatuses: (statuses: string[]) => void
+	ageFilter: string | null
+	setAgeFilter: (val: string | null) => void
+	minAge: number | null
+	setMinAge: (val: number | null) => void
+	maxAge: number | null
+	setMaxAge: (val: number | null) => void
+	filterRationColors: string[]
+	setFilterRationColors: (colors: string[]) => void
+	exportData: Patient[] // you could also use a specific shape if needed
 	setPatients: React.Dispatch<React.SetStateAction<Patient[]>>
 }) {
 	const pathname = usePathname()
@@ -48,13 +68,23 @@ export default function PatientToolbar({
 					setFilterSexes={setFilterSexes}
 					filterDiseases={filterDiseases}
 					setFilterDiseases={setFilterDiseases}
+					filterStatuses={filterStatuses}
+					setFilterStatuses={setFilterStatuses}
+					ageFilter={ageFilter}
+					setAgeFilter={setAgeFilter}
+					minAge={minAge}
+					setMinAge={setMinAge}
+					maxAge={maxAge}
+					setMaxAge={setMaxAge}
+					filterRationColors={filterRationColors}
+					setFilterRationColors={setFilterRationColors}
 				/>
 
 				<AddPatientDialog setPatients={setPatients} />
 
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<Button className='bg-blue-400 hover:bg-blue-500'>
+						<Button className=' cursor-pointer ' variant='outline'>
 							Export
 						</Button>
 					</DropdownMenuTrigger>
@@ -65,7 +95,9 @@ export default function PatientToolbar({
 							Export as CSV
 						</DropdownMenuItem>
 						<DropdownMenuItem
-							onClick={() => exportToExcel(exportData, 'patients')}
+							onClick={() =>
+								exportToExcel(exportData, 'patients')
+							}
 						>
 							Export as Excel
 						</DropdownMenuItem>

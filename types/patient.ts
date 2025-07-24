@@ -16,7 +16,7 @@ export type FollowUp = {
 export type Patient = {
 	id: string
 	name: string
-	phoneNumber: string
+	phoneNumber: string[]
 	sex?: string
 	dob?: string
 	address?: string
@@ -30,4 +30,5 @@ export type Patient = {
 		lng: number
 	}
 	followUps?: FollowUp[]
+	status?: string
 }

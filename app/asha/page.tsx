@@ -3,6 +3,7 @@
 import PatientCard from '@/components/PatientCard'
 import Loading from '@/components/ui/loading'
 import { auth, db } from '@/firebase'
+import { Patient } from '@/types/patient'
 import { onAuthStateChanged } from 'firebase/auth'
 import {
 	collection,
@@ -20,7 +21,7 @@ export default function AshaPage() {
 	const router = useRouter()
 	const [checking, setChecking] = useState(true)
 	const [ashaEmail, setAshaEmail] = useState('')
-	const [patients, setPatients] = useState<any[]>([])
+	const [patients, setPatients] = useState<Patient[]>([])
 	const [saving, setSaving] = useState(false)
 
 	useEffect(() => {

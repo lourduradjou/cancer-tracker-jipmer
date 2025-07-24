@@ -1,40 +1,23 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { deleteDoc, doc } from 'firebase/firestore'
-import { usePathname } from 'next/navigation'
-import { db } from '@/firebase'
 import {
 	Table,
-	TableHeader,
 	TableBody,
-	TableRow,
-	TableHead,
 	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
 } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import {
-	DropdownMenu,
-	DropdownMenuTrigger,
-	DropdownMenuContent,
-	DropdownMenuItem,
-} from '@/components/ui/dropdown-menu'
-import PatientFilter from './PatientFilter'
+import { db } from '@/firebase'
 import { Patient } from '@/types/patient'
-import AddPatientDialog from './AddPatientDialog'
-import UpdatePatientDialog from './UpdatePatientDialog'
-import ViewPatientDialog from './ViewPatientDialog'
-import {
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from '@/components/ui/dialog'
-import { exportToExcel, exportToCSV } from '@/lib/exportUtils'
+import { deleteDoc, doc } from 'firebase/firestore'
+import { usePathname } from 'next/navigation'
+import { useMemo, useState } from 'react'
+import DeletePatientDialog from './DeletePatientDialog'
 import PatientRow from './PatientRow'
 import PatientToolbar from './PatientToolbar'
-import DeletePatientDialog from './DeletePatientDialog'
+import UpdatePatientDialog from './UpdatePatientDialog'
+import ViewPatientDialog from './ViewPatientDialog'
 
 export default function PatientTable({
 	patients,
@@ -55,6 +38,12 @@ export default function PatientTable({
 	const [filterSexes, setFilterSexes] = useState<string[]>([])
 	const [filterDiseases, setFilterDiseases] = useState<string[]>([])
 
+	const [filterStatuses, setFilterStatuses] = useState<string[]>([])
+	const [ageFilter, setAgeFilter] = useState<string | null>(null)
+	const [minAge, setMinAge] = useState<number | null>(null)
+	const [maxAge, setMaxAge] = useState<number | null>(null)
+	const [filterRationColors, setFilterRationColors] = useState<string[]>([])
+
 	const handleConfirmDelete = async () => {
 		if (patientToDelete) {
 			await deleteDoc(doc(db, 'patients', patientToDelete.id))
@@ -66,7 +55,7 @@ export default function PatientTable({
 	}
 
 	const filteredPatients = useMemo(() => {
-		return patients.filter((p) => {
+		const result = patients.filter((p) => {
 			const matchSearch =
 				p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 				p.phoneNumber?.includes(searchTerm)
@@ -81,16 +70,79 @@ export default function PatientTable({
 					filterDiseases.includes(d.toLowerCase())
 				)
 
-			return matchSearch && matchSex && matchDisease
+			const matchStatus =
+				filterStatuses.length === 0 ||
+				filterStatuses.includes(p.status?.toLowerCase())
+
+			const matchRationCard =
+				filterRationColors.length === 0 ||
+				filterRationColors.includes(p.rationColor?.toLowerCase())
+
+			const dob = new Date(p.dob)
+			const today = new Date()
+			const ageInYears =
+				(today.getTime() - dob.getTime()) /
+				(1000 * 60 * 60 * 24 * 365.25)
+
+			const matchAgeFilter =
+				!ageFilter ||
+				(ageFilter === '<6mo' && ageInYears < 0.5) ||
+				(ageFilter === '<1yr' && ageInYears < 1)
+
+			const matchMinAge = minAge === null || ageInYears >= minAge
+			const matchMaxAge = maxAge === null || ageInYears <= maxAge
+
+			return (
+				matchSearch &&
+				matchSex &&
+				matchDisease &&
+				matchStatus &&
+				matchRationCard &&
+				matchAgeFilter &&
+				matchMinAge &&
+				matchMaxAge
+			)
 		})
-	}, [patients, searchTerm, filterSexes, filterDiseases])
+
+		// Sort Alive first, then others (e.g., Death)
+		return result.sort((a, b) => {
+			if (a.status === 'alive' && b.status !== 'alive') return -1
+			if (a.status !== 'alive' && b.status === 'alive') return 1
+			return 0
+		})
+	}, [
+		patients,
+		searchTerm,
+		filterSexes,
+		filterDiseases,
+		filterStatuses,
+		filterRationColors,
+		ageFilter,
+		minAge,
+		maxAge,
+	])
 
 	const exportData = filteredPatients.map((p) => ({
-		Name: p.name,
-		Phone: p.phoneNumber,
-		Sex: p.sex,
-		DOB: p.dob,
-		Diseases: p.diseases?.join(', ') || 'None',
+		id: p.id,
+		name: p.name,
+		phoneNumber: p.phoneNumber,
+		sex: p.sex || 'Not specified',
+		dob: p.dob || 'Not specified',
+		address: p.address || 'Not specified',
+		aadhaarId: p.aadhaarId || 'Not specified',
+		rationCardColor: p.rationCardColor || 'Not specified',
+		diseases: p.diseases?.length ? p.diseases.join(', ') : 'None',
+		assignedPhc: p.assignedPhc || 'Not assigned',
+		assignedAsha: p.assignedAsha || 'Not assigned',
+		gpsLocation: p.gpsLocation
+			? `${p.gpsLocation.lat}, ${p.gpsLocation.lng}`
+			: 'Not available',
+		followUps: p.followUps?.length
+			? p.followUps
+					.map((f, i) => `#${i + 1}: ${f.date} - ${f.remarks}`)
+					.join(' | ')
+			: 'None',
+		status: p.status || 'Not specified',
 	}))
 
 	return (
@@ -102,12 +154,22 @@ export default function PatientTable({
 				setFilterSexes={setFilterSexes}
 				filterDiseases={filterDiseases}
 				setFilterDiseases={setFilterDiseases}
+				filterStatuses={filterStatuses}
+				setFilterStatuses={setFilterStatuses}
+				ageFilter={ageFilter}
+				setAgeFilter={setAgeFilter}
+				minAge={minAge}
+				setMinAge={setMinAge}
+				maxAge={maxAge}
+				setMaxAge={setMaxAge}
+				filterRationColors={filterRationColors}
+				setFilterRationColors={setFilterRationColors}
 				exportData={exportData}
 				setPatients={setPatients}
 			/>
 
 			<Table className='border border-border rounded-md'>
-				<TableHeader>
+				<TableHeader className='bg-muted'>
 					<TableRow className='border-b border-border'>
 						<TableHead className='border-r border-border w-12 text-center'>
 							S.No
@@ -122,10 +184,13 @@ export default function PatientTable({
 							Sex
 						</TableHead>
 						<TableHead className='border-r border-border'>
-							DOB
+							Age
 						</TableHead>
 						<TableHead className='border-r border-border'>
 							Diseases
+						</TableHead>
+						<TableHead className='border-r border-border'>
+							Status
 						</TableHead>
 						<TableHead className='text-center'>Actions</TableHead>
 					</TableRow>

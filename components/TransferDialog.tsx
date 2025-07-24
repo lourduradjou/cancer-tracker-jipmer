@@ -20,6 +20,13 @@ import {
 } from '@/components/ui/command'
 import { db } from '@/firebase'
 import { collection, getDocs } from 'firebase/firestore'
+import { Repeat2 } from 'lucide-react'
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 type Hospital = {
 	id: string
@@ -36,7 +43,9 @@ export default function TransferDialog({
 	onTransfer: (hospitalId: string) => void
 }) {
 	const [hospitals, setHospitals] = useState<Hospital[]>([])
-	const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null)
+	const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(
+		null
+	)
 	const [searchTerm, setSearchTerm] = useState('')
 
 	useEffect(() => {
@@ -63,20 +72,24 @@ export default function TransferDialog({
 	}
 
 	const filteredHospitals = hospitals
-		.filter((h) =>
-			h.name.toLowerCase().includes(searchTerm.toLowerCase())
-		)
+		.filter((h) => h.name.toLowerCase().includes(searchTerm.toLowerCase()))
 		.slice(0, 3) // limit to top 3 matches
 
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button
-					variant='outline'
-					className='border-purple-500 text-purple-600 hover:bg-purple-50'
-				>
-					Transfer
-				</Button>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							size='icon'
+							variant='outline'
+							className='cursor-pointer'
+						>
+							<Repeat2 className='w-4 h-4' />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent>Transfer</TooltipContent>
+				</Tooltip>
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
@@ -95,13 +108,14 @@ export default function TransferDialog({
 							{filteredHospitals.map((hospital) => (
 								<CommandItem
 									key={hospital.id}
-									onSelect={() => {
+									onSelect={() =>
 										setSelectedHospital(hospital)
-										setSearchTerm(hospital.name) // optional UX: show selected
-									}}
+									}
 								>
 									<div>
-										<p className='font-medium'>{hospital.name}</p>
+										<p className='font-medium'>
+											{hospital.name}
+										</p>
 										<p className='text-sm text-muted-foreground'>
 											{hospital.address}
 										</p>
@@ -110,16 +124,13 @@ export default function TransferDialog({
 							))}
 						</CommandGroup>
 					</Command>
-
-					{selectedHospital && (
-						<div className="text-sm mt-2 text-muted-foreground">
-							Selected: <span className="font-medium">{selectedHospital.name}</span>
-						</div>
-					)}
 				</div>
 
 				<DialogFooter className='mt-4'>
-					<Button onClick={handleTransfer} disabled={!selectedHospital}>
+					<Button
+						onClick={handleTransfer}
+						disabled={!selectedHospital}
+					>
 						Confirm Transfer
 					</Button>
 				</DialogFooter>
