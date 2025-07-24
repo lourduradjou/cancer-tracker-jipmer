@@ -17,7 +17,7 @@ export default function PhoneCell({ phoneNumbers }: { phoneNumbers: string[] }) 
 	const remaining = phoneNumbers.length - MAX_DISPLAY
 
 	return (
-		<TableCell className=" border-border whitespace-pre-wrap">
+		<div className=" border-border whitespace-pre-wrap">
 			{displayNumbers.map((num, i) => (
 				<div key={i} className=''>{num}</div>
 			))}
@@ -39,6 +39,6 @@ export default function PhoneCell({ phoneNumbers }: { phoneNumbers: string[] }) 
 					Show less
 				</div>
 			)}
-		</TableCell>
+		</div>
 	)
 }

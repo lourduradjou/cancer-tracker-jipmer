@@ -11,7 +11,7 @@ import PatientTable from '@/components/PatientTable'
 import { Patient } from '@/types/patient'
 import { toast } from 'sonner'
 
-export default function DoctorPage() {
+export default function AdminPage() {
 	const router = useRouter()
 	const [checking, setChecking] = useState(true)
 	const [patients, setPatients] = useState<Patient[]>([])

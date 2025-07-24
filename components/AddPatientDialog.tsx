@@ -1,7 +1,6 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
 	Dialog,
 	DialogContent,
@@ -10,68 +9,42 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover'
 import { db } from '@/firebase'
-import { cn } from '@/lib/utils'
 import { Patient } from '@/types/patient'
-import { format, isFuture } from 'date-fns'
-import { addDoc, collection } from 'firebase/firestore'
-import { Plus, X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
+import { format, isFuture, subYears } from 'date-fns'
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from './ui/select'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs' // add this import if missing
-import InsuranceInfo from './InsuranceInfo'
+	addDoc,
+	collection,
+	getDocs,
+	query,
+	where,
+	doc,
+	updateDoc,
+} from 'firebase/firestore'
+import { ArrowRightCircle, Plus, X } from 'lucide-react'
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { toast } from 'sonner'
 
-const DISEASES = {
-	solid: [
-		{ label: 'Breast cancer' },
-		{ label: 'Lung cancer' },
-		{ label: 'Oral cavity (mouth) cancer' },
-		{ label: 'Cervix cancer', gender: 'female' },
-		{ label: 'Prostate cancer', gender: 'male' },
-		{ label: 'Tongue cancer' },
-		{ label: 'Stomach cancer' },
-		{ label: 'Ovary cancer', gender: 'female' },
-		{ label: 'Liver cancer' },
-		{ label: 'Uterus cancer', gender: 'female' },
-		{ label: 'Gallbladder cancer' },
-		{ label: 'Oesophagus cancer' },
-		{ label: 'Thyroid cancer' },
-		{ label: 'Colorectal cancer' },
-	],
-	blood: [
-		{ label: 'Non-Hodgkin lymphoma cancer' },
-		{ label: 'Leukemia cancer' },
-	],
-}
+import { DISEASES } from '@/constants/data'
+import PatientForm from './PatientForm'
 
 export default function AddPatientDialog({
 	setPatients,
 }: {
 	setPatients: React.Dispatch<React.SetStateAction<Patient[]>>
 }) {
+	// --- State Declarations ---
 	const [open, setOpen] = useState(false)
 	const [dob, setDob] = useState('')
 	const [aadhaar, setAadhaar] = useState({ part1: '', part2: '', part3: '' })
 	const [selectedDiseases, setSelectedDiseases] = useState<string[]>([])
 	const [selectedPhc, setSelectedPhc] = useState('')
 	const nameRef = useRef<HTMLInputElement>(null)
+	const [useAgeInstead, setUseAgeInstead] = useState(false)
+	const [ageInput, setAgeInput] = useState('')
 
 	const [formData, setFormData] = useState({
 		name: '',
-		phoneNumber: '',
 		address: '',
 		sex: '',
 		rationCardColor: '',
@@ -79,9 +52,311 @@ export default function AddPatientDialog({
 		status: 'Alive',
 	})
 
-	const [rawPhoneNumber, setRawPhoneNumber] = useState('')
+	const [rawPhoneNumbers, setRawPhoneNumbers] = useState<string[]>([''])
+	const [hasAadhaar, setHasAadhaar] = useState<boolean>(true)
+	const [aadhaarCheckTimer, setAadhaarCheckTimer] =
+		useState<NodeJS.Timeout | null>(null)
+	const [namePhoneCheckTimer, setNamePhoneCheckTimer] =
+		useState<NodeJS.Timeout | null>(null)
 
-	// Load saved form data from localStorage when dialog opens
+	// --- Helper Functions (Memoized with useCallback) ---
+	// Define functions in order of dependency.
+
+	// 1. `clearForm` (most independent)
+	const clearForm = useCallback(() => {
+		setDob('')
+		setAadhaar({ part1: '', part2: '', part3: '' })
+		setSelectedDiseases([])
+		setSelectedPhc('')
+		setFormData({
+			name: '',
+			address: '',
+			sex: '',
+			rationCardColor: '',
+			aabhaId: '',
+			status: 'Alive',
+		})
+		setRawPhoneNumbers([''])
+		setHasAadhaar(true)
+		localStorage.removeItem('addPatientFormData')
+		nameRef.current?.focus()
+	}, [])
+
+	// 2. `updatePatientAssignedPhc` (depends on `clearForm`, `setOpen`, `setPatients`, `selectedPhc`)
+	const updatePatientAssignedPhc = useCallback(
+		async (patientId: string, currentPhc: string) => {
+			if (!patientId || !currentPhc) {
+				toast.error(
+					'Cannot transfer: missing patient ID or current PHC.'
+				)
+				return
+			}
+
+			try {
+				const patientRef = doc(db, 'patients', patientId)
+				await updateDoc(patientRef, {
+					assignedPhc: currentPhc,
+					transferred: true,
+				})
+				toast.success(
+					'Patient record successfully transferred and updated!'
+				)
+				setOpen(false)
+				clearForm()
+			} catch (error) {
+				console.error('Error updating patient for transfer:', error)
+				toast.error('Failed to transfer patient. Please try again.')
+			}
+		},
+		[selectedPhc, setOpen, clearForm, setPatients]
+	)
+
+	// 3. `checkAadhaarDuplicate` (depends on `updatePatientAssignedPhc`, `selectedPhc`)
+	const checkAadhaarDuplicate = useCallback(
+		async (
+			aadhaarId: string,
+			showToast: boolean = false
+		): Promise<{ exists: boolean; patientId?: string }> => {
+			if (!aadhaarId || aadhaarId.length !== 12) {
+				return { exists: false }
+			}
+			const patientsRef = collection(db, 'patients')
+			const q = query(patientsRef, where('aadhaarId', '==', aadhaarId))
+			const querySnapshot = await getDocs(q)
+
+			if (!querySnapshot.empty) {
+				const patientId = querySnapshot.docs[0].id
+				if (showToast) {
+					toast.warning('Patient with this Aadhaar already exists.', {
+						action: {
+							label: (
+								<span className='flex items-center text-blue-500'>
+									<ArrowRightCircle className='h-4 w-4 mr-1' />{' '}
+									Transfer
+								</span>
+							),
+							onClick: () =>
+								updatePatientAssignedPhc(
+									patientId,
+									selectedPhc
+								),
+						},
+						duration: 5000,
+					})
+				}
+				return { exists: true, patientId }
+			}
+			return { exists: false }
+		},
+		[updatePatientAssignedPhc, selectedPhc]
+	)
+
+	// 4. `checkNamePhoneDuplicate` (depends on `updatePatientAssignedPhc`, `selectedPhc`, `aadhaar`, `hasAadhaar`)
+	const checkNamePhoneDuplicate = useCallback(
+		async (
+			name: string,
+			phoneNumbers: string[],
+			showToast: boolean = false
+		): Promise<{ exists: boolean; patientId?: string }> => {
+			if (!name.trim() || phoneNumbers.length === 0) {
+				return { exists: false }
+			}
+
+			const patientsRef = collection(db, 'patients')
+			const querySnapshot = await getDocs(patientsRef)
+
+			const cleanedName = name.toLowerCase().trim()
+			const cleanedPhoneNumbers = phoneNumbers
+				.map((num) => num.replace(/\D/g, ''))
+				.filter((num) => num.length === 10)
+
+			let possibleMatchFound = false
+			let matchedPatientId: string | undefined
+
+			for (const doc of querySnapshot.docs) {
+				const patient = doc.data() as Patient
+				const patientName = patient.name.toLowerCase().trim()
+				const patientPhoneNumbers = patient.phoneNumber || []
+
+				const nameMatch =
+					patientName.includes(cleanedName) ||
+					cleanedName.includes(patientName) ||
+					(cleanedName.length > 3 &&
+						patientName.startsWith(
+							cleanedName.substring(
+								0,
+								Math.floor(cleanedName.length * 0.9)
+							)
+						))
+
+				const phoneMatch = cleanedPhoneNumbers.some((num) =>
+					patientPhoneNumbers.includes(num)
+				)
+
+				const patientAadhaarId = patient.aadhaarId || ''
+				const existingPatientHasAadhaar = patient.hasAadhaar ?? true
+
+				const currentAadhaarId = hasAadhaar
+					? aadhaar.part1 + aadhaar.part2 + aadhaar.part3
+					: ''
+				const aadhaarMatch =
+					hasAadhaar &&
+					existingPatientHasAadhaar &&
+					patientAadhaarId === currentAadhaarId
+
+				if (
+					(nameMatch && phoneMatch) ||
+					(aadhaarMatch && cleanedName.length > 0)
+				) {
+					possibleMatchFound = true
+					matchedPatientId = doc.id
+					break
+				}
+			}
+
+			if (possibleMatchFound && matchedPatientId) {
+				if (showToast) {
+					toast.info(
+						'Possible match found based on name and phone number. Ask if they already provided details.',
+						{
+							// action: {
+							// 	label: (
+							// 		<span className='flex items-center text-blue-500'>
+							// 			<ArrowRightCircle className='h-4 w-4 mr-1' />{' '}
+							// 			Transfer
+							// 		</span>
+							// 	),
+							// 	onClick: () =>
+							// 		updatePatientAssignedPhc(
+							// 			matchedPatientId!,
+							// 			selectedPhc
+							// 		),
+							// },
+							duration: 5000,
+						}
+					)
+				}
+				return { exists: true, patientId: matchedPatientId }
+			}
+			return { exists: false }
+		},
+		[updatePatientAssignedPhc, selectedPhc, aadhaar, hasAadhaar]
+	)
+
+	const handleAdd = useCallback(async () => {
+		const { name, address, sex, rationCardColor, aabhaId, status } =
+			formData
+		const age = ageInput
+
+		const aadhaarId = hasAadhaar
+			? aadhaar.part1 + aadhaar.part2 + aadhaar.part3
+			: ''
+
+		const cleanedPhoneNumbers = rawPhoneNumbers
+			.map((num) => num.replace(/\D/g, ''))
+			.filter((num) => num.length > 0)
+
+		// --- Validation Checks ---
+		if (
+			!name ||
+			(useAgeInstead ? !age : !dob) || // ✅ Only one required
+			!address ||
+			!sex ||
+			!rationCardColor ||
+			!selectedPhc ||
+			selectedDiseases.length === 0
+		) {
+			toast.error('Please fill all required fields.')
+			console.log('⚠️ Validation failed due to:')
+			console.log({
+				name: !!name,
+				dob: useAgeInstead ? '(skipped)' : !!dob,
+				age: useAgeInstead ? !!age : '(skipped)',
+				address: !!address,
+				sex: !!sex,
+				rationCardColor: !!rationCardColor,
+				selectedPhc: !!selectedPhc,
+				selectedDiseases: selectedDiseases.length > 0,
+			})
+			return
+		}
+
+		// ✅ Optional: Validate age if used
+		if (useAgeInstead) {
+			const ageNum = Number(age)
+			if (isNaN(ageNum) || ageNum < 0 || ageNum > 120) {
+				toast.error('Please enter a valid age between 0 and 120.')
+				return
+			}
+		}
+
+		// ... rest of your validation
+
+		const parsedDob = useAgeInstead
+			? subYears(new Date(), Number(age)) // use age to calculate approximate DOB
+			: new Date(dob)
+
+		if (isNaN(parsedDob.getTime())) {
+			toast.error('Invalid date of birth or age.')
+			return
+		}
+
+		if (isFuture(parsedDob)) {
+			toast.error('Date of birth cannot be in the future.')
+			return
+		}
+
+		try {
+			const fullData = {
+				name,
+				phoneNumber:
+					cleanedPhoneNumbers.length > 0
+						? cleanedPhoneNumbers
+						: ['N/A'],
+				aadhaarId: hasAadhaar ? aadhaarId : 'N/A',
+				aabhaId,
+				dob: format(parsedDob, 'dd-MM-yyyy'), // always derived
+				address,
+				sex,
+				rationCardColor,
+				assignedPhc: selectedPhc,
+				diseases: selectedDiseases,
+				status,
+				hasAadhaar,
+				transferred: false,
+			}
+
+			const docRef = await addDoc(collection(db, 'patients'), fullData)
+			setPatients((prev) => [
+				...prev,
+				{ id: docRef.id, ...fullData } as Patient,
+			])
+			toast.success('Patient added successfully.')
+			setOpen(false)
+			clearForm()
+		} catch (error) {
+			console.error('Error adding patient:', error)
+			toast.error('Failed to add patient. Please try again.')
+		}
+	}, [
+		formData,
+		aadhaar,
+		hasAadhaar,
+		rawPhoneNumbers,
+		dob,
+		selectedPhc,
+		selectedDiseases,
+		clearForm,
+		checkAadhaarDuplicate,
+		checkNamePhoneDuplicate,
+		setPatients,
+		useAgeInstead, // ✅ add this
+	])
+
+	// --- useEffects ---
+	// These useEffects must be declared *after* all the useCallback functions they depend on.
+
+	// Load saved form data from localStorage
 	useEffect(() => {
 		if (open) {
 			const saved = localStorage.getItem('addPatientFormData')
@@ -89,13 +364,19 @@ export default function AddPatientDialog({
 				try {
 					const parsed = JSON.parse(saved)
 					setFormData(parsed.formData || {})
-					setRawPhoneNumber(parsed.rawPhoneNumber || '')
+					setRawPhoneNumbers(
+						Array.isArray(parsed.rawPhoneNumbers) &&
+							parsed.rawPhoneNumbers.length > 0
+							? parsed.rawPhoneNumbers
+							: ['']
+					)
 					setAadhaar(
 						parsed.aadhaar || { part1: '', part2: '', part3: '' }
 					)
 					setDob(parsed.dob || '')
 					setSelectedPhc(parsed.selectedPhc || '')
 					setSelectedDiseases(parsed.selectedDiseases || [])
+					setHasAadhaar(parsed.hasAadhaar ?? true)
 				} catch (err) {
 					console.warn('Failed to parse saved form data:', err)
 				}
@@ -107,15 +388,25 @@ export default function AddPatientDialog({
 	useEffect(() => {
 		const dataToSave = {
 			formData,
-			rawPhoneNumber,
+			rawPhoneNumbers,
 			aadhaar,
 			dob,
 			selectedPhc,
 			selectedDiseases,
+			hasAadhaar,
 		}
 		localStorage.setItem('addPatientFormData', JSON.stringify(dataToSave))
-	}, [formData, rawPhoneNumber, aadhaar, dob, selectedPhc, selectedDiseases])
+	}, [
+		formData,
+		rawPhoneNumbers,
+		aadhaar,
+		dob,
+		selectedPhc,
+		selectedDiseases,
+		hasAadhaar,
+	])
 
+	// Filter diseases based on sex
 	useEffect(() => {
 		setSelectedDiseases((prev) =>
 			prev.filter((disease) => {
@@ -126,6 +417,7 @@ export default function AddPatientDialog({
 		)
 	}, [formData.sex])
 
+	// Keyboard shortcut to focus the name input
 	useEffect(() => {
 		const handler = (e: KeyboardEvent) => {
 			if (
@@ -141,120 +433,72 @@ export default function AddPatientDialog({
 		return () => window.removeEventListener('keydown', handler)
 	}, [open])
 
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const { name, value } = e.target
-		setFormData((prev) => ({ ...prev, [name]: value }))
-	}
-
-	const handleAadhaarChange = (
-		e: React.ChangeEvent<HTMLInputElement>,
-		part: 'part1' | 'part2' | 'part3'
-	) => {
-		const value = e.target.value.replace(/\D/g, '').slice(0, 4)
-		setAadhaar((prev) => ({ ...prev, [part]: value }))
-
-		if (value.length === 4) {
-			const next = { part1: 'part2', part2: 'part3', part3: '' }[part]
-			if (next && e.target.form?.elements.namedItem(next)) {
-				;(
-					e.target.form.elements.namedItem(next) as HTMLInputElement
-				).focus()
+	// Effect for debouncing Aadhaar input check (REAL-TIME)
+	useEffect(() => {
+		if (hasAadhaar) {
+			const fullAadhaar = aadhaar.part1 + aadhaar.part2 + aadhaar.part3
+			if (fullAadhaar.length === 12) {
+				if (aadhaarCheckTimer) {
+					clearTimeout(aadhaarCheckTimer)
+				}
+				const timer = setTimeout(async () => {
+					await checkAadhaarDuplicate(fullAadhaar, true)
+				}, 500)
+				setAadhaarCheckTimer(timer)
+			}
+		} else if (aadhaarCheckTimer) {
+			clearTimeout(aadhaarCheckTimer)
+		}
+		return () => {
+			if (aadhaarCheckTimer) {
+				clearTimeout(aadhaarCheckTimer)
+				// No need to set setAadhaarCheckTimer(null) here, as useState manages it
+				// We clear the timeout, but the state will naturally update on next render
+				// if the timer ID changes.
 			}
 		}
-	}
+	}, [
+		aadhaar.part1,
+		aadhaar.part2,
+		aadhaar.part3,
+		hasAadhaar,
+		checkAadhaarDuplicate,
+	]) // Removed aadhaarCheckTimer from dependencies
 
-	const clearForm = () => {
-		setDob('')
-		setAadhaar({ part1: '', part2: '', part3: '' })
-		setSelectedDiseases([])
-		setSelectedPhc('')
-		setFormData({
-			name: '',
-			phoneNumber: '',
-			address: '',
-			sex: '',
-			rationCardColor: '',
-			aabhaId: '',
-			status: 'Alive',
-		})
-		setRawPhoneNumber('')
-		localStorage.removeItem('addPatientFormData')
-		nameRef.current?.focus()
-	}
+	// New Effect for debouncing Name/Phone fuzzy check (REAL-TIME for 'No Aadhaar' patients)
+	useEffect(() => {
+		if (!hasAadhaar) {
+			const cleanedPhoneNumbers = rawPhoneNumbers
+				.map((num) => num.replace(/\D/g, ''))
+				.filter((num) => num.length > 0)
+			const trimmedName = formData.name.trim()
 
-	const handleAdd = async () => {
-		const { name, address, sex, rationCardColor, aabhaId } = formData
-		const phoneNumber = rawPhoneNumber.replace(/\D/g, '') // remove dashes
-		const aadhaarId = aadhaar.part1 + aadhaar.part2 + aadhaar.part3
-
-		if (
-			!name ||
-			!phoneNumber ||
-			!aadhaarId ||
-			!dob ||
-			!address ||
-			!sex ||
-			!rationCardColor ||
-			!selectedPhc ||
-			selectedDiseases.length === 0
-		) {
-			toast.error('Please fill all required fields.')
-			return
-		}
-
-		if (!/^\d{10}$/.test(phoneNumber)) {
-			toast.error('Phone number must be exactly 10 digits.')
-			return
-		}
-
-		if (!/^\d{12}$/.test(aadhaarId)) {
-			toast.error('Aadhaar must be exactly 12 digits.')
-			return
-		}
-
-		const parsedDob = new Date(dob)
-		if (isNaN(parsedDob.getTime())) {
-			toast.error('Invalid date of birth.')
-			return
-		}
-
-		if (isFuture(parsedDob)) {
-			toast.error('Date of birth cannot be in the future.')
-			return
-		}
-
-		if (!formData.status) {
-			toast.error('Please select patient status.')
-			return
-		}
-
-		try {
-			const fullData = {
-				name,
-				phoneNumber,
-				aadhaarId,
-				aabhaId,
-				dob: format(parsedDob, 'dd-MM-yyyy'),
-				address,
-				sex,
-				rationCardColor,
-				assignedPhc: selectedPhc,
-				diseases: selectedDiseases,
-				status: formData.status,
+			if (
+				trimmedName.length > 0 &&
+				cleanedPhoneNumbers.some((num) => /^\d{10}$/.test(num))
+			) {
+				if (namePhoneCheckTimer) {
+					clearTimeout(namePhoneCheckTimer)
+				}
+				const timer = setTimeout(async () => {
+					await checkNamePhoneDuplicate(
+						trimmedName,
+						cleanedPhoneNumbers,
+						true
+					)
+				}, 700)
+				setNamePhoneCheckTimer(timer)
 			}
-			const docRef = await addDoc(collection(db, 'patients'), fullData)
-			setPatients((prev) => [
-				...prev,
-				{ id: docRef.id, ...fullData } as Patient,
-			])
-			toast.success('Patient added successfully.')
-			setOpen(false)
-			clearForm()
-		} catch (error) {
-			console.error('Error adding patient:', error)
-			toast.error('Failed to add patient. Please try again.')
+		} else if (namePhoneCheckTimer) {
+			clearTimeout(namePhoneCheckTimer)
 		}
-	}
+		return () => {
+			if (namePhoneCheckTimer) {
+				clearTimeout(namePhoneCheckTimer)
+				// No need to set setNamePhoneCheckTimer(null) here either.
+			}
+		}
+	}, [hasAadhaar, formData.name, rawPhoneNumbers, checkNamePhoneDuplicate]) // Removed namePhoneCheckTimer from dependencies
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
@@ -268,360 +512,37 @@ export default function AddPatientDialog({
 				</Button>
 			</DialogTrigger>
 
-			<DialogContent>
+			<DialogContent
+				onInteractOutside={(e) => e.preventDefault()}
+				className='w-full'
+			>
 				<DialogHeader>
-					<DialogTitle>Add New Patient</DialogTitle>
+					<DialogTitle className='select-none'>
+						Add New Patient
+					</DialogTitle>
 				</DialogHeader>
 
-				<form
-					className='grid gap-6 py-4'
-					onSubmit={(e) => e.preventDefault()}
-				>
-					<div className='flex flex-col md:flex-row gap-6'>
-						<div className='flex flex-col gap-4 md:w-1/2'>
-							<Input
-								ref={nameRef}
-								name='name'
-								placeholder='Full Name'
-								value={formData.name}
-								onChange={handleChange}
-							/>
-							<Input
-								name='phoneNumber'
-								placeholder='Phone Number (e.g. 1234-5678-90)'
-								value={rawPhoneNumber}
-								onChange={(e) => {
-									let val = e.target.value.replace(/\D/g, '')
-									if (val.length > 10) val = val.slice(0, 10)
-									const formatted = val.replace(
-										/^(\d{4})(\d{0,4})(\d{0,2})$/,
-										(_, g1, g2, g3) =>
-											[g1, g2, g3]
-												.filter(Boolean)
-												.join('-')
-									)
-									setRawPhoneNumber(formatted)
-								}}
-							/>
-
-							<div className='flex flex-col gap-1'>
-								<label className='text-sm font-medium text-muted-foreground'>
-									Aadhaar Number
-								</label>
-								<div className='flex gap-2'>
-									{(['part1', 'part2', 'part3'] as const).map(
-										(part) => (
-											<Input
-												key={part}
-												name={part}
-												placeholder='_ _ _ _'
-												value={aadhaar[part]}
-												onChange={(e) =>
-													handleAadhaarChange(e, part)
-												}
-												className='w-1/3'
-											/>
-										)
-									)}
-								</div>
-							</div>
-
-							<Input
-								name='aabhaId'
-								placeholder='AABHA ID (optional)'
-								value={formData.aabhaId}
-								onChange={handleChange}
-							/>
-							<Input
-								name='address'
-								placeholder='Address'
-								value={formData.address}
-								onChange={handleChange}
-							/>
-
-							<InsuranceInfo />
-						</div>
-
-						<div className='flex flex-col gap-4 md:w-1/2'>
-							<div className='flex flex-col gap-1'>
-								<label className='text-sm font-medium text-muted-foreground'>
-									Date of Birth
-								</label>
-								<input
-									type='date'
-									value={dob}
-									max={format(new Date(), 'yyyy-MM-dd')}
-									onChange={(e) => setDob(e.target.value)}
-									className='w-full border rounded-md px-3 py-2 text-sm'
-								/>
-							</div>
-
-							{/* Sex */}
-							<Select
-								onValueChange={(val) =>
-									setFormData((p) => ({ ...p, sex: val }))
-								}
-							>
-								<SelectTrigger className='w-full'>
-									<SelectValue placeholder='Select Sex' />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value='male'>Male</SelectItem>
-									<SelectItem value='female'>
-										Female
-									</SelectItem>
-									<SelectItem value='other'>Other</SelectItem>
-								</SelectContent>
-							</Select>
-							{/* Status Dropdown */}
-							<Select
-								defaultValue='Alive'
-								onValueChange={(val) =>
-									setFormData((p) => ({
-										...p,
-										status: val,
-									}))
-								}
-							>
-								<SelectTrigger className='w-full'>
-									<SelectValue>
-										{formData.status ? (
-											<span
-												className={cn('font-medium', {
-													'text-green-600':
-														formData.status ===
-														'Alive',
-													'text-red-600':
-														formData.status ===
-														'Death',
-													'text-blue-600':
-														formData.status ===
-														'Ongoing',
-													'text-yellow-600':
-														formData.status ===
-														'Followup',
-												})}
-											>
-												{formData.status}
-											</span>
-										) : (
-											'Select Status'
-										)}
-									</SelectValue>
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value='Alive'>
-										<span className='text-green-600'>
-											Alive
-										</span>
-									</SelectItem>
-									<SelectItem value='Death'>
-										<span className='text-red-600'>
-											Death
-										</span>
-									</SelectItem>
-									<SelectItem value='Ongoing'>
-										<span className='text-blue-600'>
-											Ongoing
-										</span>
-									</SelectItem>
-									<SelectItem value='Followup'>
-										<span className='text-yellow-600'>
-											Followup
-										</span>
-									</SelectItem>
-								</SelectContent>
-							</Select>
-
-							{/* Diseases Multi-Select */}
-							<Popover>
-								<PopoverTrigger asChild>
-									<Button
-										variant='outline'
-										className={cn('w-full justify-start', {
-											'text-muted-foreground':
-												selectedDiseases.length === 0,
-										})}
-									>
-										<div className='overflow-x-auto whitespace-nowrap w-full no-scrollbar'>
-											{selectedDiseases.length > 0
-												? selectedDiseases.join(', ')
-												: 'Select Diseases'}
-										</div>
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent className='flex justify-center w-full'>
-									<Tabs
-										defaultValue='solid'
-										className='w-full'
-									>
-										<TabsList className='grid w-full grid-cols-2 mb-2'>
-											<TabsTrigger value='solid'>
-												Solid Tumors
-											</TabsTrigger>
-											<TabsTrigger value='blood'>
-												Blood-Related
-											</TabsTrigger>
-										</TabsList>
-
-										<TabsContent value='solid'>
-											<div className='h-[250px] overflow-y-auto'>
-												<div
-													className={`grid space-x-6 space-y-2 px-4 ${
-														DISEASES.solid.length >
-														5
-															? 'grid-cols-2'
-															: 'grid-cols-1'
-													}`}
-												>
-													{DISEASES.solid
-														.filter(
-															(d) =>
-																!d.gender ||
-																d.gender ===
-																	formData.sex
-														)
-														.map(({ label }) => (
-															<label
-																key={label}
-																className='flex items-center gap-1 cursor-pointer'
-															>
-																<Checkbox
-																	checked={selectedDiseases.includes(
-																		label
-																	)}
-																	onCheckedChange={(
-																		checked
-																	) => {
-																		setSelectedDiseases(
-																			(
-																				prev
-																			) =>
-																				checked
-																					? [
-																							...prev,
-																							label,
-																					  ]
-																					: prev.filter(
-																							(
-																								d
-																							) =>
-																								d !==
-																								label
-																					  )
-																		)
-																	}}
-																/>
-																<span className='text-sm ml-1'>
-																	{label}
-																</span>
-															</label>
-														))}
-												</div>
-											</div>
-										</TabsContent>
-
-										<TabsContent value='blood'>
-											<div className='h-[250px] overflow-y-auto'>
-												<div
-													className={`grid space-x-4 space-y-2 px-4 ${
-														DISEASES.blood.length >
-														5
-															? 'grid-cols-2'
-															: 'grid-cols-1'
-													}`}
-												>
-													{DISEASES.blood
-														.filter(
-															(d) =>
-																!d.gender ||
-																d.gender ===
-																	formData.sex
-														)
-														.map(({ label }) => (
-															<label
-																key={label}
-																className='flex items-center gap-1 cursor-pointer'
-															>
-																<Checkbox
-																	checked={selectedDiseases.includes(
-																		label
-																	)}
-																	onCheckedChange={(
-																		checked
-																	) => {
-																		setSelectedDiseases(
-																			(
-																				prev
-																			) =>
-																				checked
-																					? [
-																							...prev,
-																							label,
-																					  ]
-																					: prev.filter(
-																							(
-																								d
-																							) =>
-																								d !==
-																								label
-																					  )
-																		)
-																	}}
-																/>
-																<span className='text-sm ml-1'>
-																	{label}
-																</span>
-															</label>
-														))}
-												</div>
-											</div>
-										</TabsContent>
-									</Tabs>
-								</PopoverContent>
-							</Popover>
-
-							<Select
-								onValueChange={(val) =>
-									setFormData((p) => ({
-										...p,
-										rationCardColor: val,
-									}))
-								}
-							>
-								<SelectTrigger className='w-full'>
-									<SelectValue placeholder='Ration Card Color' />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value='red'>Red</SelectItem>
-									<SelectItem value='yellow'>
-										Yellow
-									</SelectItem>
-									<SelectItem value='none'>None</SelectItem>
-								</SelectContent>
-							</Select>
-
-							<Select
-								onValueChange={(val) => setSelectedPhc(val)}
-							>
-								<SelectTrigger className='w-full'>
-									<SelectValue placeholder='Select Hospital' />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value='jip-ig-1'>
-										JIPMER IG 1
-									</SelectItem>
-									<SelectItem value='gov-gen-hosp-2'>
-										Gov General Hospital 2
-									</SelectItem>
-									<SelectItem value='puducherry-phc-3'>
-										Puducherry PHC 3
-									</SelectItem>
-								</SelectContent>
-							</Select>
-						</div>
-					</div>
-				</form>
+				<PatientForm
+					formData={formData}
+					setFormData={setFormData}
+					rawPhoneNumbers={rawPhoneNumbers}
+					setRawPhoneNumbers={setRawPhoneNumbers}
+					aadhaar={aadhaar}
+					setAadhaar={setAadhaar}
+					dob={dob}
+					setDob={setDob}
+					selectedDiseases={selectedDiseases}
+					setSelectedDiseases={setSelectedDiseases}
+					selectedPhc={selectedPhc}
+					setSelectedPhc={setSelectedPhc}
+					nameRef={nameRef}
+					hasAadhaar={hasAadhaar}
+					setHasAadhaar={setHasAadhaar}
+					useAgeInstead={useAgeInstead}
+					setUseAgeInstead={setUseAgeInstead}
+					ageInput={ageInput}
+					setAgeInput={setAgeInput}
+				/>
 
 				<DialogFooter className='flex gap-2 justify-between'>
 					<Button

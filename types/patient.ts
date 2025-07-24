@@ -16,9 +16,10 @@ export type FollowUp = {
 export type Patient = {
 	id: string
 	name: string
-	phoneNumber: string[]
+	phoneNumber?: string[]
 	sex?: string
 	dob?: string
+	age?: string
 	address?: string
 	aadhaarId?: string
 	rationCardColor?: string
@@ -31,4 +32,6 @@ export type Patient = {
 	}
 	followUps?: FollowUp[]
 	status?: string
+	hasAadhaar?: boolean
+	transferred?: boolean
 }
