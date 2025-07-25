@@ -15,6 +15,7 @@ import { doc, updateDoc } from 'firebase/firestore'
 import { usePathname } from 'next/navigation'
 import TransferDialog from './TransferDialog'
 import PhoneCell from './PhoneCell'
+import { toast } from 'sonner'
 
 export default function PatientRow({
 	patient,
@@ -79,7 +80,7 @@ export default function PatientRow({
 				{patient.name}
 			</TableCell>
 			<TableCell className='border-r border-border'>
-				<PhoneCell phoneNumbers={patient.phoneNumber} />
+				<PhoneCell phoneNumbers={patient.phoneNumber ?? []} />
 			</TableCell>
 			<TableCell className='border-r border-border capitalize'>
 				{patient.sex}
@@ -167,14 +168,14 @@ export default function PatientRow({
 								)
 								await updateDoc(patientRef, {
 									assignedPhc: phc,
+									assignedAsha: '',
 								})
-								console.log(
-									`Successfully transferred ${patient.name} to PHC ${phc}`
+
+								toast.success(
+									`Transferred ${patient.name} to new PHC.`
 								)
-								alert(`Transferred ${patient.name} to new PHC.`)
 							} catch (err) {
-								console.error('Transfer failed:', err)
-								alert(
+								toast.error(
 									'Transfer failed. See console for details.'
 								)
 							}

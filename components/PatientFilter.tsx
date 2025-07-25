@@ -23,10 +23,10 @@ type Props = {
 	setFilterStatuses: (val: string[]) => void
 	ageFilter: string | null
 	setAgeFilter: (val: string | null) => void
-	minAge: number | null
-	setMinAge: (val: number | null) => void
-	maxAge: number | null
-	setMaxAge: (val: number | null) => void
+	assignedFilter: 'assigned' | 'unassigned' | ''
+	setAssignedFilter: (val: 'assigned' | 'unassigned' | '') => void
+	transferFilter: 'transferred' | 'not_transferred' | ''
+	setTransferFilter: (val: 'transferred' | 'not_transferred' | '') => void
 	filterRationColors: string[]
 	setFilterRationColors: (val: string[]) => void
 }
@@ -57,12 +57,12 @@ export default function PatientFilter({
 	setFilterStatuses,
 	ageFilter,
 	setAgeFilter,
-	minAge,
-	setMinAge,
-	maxAge,
-	setMaxAge,
 	filterRationColors,
 	setFilterRationColors,
+	assignedFilter,
+	setAssignedFilter,
+	setTransferFilter,
+	transferFilter,
 }: Props) {
 	const searchRef = useRef<HTMLInputElement>(null)
 
@@ -110,23 +110,34 @@ export default function PatientFilter({
 					</Button>
 				</PopoverTrigger>
 
-				<PopoverContent className='w-[600px] p-4'>
+				<PopoverContent className='w-[650px] px-10 py-4'>
 					<div className='flex flex-wrap gap-6'>
-
 						{/* Sex Filter */}
 						<div className='min-w-[150px]'>
 							<Label className='text-sm font-medium'>Sex</Label>
 							<div className='mt-2 space-y-1'>
 								{SEX_OPTIONS.map((option) => (
-									<div key={option} className='flex items-center space-x-2'>
+									<div
+										key={option}
+										className='flex items-center space-x-2'
+									>
 										<Checkbox
 											id={`sex-${option}`}
-											checked={filterSexes.includes(option)}
+											checked={filterSexes.includes(
+												option
+											)}
 											onCheckedChange={() =>
-												toggleSelection(option, filterSexes, setFilterSexes)
+												toggleSelection(
+													option,
+													filterSexes,
+													setFilterSexes
+												)
 											}
 										/>
-										<Label htmlFor={`sex-${option}`} className='capitalize'>
+										<Label
+											htmlFor={`sex-${option}`}
+											className='capitalize'
+										>
 											{option}
 										</Label>
 									</div>
@@ -136,18 +147,32 @@ export default function PatientFilter({
 
 						{/* Disease Filter */}
 						<div className='min-w-[180px]'>
-							<Label className='text-sm font-medium'>Disease</Label>
+							<Label className='text-sm font-medium'>
+								Disease
+							</Label>
 							<div className='mt-2 space-y-1'>
 								{DISEASE_OPTIONS.map((option) => (
-									<div key={option} className='flex items-center space-x-2'>
+									<div
+										key={option}
+										className='flex items-center space-x-2'
+									>
 										<Checkbox
 											id={`disease-${option}`}
-											checked={filterDiseases.includes(option)}
+											checked={filterDiseases.includes(
+												option
+											)}
 											onCheckedChange={() =>
-												toggleSelection(option, filterDiseases, setFilterDiseases)
+												toggleSelection(
+													option,
+													filterDiseases,
+													setFilterDiseases
+												)
 											}
 										/>
-										<Label htmlFor={`disease-${option}`} className='capitalize'>
+										<Label
+											htmlFor={`disease-${option}`}
+											className='capitalize'
+										>
 											{option}
 										</Label>
 									</div>
@@ -157,18 +182,32 @@ export default function PatientFilter({
 
 						{/* Status Filter */}
 						<div className='min-w-[150px]'>
-							<Label className='text-sm font-medium'>Status</Label>
+							<Label className='text-sm font-medium'>
+								Status
+							</Label>
 							<div className='mt-2 space-y-1'>
 								{STATUS.map((option) => (
-									<div key={option} className='flex items-center space-x-2'>
+									<div
+										key={option}
+										className='flex items-center space-x-2'
+									>
 										<Checkbox
 											id={`status-${option}`}
-											checked={filterStatuses.includes(option)}
+											checked={filterStatuses.includes(
+												option
+											)}
 											onCheckedChange={() =>
-												toggleSelection(option, filterStatuses, setFilterStatuses)
+												toggleSelection(
+													option,
+													filterStatuses,
+													setFilterStatuses
+												)
 											}
 										/>
-										<Label htmlFor={`status-${option}`} className='capitalize'>
+										<Label
+											htmlFor={`status-${option}`}
+											className='capitalize'
+										>
 											{option}
 										</Label>
 									</div>
@@ -176,75 +215,161 @@ export default function PatientFilter({
 							</div>
 						</div>
 
-						{/* Age Filter */}
-						<div className='min-w-[220px]'>
-							<Label className='text-sm font-medium'>Age</Label>
-							<div className='mt-2 space-y-1'>
-								<div className='flex items-center space-x-2'>
-									<Checkbox
-										id='age-6mo'
-										checked={ageFilter === '<6mo'}
-										onCheckedChange={() =>
-											setAgeFilter(ageFilter === '<6mo' ? null : '<6mo')
-										}
-									/>
-									<Label htmlFor='age-6mo'>Less than 6 months</Label>
-								</div>
-								<div className='flex items-center space-x-2'>
-									<Checkbox
-										id='age-1yr'
-										checked={ageFilter === '<1yr'}
-										onCheckedChange={() =>
-											setAgeFilter(ageFilter === '<1yr' ? null : '<1yr')
-										}
-									/>
-									<Label htmlFor='age-1yr'>Less than 1 year</Label>
-								</div>
-								{/* <div className='flex items-center space-x-2'>
-									<input
-										type='number'
-										placeholder='Min age'
-										className='w-20 border rounded px-2 py-1 text-sm'
-										value={minAge ?? ''}
-										onChange={(e) =>
-											setMinAge(e.target.value ? +e.target.value : null)
-										}
-									/>
-									<span>to</span>
-									<input
-										type='number'
-										placeholder='Max age'
-										className='w-20 border rounded px-2 py-1 text-sm'
-										value={maxAge ?? ''}
-										onChange={(e) =>
-											setMaxAge(e.target.value ? +e.target.value : null)
-										}
-									/>
-								</div> */}
-							</div>
-						</div>
-
-						{/* Ration Card Filter */}
-						<div className='min-w-[150px]'>
-							<Label className='text-sm font-medium'>Ration Card</Label>
-							<div className='mt-2 space-y-1'>
-								{RATION_COLORS.map((color) => (
-									<div key={color} className='flex items-center space-x-2'>
+						<section className='flex '>
+							{/* Age Filter */}
+							<div className='min-w-[180px]'>
+								<Label className='text-sm font-medium'>
+									Age
+								</Label>
+								<div className='mt-2 space-y-1'>
+									<div className='flex items-center space-x-2'>
 										<Checkbox
-											id={`ration-${color}`}
-											checked={filterRationColors.includes(color)}
+											id='age-6mo'
+											checked={ageFilter === '<6mo'}
 											onCheckedChange={() =>
-												toggleSelection(color, filterRationColors, setFilterRationColors)
+												setAgeFilter(
+													ageFilter === '<6mo'
+														? null
+														: '<6mo'
+												)
 											}
 										/>
-										<Label htmlFor={`ration-${color}`} className='capitalize'>
-											{color}
+										<Label htmlFor='age-6mo'>
+											Less than 6 months
 										</Label>
 									</div>
-								))}
+									<div className='flex items-center space-x-2'>
+										<Checkbox
+											id='age-1yr'
+											checked={ageFilter === '<1yr'}
+											onCheckedChange={() =>
+												setAgeFilter(
+													ageFilter === '<1yr'
+														? null
+														: '<1yr'
+												)
+											}
+										/>
+										<Label htmlFor='age-1yr'>
+											Less than 1 year
+										</Label>
+									</div>
+								</div>
 							</div>
-						</div>
 
+							{/* Ration Card Filter */}
+							<div className='min-w-[110px]'>
+								<Label className='text-sm font-medium'>
+									Ration Card
+								</Label>
+								<div className='mt-2 space-y-1'>
+									{RATION_COLORS.map((color) => (
+										<div
+											key={color}
+											className='flex items-center space-x-2'
+										>
+											<Checkbox
+												id={`ration-${color}`}
+												checked={filterRationColors.includes(
+													color
+												)}
+												onCheckedChange={() =>
+													toggleSelection(
+														color,
+														filterRationColors,
+														setFilterRationColors
+													)
+												}
+											/>
+											<Label
+												htmlFor={`ration-${color}`}
+												className='capitalize'
+											>
+												{color}
+											</Label>
+										</div>
+									))}
+								</div>
+							</div>
+
+							{/* Assigned Filter */}
+							<div className='min-w-[140px]'>
+								<Label className='text-sm font-medium'>
+									Assigned
+								</Label>
+								<div className='mt-2 space-y-1'>
+									{['assigned', 'unassigned'].map(
+										(option) => (
+											<div
+												key={option}
+												className='flex items-center space-x-2'
+											>
+												<Checkbox
+													id={`assigned-${option}`}
+													checked={
+														assignedFilter ===
+														option
+													}
+													onCheckedChange={() =>
+														setAssignedFilter(
+															assignedFilter ===
+																option
+																? ''
+																: (option as any)
+														)
+													}
+												/>
+												<Label
+													htmlFor={`assigned-${option}`}
+													className='capitalize'
+												>
+													{option}
+												</Label>
+											</div>
+										)
+									)}
+								</div>
+							</div>
+
+							{/* Transferred Filter */}
+							<div className='min-w-[150px]'>
+								<Label className='text-sm font-medium'>
+									Transferred
+								</Label>
+								<div className='mt-2 space-y-1'>
+									{['transferred', 'not_transferred'].map(
+										(option) => (
+											<div
+												key={option}
+												className='flex items-center space-x-2'
+											>
+												<Checkbox
+													id={`transfer-${option}`}
+													checked={
+														transferFilter ===
+														option
+													}
+													onCheckedChange={() =>
+														setTransferFilter(
+															transferFilter ===
+																option
+																? ''
+																: (option as any)
+														)
+													}
+												/>
+												<Label
+													htmlFor={`transfer-${option}`}
+													className='capitalize'
+												>
+													{option.replace('_', ' ')}
+												</Label>
+											</div>
+										)
+									)}
+								</div>
+							</div>
+						</section>
 					</div>
 				</PopoverContent>
 			</Popover>

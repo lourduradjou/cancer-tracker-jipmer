@@ -24,12 +24,12 @@ export default function PatientToolbar({
 	setFilterStatuses,
 	ageFilter,
 	setAgeFilter,
-	minAge,
-	setMinAge,
-	maxAge,
-	setMaxAge,
 	filterRationColors,
 	setFilterRationColors,
+	assignedFilter,
+	setAssignedFilter,
+	transferFilter,
+	setTransferFilter,
 	exportData,
 	setPatients,
 }: {
@@ -43,23 +43,44 @@ export default function PatientToolbar({
 	setFilterStatuses: (statuses: string[]) => void
 	ageFilter: string | null
 	setAgeFilter: (val: string | null) => void
-	minAge: number | null
-	setMinAge: (val: number | null) => void
-	maxAge: number | null
-	setMaxAge: (val: number | null) => void
 	filterRationColors: string[]
 	setFilterRationColors: (colors: string[]) => void
-	exportData: Patient[] // you could also use a specific shape if needed
+	assignedFilter: 'assigned' | 'unassigned' | ''
+	setAssignedFilter: (val: 'assigned' | 'unassigned' | '') => void
+	transferFilter: 'transferred' | 'not_transferred' | ''
+	setTransferFilter: (val: 'transferred' | 'not_transferred' | '') => void
+	exportData: Patient[]
 	setPatients: React.Dispatch<React.SetStateAction<Patient[]>>
 }) {
 	const pathname = usePathname()
-	const userRole = pathname.includes('/nurse')
-		? 'Nurse Dashboard'
-		: 'Doctor Dashboard'
+	let dashboardTitleContent
+	if (pathname.includes('/admin')) {
+		dashboardTitleContent = (
+			<div className='flex gap-4'>
+				{/* You can make these actual tabs with state management if needed */}
+				<Button variant='ghost' className='text-lg font-semibold'>
+					Patients
+				</Button>
+				<Button variant='ghost' className='text-lg font-semibold'>
+					Doctors
+				</Button>
+				<Button variant='ghost' className='text-lg font-semibold'>
+					Nurses
+				</Button>
+			</div>
+		)
+	} else {
+		const userRole = pathname.includes('/nurse')
+			? 'Nurse Dashboard'
+			: 'Doctor Dashboard'
+		dashboardTitleContent = (
+			<h1 className='text-2xl font-bold'>{userRole}</h1>
+		)
+	}
 
 	return (
 		<div className='flex justify-between items-center mb-4'>
-			<h1 className='text-2xl font-bold'>{userRole}</h1>	
+			<h1 className='text-2xl font-bold'>{dashboardTitleContent}</h1>
 			<div className='flex gap-2 items-center'>
 				<PatientFilter
 					searchTerm={searchTerm}
@@ -72,12 +93,12 @@ export default function PatientToolbar({
 					setFilterStatuses={setFilterStatuses}
 					ageFilter={ageFilter}
 					setAgeFilter={setAgeFilter}
-					minAge={minAge}
-					setMinAge={setMinAge}
-					maxAge={maxAge}
-					setMaxAge={setMaxAge}
 					filterRationColors={filterRationColors}
 					setFilterRationColors={setFilterRationColors}
+					assignedFilter={assignedFilter}
+					setAssignedFilter={setAssignedFilter}
+					transferFilter={transferFilter}
+					setTransferFilter={setTransferFilter}
 				/>
 
 				<AddPatientDialog setPatients={setPatients} />

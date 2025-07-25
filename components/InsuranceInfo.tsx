@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import {
@@ -9,10 +8,19 @@ import {
 	SelectValue,
 } from '@/components/ui/select'
 
-export default function InsuranceInfo() {
-	const [insuranceType, setInsuranceType] = useState('none')
-	const [insuranceId, setInsuranceId] = useState('')
+interface InsuranceInfoProps {
+	insuranceType: 'none' | 'private' | 'government'
+	setInsuranceType: (value: 'none' | 'private' | 'government') => void
+	insuranceId: string
+	setInsuranceId: (value: string) => void
+}
 
+export default function InsuranceInfo({
+	insuranceType,
+	setInsuranceType,
+	insuranceId,
+	setInsuranceId,
+}: InsuranceInfoProps) {
 	return (
 		<div className='space-y-4'>
 			<div>
@@ -34,7 +42,10 @@ export default function InsuranceInfo() {
 
 			{insuranceType !== 'none' && (
 				<div className='transition-opacity duration-300 ease-in-out opacity-0 animate-fadeIn space-y-2'>
-					<Label htmlFor='insurance-id' className='text-sm font-medium text-muted-foreground'>
+					<Label
+						htmlFor='insurance-id'
+						className='text-sm font-medium text-muted-foreground'
+					>
 						Insurance ID / Policy Number
 					</Label>
 					<Input

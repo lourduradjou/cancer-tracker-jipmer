@@ -22,6 +22,7 @@ import {
 } from './ui/select'
 import { PlusCircle, MinusCircle } from 'lucide-react'
 import { DISEASES } from '@/constants/data'
+import HospitalSearch from './HospitalSearch' // 1. Import the new component
 
 // Define the types for the props
 interface FormData {
@@ -59,6 +60,16 @@ interface PatientFormProps {
 	setUseAgeInstead: React.Dispatch<React.SetStateAction<boolean>>
 	ageInput: string
 	setAgeInput: React.Dispatch<React.SetStateAction<string>>
+	diagnosedDate: string
+	setDiagnosedDate: React.Dispatch<React.SetStateAction<string>>
+	diagnosedYearsAgo: string
+	setDiagnosedYearsAgo: React.Dispatch<React.SetStateAction<string>>
+	insuranceType: 'none' | 'government' | 'private'
+	setInsuranceType: React.Dispatch<
+		React.SetStateAction<'none' | 'government' | 'private'>
+	>
+	insuranceId: string
+	setInsuranceId: React.Dispatch<React.SetStateAction<string>>
 }
 
 const MAX_PHONE_NUMBERS = 10
@@ -83,6 +94,14 @@ export default function PatientForm({
 	setUseAgeInstead,
 	ageInput,
 	setAgeInput,
+	diagnosedDate,
+	diagnosedYearsAgo,
+	setDiagnosedDate,
+	setDiagnosedYearsAgo,
+	insuranceId,
+	setInsuranceId,
+	insuranceType,
+	setInsuranceType,
 }: PatientFormProps) {
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target
@@ -145,12 +164,12 @@ export default function PatientForm({
 
 	return (
 		<form
-			className='grid gap-6 py-4 w-full select-none'
+			className='grid gap-6 py-4 min-w-full select-none'
 			onSubmit={(e) => e.preventDefault()}
 			autoComplete='off'
 		>
 			<div className='flex flex-col md:flex-row gap-6 w-full'>
-				<div className='flex flex-col gap-4 md:w-1/2'>
+				<div className='flex flex-col gap-4 w-full'>
 					<Input
 						ref={nameRef}
 						name='name'
@@ -160,6 +179,47 @@ export default function PatientForm({
 						autoComplete='off'
 						aria-autocomplete='none'
 					/>
+					{/* "No Aadhaar" Checkbox */}
+					<div className='flex items-center space-x-2 mt-2'>
+						<Checkbox
+							id='noAadhaar'
+							checked={!hasAadhaar}
+							onCheckedChange={(checked) =>
+								setHasAadhaar(!checked)
+							}
+						/>
+						<label
+							htmlFor='noAadhaar'
+							className='text-sm text-muted-foreground'
+						>
+							No Aadhaar
+						</label>
+					</div>
+					{/* Aadhaar Number Inputs (Conditionally Enabled) */}
+					<div className='flex flex-col gap-1'>
+						<label className='text-sm font-medium text-muted-foreground'>
+							Aadhaar Number
+						</label>
+						<div className='flex gap-2'>
+							{(['part1', 'part2', 'part3'] as const).map(
+								(part) => (
+									<Input
+										key={part}
+										name={part}
+										placeholder='_ _ _ _'
+										value={aadhaar[part]}
+										onChange={(e) =>
+											handleAadhaarChange(e, part)
+										}
+										className='w-2/3 text-center text-lg'
+										maxLength={4}
+										disabled={!hasAadhaar}
+										autoComplete='off'
+									/>
+								)
+							)}
+						</div>
+					</div>
 
 					{/* Dynamic Phone Number Inputs */}
 					<div className='flex flex-col gap-2'>
@@ -209,49 +269,6 @@ export default function PatientForm({
 						)}
 					</div>
 
-					{/* "No Aadhaar" Checkbox */}
-					<div className='flex items-center space-x-2 mt-2'>
-						<Checkbox
-							id='noAadhaar'
-							checked={!hasAadhaar}
-							onCheckedChange={(checked) =>
-								setHasAadhaar(!checked)
-							}
-						/>
-						<label
-							htmlFor='noAadhaar'
-							className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-						>
-							Patient does not have Aadhaar
-						</label>
-					</div>
-
-					{/* Aadhaar Number Inputs (Conditionally Enabled) */}
-					<div className='flex flex-col gap-1'>
-						<label className='text-sm font-medium text-muted-foreground'>
-							Aadhaar Number
-						</label>
-						<div className='flex gap-2'>
-							{(['part1', 'part2', 'part3'] as const).map(
-								(part) => (
-									<Input
-										key={part}
-										name={part}
-										placeholder='_ _ _ _'
-										value={aadhaar[part]}
-										onChange={(e) =>
-											handleAadhaarChange(e, part)
-										}
-										className='w-1/3'
-										maxLength={4}
-										disabled={!hasAadhaar}
-										autoComplete='off'
-									/>
-								)
-							)}
-						</div>
-					</div>
-
 					<Input
 						name='aabhaId'
 						placeholder='AABHA ID (optional)'
@@ -259,6 +276,8 @@ export default function PatientForm({
 						onChange={handleChange}
 						autoComplete='off'
 					/>
+				</div>
+				<div className='flex flex-col gap-4 md:w-1/2'>
 					<Input
 						name='address'
 						placeholder='Address'
@@ -267,10 +286,13 @@ export default function PatientForm({
 						autoComplete='off'
 					/>
 
-					<InsuranceInfo />
-				</div>
+					<InsuranceInfo
+						insuranceType={insuranceType}
+						setInsuranceType={setInsuranceType}
+						insuranceId={insuranceId}
+						setInsuranceId={setInsuranceId}
+					/>
 
-				<div className='flex flex-col gap-4 md:w-1/2'>
 					<div className='flex flex-col gap-1'>
 						<label className='text-sm font-medium text-muted-foreground'>
 							Date of Birth or Age
@@ -309,7 +331,6 @@ export default function PatientForm({
 							/>
 						)}
 					</div>
-
 					{/* Sex */}
 					<Select
 						value={formData.sex}
@@ -330,6 +351,7 @@ export default function PatientForm({
 							{/* 'other' implies show all */}
 						</SelectContent>
 					</Select>
+
 					{/* Status Dropdown */}
 					<Select
 						defaultValue='Alive'
@@ -380,7 +402,8 @@ export default function PatientForm({
 							</SelectItem>
 						</SelectContent>
 					</Select>
-
+				</div>
+				<div className='flex flex-col gap-4 md:w-1/2'>
 					{/* Diseases Multi-Select */}
 					<Popover>
 						<PopoverTrigger asChild>
@@ -410,7 +433,10 @@ export default function PatientForm({
 								</div>
 							</Button>
 						</PopoverTrigger>
-						<PopoverContent className='flex justify-center w-full' align='start'>
+						<PopoverContent
+							className='flex justify-center w-full'
+							align='start'
+						>
 							<Tabs defaultValue='solid' className='w-full'>
 								<TabsList className='grid w-full grid-cols-2 mb-2'>
 									<TabsTrigger value='solid'>
@@ -704,25 +730,41 @@ export default function PatientForm({
 						</SelectContent>
 					</Select>
 
-					<Select
+					<HospitalSearch
 						value={selectedPhc}
-						onValueChange={(val) => setSelectedPhc(val)}
-					>
-						<SelectTrigger className='w-full'>
-							<SelectValue placeholder='Select Hospital' />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value='jip-ig-1'>
-								JIPMER IG 1
-							</SelectItem>
-							<SelectItem value='gov-gen-hosp-2'>
-								Gov General Hospital 2
-							</SelectItem>
-							<SelectItem value='puducherry-phc-3'>
-								Puducherry PHC 3
-							</SelectItem>
-						</SelectContent>
-					</Select>
+						onValueChange={setSelectedPhc}
+					/>
+
+					<div className='space-y-4'>
+						<label className='flex flex-col'>
+							<span className='text-muted-foreground text-sm'>
+								Diagnosed Date
+							</span>
+							<Input
+								type='date'
+								value={diagnosedDate}
+								onChange={(e) =>
+									setDiagnosedDate(e.target.value)
+								}
+							/>
+						</label>
+
+						<label className='flex flex-col'>
+							<span className='text-muted-foreground text-sm'>
+								Or Years Ago
+							</span>
+							<Input
+								type='number'
+								min='0'
+								max='100'
+								placeholder='e.g. 2'
+								value={diagnosedYearsAgo}
+								onChange={(e) =>
+									setDiagnosedYearsAgo(e.target.value)
+								}
+							/>
+						</label>
+					</div>
 				</div>
 			</div>
 		</form>

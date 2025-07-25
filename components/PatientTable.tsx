@@ -1,14 +1,6 @@
 'use client'
 
 import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '@/components/ui/table'
-import {
 	Pagination,
 	PaginationContent,
 	PaginationItem,
@@ -16,11 +8,22 @@ import {
 	PaginationNext,
 	PaginationPrevious,
 } from '@/components/ui/pagination'
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@/components/ui/table'
 import { db } from '@/firebase'
+import { useFilteredPatients } from '@/hooks/useFilteredPatients'
+import { usePagination } from '@/hooks/usePagination'
+import { usePatientStats } from '@/hooks/usePatientStats'
 import { Patient } from '@/types/patient'
 import { deleteDoc, doc } from 'firebase/firestore'
 import { usePathname } from 'next/navigation'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import DeletePatientDialog from './DeletePatientDialog'
 import PatientRow from './PatientRow'
 import PatientToolbar from './PatientToolbar'
@@ -34,8 +37,7 @@ export default function PatientTable({
 	patients: Patient[]
 	setPatients: React.Dispatch<React.SetStateAction<Patient[]>>
 }) {
-	const pathname = usePathname()
-	const isNurse = pathname.startsWith('/nurse')
+
 
 	const [rowsPerPage, setRowsPerPage] = useState(8) // Initial default
 
@@ -79,118 +81,43 @@ export default function PatientTable({
 	// allowing your sorting logic to handle the initial view.
 	const [filterStatuses, setFilterStatuses] = useState<string[]>([])
 
-	const [ageFilter, setAgeFilter] = useState<string | null>(null)
-	const [minAge, setMinAge] = useState<number | null>(null)
-	const [maxAge, setMaxAge] = useState<number | null>(null)
+	const [ageFilter, setAgeFilter] = useState<'lt5' | 'lt20' | 'gt50' | null>(
+		null
+	)
+	const [assignedFilter, setAssignedFilter] = useState<
+		'assigned' | 'unassigned' | ''
+	>('')
+	const [transferFilter, setTransferFilter] = useState<
+		'transferred' | 'not_transferred' | ''
+	>('')
+
 	const [filterRationColors, setFilterRationColors] = useState<string[]>([])
 
-	// State for pagination
-	const [currentPage, setCurrentPage] = useState(1)
-	const ROWS_PER_PAGE = rowsPerPage
-
-	const handleConfirmDelete = async () => {
-		if (patientToDelete) {
-			await deleteDoc(doc(db, 'patients', patientToDelete.id))
-			setPatients((prev) =>
-				prev.filter((p) => p.id !== patientToDelete.id)
-			)
-			setPatientToDelete(null)
-		}
-	}
-
-	const filteredPatients = useMemo(() => {
-		// First, the list is filtered based on user selections
-		const result = patients.filter((p) => {
-			const matchSearch =
-				p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				p.phoneNumber?.includes(searchTerm)
-
-			const matchSex =
-				filterSexes.length === 0 ||
-				filterSexes.includes(p.sex?.toLowerCase())
-
-			const matchDisease =
-				filterDiseases.length === 0 ||
-				p.diseases?.some((d) =>
-					filterDiseases.includes(d.toLowerCase())
-				)
-
-			const matchStatus =
-				filterStatuses.length === 0 ||
-				filterStatuses.includes(p.status?.toLowerCase())
-
-			const matchRationCard =
-				filterRationColors.length === 0 ||
-				filterRationColors.includes(p.rationColor?.toLowerCase())
-
-			const dob = new Date(p.dob)
-			const today = new Date()
-			const ageInYears =
-				(today.getTime() - dob.getTime()) /
-				(1000 * 60 * 60 * 24 * 365.25)
-
-			const matchAgeFilter =
-				!ageFilter ||
-				(ageFilter === '<6mo' && ageInYears < 0.5) ||
-				(ageFilter === '<1yr' && ageInYears < 1)
-
-			const matchMinAge = minAge === null || ageInYears >= minAge
-			const matchMaxAge = maxAge === null || ageInYears <= maxAge
-
-			return (
-				matchSearch &&
-				matchSex &&
-				matchDisease &&
-				matchStatus &&
-				matchRationCard &&
-				matchAgeFilter &&
-				matchMinAge &&
-				matchMaxAge
-			)
-		})
-
-		// Then, the filtered list is sorted. This runs on the initial render.
-		return result.sort((a, b) => {
-			if (
-				a.status?.toLowerCase() === 'alive' &&
-				b.status?.toLowerCase() !== 'alive'
-			)
-				return -1
-			if (
-				a.status?.toLowerCase() !== 'alive' &&
-				b.status?.toLowerCase() === 'alive'
-			)
-				return 1
-			return 0
-		})
-	}, [
-		patients,
+	// Filtering
+	const filteredPatients = useFilteredPatients(patients, {
 		searchTerm,
 		filterSexes,
 		filterDiseases,
 		filterStatuses,
 		filterRationColors,
 		ageFilter,
-		minAge,
-		maxAge,
-	])
+		assignedFilter,
+		transferFilter,
+	})
+
+	const {
+		paginated: paginatedPatients,
+		currentPage,
+		totalPages,
+		setCurrentPage,
+	} = usePagination(filteredPatients, rowsPerPage)
+
+	// Stats
+	const patientStats = usePatientStats(filteredPatients)
 
 	useEffect(() => {
 		setCurrentPage(1)
 	}, [filteredPatients.length])
-
-	const totalPages = Math.ceil(filteredPatients.length / ROWS_PER_PAGE)
-	const startIndex = (currentPage - 1) * ROWS_PER_PAGE
-	const paginatedPatients = filteredPatients.slice(
-		startIndex,
-		startIndex + ROWS_PER_PAGE
-	)
-
-	useEffect(() => {
-		if (currentPage > totalPages) {
-			setCurrentPage(totalPages)
-		}
-	}, [totalPages, currentPage])
 
 	const exportData = filteredPatients.map((p) => ({
 		id: p.id,
@@ -228,12 +155,12 @@ export default function PatientTable({
 				setFilterStatuses={setFilterStatuses}
 				ageFilter={ageFilter}
 				setAgeFilter={setAgeFilter}
-				minAge={minAge}
-				setMinAge={setMinAge}
-				maxAge={maxAge}
-				setMaxAge={setMaxAge}
 				filterRationColors={filterRationColors}
 				setFilterRationColors={setFilterRationColors}
+				assignedFilter={assignedFilter}
+				setAssignedFilter={setAssignedFilter}
+				transferFilter={transferFilter}
+				setTransferFilter={setTransferFilter}
 				exportData={exportData}
 				setPatients={setPatients}
 			/>
@@ -272,7 +199,7 @@ export default function PatientTable({
 							<PatientRow
 								key={patient.id}
 								patient={patient}
-								index={startIndex + index}
+								index={index}
 								onView={(p) => {
 									setSelectedPatient(p)
 									setShowView(true)
@@ -298,7 +225,41 @@ export default function PatientTable({
 			</Table>
 
 			{totalPages > 1 && (
-				<div className='flex justify-center items-center mt-4'>
+				<div className='flex justify-between items-center mt-4 flex-wrap gap-4'>
+					{/* Stats Section */}
+					<div className='text-sm font-light flex md:flex-row justify-between w-full'>
+						<section className='flex space-x-4'>
+							<div className='border px-2 py-1 tracking-wider'>
+								Total Patients: {patientStats.total}
+							</div>
+							<div className='border px-2 py-1 tracking-wider'>
+								Male: {patientStats.male}
+							</div>
+							<div className='border px-2 py-1 tracking-wider'>
+								Female: {patientStats.female}
+							</div>
+							<div className='border px-2 py-1 tracking-wider'>
+								Others: {patientStats.others}
+							</div>
+						</section>
+
+						<section className='flex space-x-4'>
+							<div className='border px-2 py-1 tracking-wider'>
+								Assigned: {patientStats.assigned}
+							</div>
+							<div className='border px-2 py-1 tracking-wider'>
+								Unassigned: {patientStats.unassigned}
+							</div>
+							<div className='border px-2 py-1 tracking-wider'>
+								Alive: {patientStats.alive}
+							</div>
+							<div className='border px-2 py-1 tracking-wider'>
+								Death: {patientStats.deceased}
+							</div>
+						</section>
+					</div>
+
+					{/* Pagination UI */}
 					<Pagination>
 						<PaginationContent>
 							<PaginationItem>

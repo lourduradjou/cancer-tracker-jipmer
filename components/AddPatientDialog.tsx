@@ -42,6 +42,12 @@ export default function AddPatientDialog({
 	const nameRef = useRef<HTMLInputElement>(null)
 	const [useAgeInstead, setUseAgeInstead] = useState(false)
 	const [ageInput, setAgeInput] = useState('')
+	const [diagnosedDate, setDiagnosedDate] = useState('')
+	const [diagnosedYearsAgo, setDiagnosedYearsAgo] = useState('')
+	const [insuranceType, setInsuranceType] = useState<
+		'none' | 'government' | 'private'
+	>('none')
+	const [insuranceId, setInsuranceId] = useState('')
 
 	const [formData, setFormData] = useState({
 		name: '',
@@ -248,6 +254,12 @@ export default function AddPatientDialog({
 			formData
 		const age = ageInput
 
+		let finalDiagnosedDate = diagnosedDate
+		if (!diagnosedDate && diagnosedYearsAgo) {
+			const approxDate = subYears(new Date(), Number(diagnosedYearsAgo))
+			finalDiagnosedDate = format(approxDate, 'yyyy-MM-dd')
+		}
+
 		const aadhaarId = hasAadhaar
 			? aadhaar.part1 + aadhaar.part2 + aadhaar.part3
 			: ''
@@ -324,6 +336,14 @@ export default function AddPatientDialog({
 				status,
 				hasAadhaar,
 				transferred: false,
+				diagnosedDate: finalDiagnosedDate || 'Unknown',
+				insurance:
+					insuranceType === 'none'
+						? 'none'
+						: {
+								type: insuranceType,
+								id: insuranceId || 'N/A',
+						  },
 			}
 
 			const docRef = await addDoc(collection(db, 'patients'), fullData)
@@ -514,7 +534,7 @@ export default function AddPatientDialog({
 
 			<DialogContent
 				onInteractOutside={(e) => e.preventDefault()}
-				className='w-full'
+				className='min-w-[1000px]'
 			>
 				<DialogHeader>
 					<DialogTitle className='select-none'>
@@ -542,6 +562,14 @@ export default function AddPatientDialog({
 					setUseAgeInstead={setUseAgeInstead}
 					ageInput={ageInput}
 					setAgeInput={setAgeInput}
+					diagnosedDate={diagnosedDate}
+					setDiagnosedDate={setDiagnosedDate}
+					diagnosedYearsAgo={diagnosedYearsAgo}
+					setDiagnosedYearsAgo={setDiagnosedYearsAgo}
+					insuranceType={insuranceType}
+					setInsuranceType={setInsuranceType}
+					insuranceId={insuranceId}
+					setInsuranceId={setInsuranceId}
 				/>
 
 				<DialogFooter className='flex gap-2 justify-between'>

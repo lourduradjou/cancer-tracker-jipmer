@@ -77,9 +77,9 @@ export default function TransferDialog({
 
 	return (
 		<Dialog>
-			<DialogTrigger asChild>
-				<Tooltip>
-					<TooltipTrigger asChild>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<DialogTrigger asChild>
 						<Button
 							size='icon'
 							variant='outline'
@@ -87,10 +87,10 @@ export default function TransferDialog({
 						>
 							<Repeat2 className='w-4 h-4' />
 						</Button>
-					</TooltipTrigger>
-					<TooltipContent>Transfer</TooltipContent>
-				</Tooltip>
-			</DialogTrigger>
+					</DialogTrigger>
+				</TooltipTrigger>
+				<TooltipContent>Transfer</TooltipContent>
+			</Tooltip>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Transfer Patient</DialogTitle>

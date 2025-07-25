@@ -42,24 +42,21 @@ export default function AdminPage() {
 			const doctorData = snap.docs[0].data()
 			const role = doctorData.role
 			console.log('role' + role)
-			if (role !== 'doctor') {
+			if (role !== 'admin') {
 				if (role === 'nurse') {
 					router.push('/nurse')
-					toast.warning('You are not allowed to view this page')
 				} else if (role === 'asha') {
 					router.push('/asha')
-					toast.warning('You are not allowed to view this page')
+				} else if (role === 'doctor') {
+					router.push('/doctor')
 				} else router.push('/login')
+				toast.warning('You are not allowed to view this page')
 				return
 			}
 
-
 			const orgId = doctorData.orgId
 
-			const patientsQuery = query(
-				collection(db, 'patients'),
-				where('assignedPhc', '==', orgId)
-			)
+			const patientsQuery = query(collection(db, 'patients'))
 
 			const patientsSnap = await getDocs(patientsQuery)
 
