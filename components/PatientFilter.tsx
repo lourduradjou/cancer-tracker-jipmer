@@ -9,7 +9,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover'
-import { Keyboard, ListFilter, Search } from 'lucide-react'
+import { ListFilter, Search } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 
 type Props = {
@@ -22,7 +22,7 @@ type Props = {
 	filterStatuses: string[]
 	setFilterStatuses: (val: string[]) => void
 	ageFilter: string | null
-	setAgeFilter: (val: string | null) => void
+	setAgeFilter: (val: 'lt5' | 'lt20' | 'gt50' | null) => void
 	assignedFilter: 'assigned' | 'unassigned' | ''
 	setAssignedFilter: (val: 'assigned' | 'unassigned' | '') => void
 	transferFilter: 'transferred' | 'not_transferred' | ''
@@ -224,34 +224,34 @@ export default function PatientFilter({
 								<div className='mt-2 space-y-1'>
 									<div className='flex items-center space-x-2'>
 										<Checkbox
-											id='age-6mo'
-											checked={ageFilter === '<6mo'}
+											id='age-lt5'
+											checked={ageFilter === 'lt5'}
 											onCheckedChange={() =>
 												setAgeFilter(
-													ageFilter === '<6mo'
+													ageFilter === 'lt5'
 														? null
-														: '<6mo'
+														: 'lt5'
 												)
 											}
 										/>
-										<Label htmlFor='age-6mo'>
-											Less than 6 months
+										<Label htmlFor='age-lt5'>
+											Less than 5 years
 										</Label>
 									</div>
 									<div className='flex items-center space-x-2'>
 										<Checkbox
-											id='age-1yr'
-											checked={ageFilter === '<1yr'}
+											id='age-lt20'
+											checked={ageFilter === 'lt20'}
 											onCheckedChange={() =>
 												setAgeFilter(
-													ageFilter === '<1yr'
+													ageFilter === 'lt20'
 														? null
-														: '<1yr'
+														: 'lt20'
 												)
 											}
 										/>
-										<Label htmlFor='age-1yr'>
-											Less than 1 year
+										<Label htmlFor='age-lt20'>
+											Less than 20 years
 										</Label>
 									</div>
 								</div>
@@ -315,7 +315,7 @@ export default function PatientFilter({
 															assignedFilter ===
 																option
 																? ''
-																: (option as any)
+																: (option as 'assigned' | 'unassigned')
 														)
 													}
 												/>
@@ -354,7 +354,7 @@ export default function PatientFilter({
 															transferFilter ===
 																option
 																? ''
-																: (option as any)
+																: (option as 'transferred' | 'not_transferred')
 														)
 													}
 												/>

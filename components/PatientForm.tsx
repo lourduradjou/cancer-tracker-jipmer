@@ -9,9 +9,12 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { DISEASES } from '@/constants/data'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
-import React, { useState } from 'react'
+import { MinusCircle, PlusCircle } from 'lucide-react'
+import React from 'react'
+import HospitalSearch from './HospitalSearch'; // 1. Import the new component
 import InsuranceInfo from './InsuranceInfo'
 import {
 	Select,
@@ -20,9 +23,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from './ui/select'
-import { PlusCircle, MinusCircle } from 'lucide-react'
-import { DISEASES } from '@/constants/data'
-import HospitalSearch from './HospitalSearch' // 1. Import the new component
 
 // Define the types for the props
 interface FormData {
@@ -53,7 +53,7 @@ interface PatientFormProps {
 	setSelectedDiseases: React.Dispatch<React.SetStateAction<string[]>>
 	selectedPhc: string
 	setSelectedPhc: React.Dispatch<React.SetStateAction<string>>
-	nameRef: React.RefObject<HTMLInputElement>
+	nameRef: React.RefObject<HTMLInputElement | null>
 	hasAadhaar: boolean
 	setHasAadhaar: React.Dispatch<React.SetStateAction<boolean>>
 	useAgeInstead: boolean

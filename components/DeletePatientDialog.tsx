@@ -1,16 +1,16 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
 import {
 	Dialog,
 	DialogContent,
-	DialogHeader,
 	DialogFooter,
+	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { deleteDoc, doc } from 'firebase/firestore'
 import { db } from '@/firebase'
 import { Patient } from '@/types/patient'
+import { deleteDoc, doc } from 'firebase/firestore'
 
 export default function DeletePatientDialog({
 	patient,

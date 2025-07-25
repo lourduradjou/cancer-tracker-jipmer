@@ -35,7 +35,7 @@ export function useFilteredPatients(
 
 				const matchSex =
 					filterSexes.length === 0 ||
-					filterSexes.includes(p.sex?.toLowerCase())
+					filterSexes.includes((p.sex || '').toLowerCase())
 
 				const matchDisease =
 					filterDiseases.length === 0 ||
@@ -45,11 +45,11 @@ export function useFilteredPatients(
 
 				const matchStatus =
 					filterStatuses.length === 0 ||
-					filterStatuses.includes(p.status?.toLowerCase())
+					filterStatuses.includes((p.status || '').toLowerCase())
 
 				const matchRationCard =
 					filterRationColors.length === 0 ||
-					filterRationColors.includes(p.rationCardColor?.toLowerCase())
+					filterRationColors.includes((p.rationCardColor || '').toLowerCase())
 
 				const dob = new Date(p.dob || '')
 				const ageInYears = isNaN(dob.getTime())

@@ -1,10 +1,10 @@
 // hooks/useAuthStatus.ts
 "use client";
 
-import { useEffect, useState } from "react";
 import { auth, db } from "@/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import { useEffect, useState } from "react";
 
 export function useAuthStatus() {
 	const [checking, setChecking] = useState(true);

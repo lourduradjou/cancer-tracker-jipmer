@@ -1,16 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import {
-	Dialog,
-	DialogTrigger,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogFooter,
-} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
 import {
 	Command,
 	CommandEmpty,
@@ -18,15 +8,25 @@ import {
 	CommandInput,
 	CommandItem,
 } from '@/components/ui/command'
-import { db } from '@/firebase'
-import { collection, getDocs } from 'firebase/firestore'
-import { Repeat2 } from 'lucide-react'
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
 import {
 	Tooltip,
 	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
+	TooltipTrigger
 } from '@/components/ui/tooltip'
+import { db } from '@/firebase'
+import { Patient } from '@/types/patient'
+import { collection, getDocs } from 'firebase/firestore'
+import { Repeat2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 type Hospital = {
 	id: string
@@ -36,10 +36,9 @@ type Hospital = {
 }
 
 export default function TransferDialog({
-	patient,
 	onTransfer,
 }: {
-	patient: any
+	patient: Patient
 	onTransfer: (hospitalId: string) => void
 }) {
 	const [hospitals, setHospitals] = useState<Hospital[]>([])

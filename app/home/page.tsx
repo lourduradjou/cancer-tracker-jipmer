@@ -21,7 +21,7 @@ export default function HomePage() {
 			</ul>
 
 			<TypographyP className="text-gray-600">
-				If you're unsure where to begin, choose your role from the <strong>Data Entry</strong> dropdown in the navigation bar above.
+				If you&apos;re unsure where to begin, choose your role from the <strong>Data Entry</strong> dropdown in the navigation bar above.
 			</TypographyP>
 		</div>
 	);

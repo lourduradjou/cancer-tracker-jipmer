@@ -6,8 +6,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog'
-import { Patient } from '@/types/patient'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Patient } from '@/types/patient'
 
 export default function ViewPatientDialog({
 	open,
@@ -31,7 +31,7 @@ export default function ViewPatientDialog({
 						{/* Left Column */}
 						<div className='space-y-2'>
 							<Info label='Name' value={patient.name} />
-							<Info label='Phone' value={patient.phoneNumber} />
+							<Info label='Phone' value={Array.isArray(patient.phoneNumber) ? patient.phoneNumber.join(', ') : patient.phoneNumber} />
 							<Info label='Sex' value={patient.sex} />
 							<Info label='DOB' value={patient.dob} />
 							<Info label='Address' value={patient.address} />

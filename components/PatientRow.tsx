@@ -13,9 +13,9 @@ import { db } from '@/firebase'
 import { Patient } from '@/types/patient'
 import { doc, updateDoc } from 'firebase/firestore'
 import { usePathname } from 'next/navigation'
-import TransferDialog from './TransferDialog'
-import PhoneCell from './PhoneCell'
 import { toast } from 'sonner'
+import PhoneCell from './PhoneCell'
+import TransferDialog from './TransferDialog'
 
 export default function PatientRow({
 	patient,
@@ -176,7 +176,7 @@ export default function PatientRow({
 								)
 							} catch (err) {
 								toast.error(
-									'Transfer failed. See console for details.'
+									'Transfer failed. See console for details.' + err
 								)
 							}
 						}}

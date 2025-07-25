@@ -1,5 +1,6 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
 import {
 	Dialog,
 	DialogContent,
@@ -7,12 +8,11 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { updateDoc, doc } from 'firebase/firestore'
+import { Label } from '@/components/ui/label'
 import { db } from '@/firebase'
 import { Patient } from '@/types/patient'
-import { Label } from '@/components/ui/label'
+import { doc, updateDoc } from 'firebase/firestore'
 
 export default function UpdatePatientDialog({
 	open,
@@ -73,8 +73,8 @@ export default function UpdatePatientDialog({
 				? {
 						...prev,
 						gpsLocation: {
-							...(prev.gpsLocation || {}),
-							[axis]: num,
+							lat: axis === 'lat' ? num : prev.gpsLocation?.lat ?? 0,
+							lng: axis === 'lng' ? num : prev.gpsLocation?.lng ?? 0,
 						},
 				  }
 				: prev

@@ -1,14 +1,14 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { ChevronDown } from 'lucide-react';
 import {
 	DropdownMenu,
-	DropdownMenuTrigger,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'; // ✅ from shadcn/ui
+import { ChevronDown } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function HomeNavbar() {
 	const pathname = usePathname();

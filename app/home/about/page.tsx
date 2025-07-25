@@ -14,14 +14,14 @@ export default function AboutPage() {
 				diagnoses contribute to high mortality rates.
 			</TypographyP>
 			<TypographyP>
-				The project's core concept involves introducing and integrating
-				both community and hospitalnavigators to create a conducive
+				The project&apos;s core concept involves introducing and integrating
+				both community and hospital navigators to create a conducive
 				environment for patient navigation through the health care
-				system.Community navigators will be trained lay workers
-				providing informational and emotional support,while hospital
+				system. Community navigators will be trained lay workers
+				providing informational and emotional support, while hospital
 				navigators will be junior nurses or social workers coordinating
-				care and decisionmaking. This dual approach aims to bridge gaps
-				in the cancer care pathway from screening tosurvivorship and
+				care and decision making. This dual approach aims to bridge gaps
+				in the cancer care pathway from screening to survivorship and
 				palliative care.
 			</TypographyP>
 		</div>

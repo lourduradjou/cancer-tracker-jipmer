@@ -16,13 +16,10 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table'
-import { db } from '@/firebase'
 import { useFilteredPatients } from '@/hooks/useFilteredPatients'
 import { usePagination } from '@/hooks/usePagination'
 import { usePatientStats } from '@/hooks/usePatientStats'
 import { Patient } from '@/types/patient'
-import { deleteDoc, doc } from 'firebase/firestore'
-import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import DeletePatientDialog from './DeletePatientDialog'
 import PatientRow from './PatientRow'
@@ -117,7 +114,7 @@ export default function PatientTable({
 
 	useEffect(() => {
 		setCurrentPage(1)
-	}, [filteredPatients.length])
+	}, [filteredPatients.length, setCurrentPage])
 
 	const exportData = filteredPatients.map((p) => ({
 		id: p.id,

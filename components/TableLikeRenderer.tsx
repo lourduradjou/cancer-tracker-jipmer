@@ -1,11 +1,23 @@
 // components/TableLikeRenderer.tsx
-export default function TableLikeRenderer({
-	data,
-	entity,
-}: {
-	data: any[]
-	entity: 'doctor' | 'nurse'
-}) {
+type Doctor = {
+	id?: string | number
+	name: string
+	specialty: string
+	phone: string
+}
+
+type Nurse = {
+	id?: string | number
+	name: string
+	ward: string
+	shift: string
+}
+
+type TableLikeRendererProps =
+	| { data: Doctor[]; entity: 'doctor' }
+	| { data: Nurse[]; entity: 'nurse' }
+
+export default function TableLikeRenderer({ data, entity }: TableLikeRendererProps) {
 	if (!data.length) return <p>No {entity} found.</p>
 
 	const columns =
@@ -29,7 +41,9 @@ export default function TableLikeRenderer({
 					<tr key={item.id || idx}>
 						{columns.map(col => (
 							<td key={col} className='border p-2'>
-								{item[col] ?? '—'}
+								{entity === 'doctor'
+									? (item as Doctor)[col as keyof Doctor] ?? '—'
+									: (item as Nurse)[col as keyof Nurse] ?? '—'}
 							</td>
 						))}
 					</tr>

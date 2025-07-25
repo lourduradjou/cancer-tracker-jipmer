@@ -12,17 +12,9 @@ import {
 import { db } from '@/firebase'
 import { Patient } from '@/types/patient'
 import { format, isFuture, subYears } from 'date-fns'
-import {
-	addDoc,
-	collection,
-	getDocs,
-	query,
-	where,
-	doc,
-	updateDoc,
-} from 'firebase/firestore'
-import { ArrowRightCircle, Plus, X } from 'lucide-react'
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { addDoc, collection, getDocs, query, where } from 'firebase/firestore'
+import { Plus, X } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { DISEASES } from '@/constants/data'
@@ -89,33 +81,33 @@ export default function AddPatientDialog({
 	}, [])
 
 	// 2. `updatePatientAssignedPhc` (depends on `clearForm`, `setOpen`, `setPatients`, `selectedPhc`)
-	const updatePatientAssignedPhc = useCallback(
-		async (patientId: string, currentPhc: string) => {
-			if (!patientId || !currentPhc) {
-				toast.error(
-					'Cannot transfer: missing patient ID or current PHC.'
-				)
-				return
-			}
+	// const updatePatientAssignedPhc = useCallback(
+	// 	async (patientId: string, currentPhc: string) => {
+	// 		if (!patientId || !currentPhc) {
+	// 			toast.error(
+	// 				'Cannot transfer: missing patient ID or current PHC.'
+	// 			)
+	// 			return
+	// 		}
 
-			try {
-				const patientRef = doc(db, 'patients', patientId)
-				await updateDoc(patientRef, {
-					assignedPhc: currentPhc,
-					transferred: true,
-				})
-				toast.success(
-					'Patient record successfully transferred and updated!'
-				)
-				setOpen(false)
-				clearForm()
-			} catch (error) {
-				console.error('Error updating patient for transfer:', error)
-				toast.error('Failed to transfer patient. Please try again.')
-			}
-		},
-		[selectedPhc, setOpen, clearForm, setPatients]
-	)
+	// 		try {
+	// 			const patientRef = doc(db, 'patients', patientId)
+	// 			await updateDoc(patientRef, {
+	// 				assignedPhc: currentPhc,
+	// 				transferred: true,
+	// 			})
+	// 			toast.success(
+	// 				'Patient record successfully transferred and updated!'
+	// 			)
+	// 			setOpen(false)
+	// 			clearForm()
+	// 		} catch (error) {
+	// 			console.error('Error updating patient for transfer:', error)
+	// 			toast.error('Failed to transfer patient. Please try again.')
+	// 		}
+	// 	},
+	// 	[setOpen, clearForm]
+	// )
 
 	// 3. `checkAadhaarDuplicate` (depends on `updatePatientAssignedPhc`, `selectedPhc`)
 	const checkAadhaarDuplicate = useCallback(
@@ -134,19 +126,19 @@ export default function AddPatientDialog({
 				const patientId = querySnapshot.docs[0].id
 				if (showToast) {
 					toast.warning('Patient with this Aadhaar already exists.', {
-						action: {
-							label: (
-								<span className='flex items-center text-blue-500'>
-									<ArrowRightCircle className='h-4 w-4 mr-1' />{' '}
-									Transfer
-								</span>
-							),
-							onClick: () =>
-								updatePatientAssignedPhc(
-									patientId,
-									selectedPhc
-								),
-						},
+						// action: {
+						// 	label: (
+						// 		<span className='flex items-center text-blue-500'>
+						// 			<ArrowRightCircle className='h-4 w-4 mr-1' />{' '}
+						// 			Transfer
+						// 		</span>
+						// 	),
+						// 	onClick: () =>
+						// 		updatePatientAssignedPhc(
+						// 			patientId,
+						// 			selectedPhc
+						// 		),
+						// },
 						duration: 5000,
 					})
 				}
@@ -154,7 +146,7 @@ export default function AddPatientDialog({
 			}
 			return { exists: false }
 		},
-		[updatePatientAssignedPhc, selectedPhc]
+		[]
 	)
 
 	// 4. `checkNamePhoneDuplicate` (depends on `updatePatientAssignedPhc`, `selectedPhc`, `aadhaar`, `hasAadhaar`)
@@ -246,7 +238,7 @@ export default function AddPatientDialog({
 			}
 			return { exists: false }
 		},
-		[updatePatientAssignedPhc, selectedPhc, aadhaar, hasAadhaar]
+		[aadhaar, hasAadhaar]
 	)
 
 	const handleAdd = useCallback(async () => {
@@ -367,10 +359,13 @@ export default function AddPatientDialog({
 		selectedPhc,
 		selectedDiseases,
 		clearForm,
-		checkAadhaarDuplicate,
-		checkNamePhoneDuplicate,
 		setPatients,
 		useAgeInstead, // ✅ add this
+		ageInput,
+		diagnosedDate,
+		diagnosedYearsAgo,
+		insuranceType,
+		insuranceId,
 	])
 
 	// --- useEffects ---
@@ -483,7 +478,8 @@ export default function AddPatientDialog({
 		aadhaar.part3,
 		hasAadhaar,
 		checkAadhaarDuplicate,
-	]) // Removed aadhaarCheckTimer from dependencies
+		aadhaarCheckTimer,
+	])
 
 	// New Effect for debouncing Name/Phone fuzzy check (REAL-TIME for 'No Aadhaar' patients)
 	useEffect(() => {
@@ -518,7 +514,13 @@ export default function AddPatientDialog({
 				// No need to set setNamePhoneCheckTimer(null) here either.
 			}
 		}
-	}, [hasAadhaar, formData.name, rawPhoneNumbers, checkNamePhoneDuplicate]) // Removed namePhoneCheckTimer from dependencies
+	}, [
+		hasAadhaar,
+		formData.name,
+		rawPhoneNumbers,
+		checkNamePhoneDuplicate,
+		namePhoneCheckTimer,
+	]) // Removed namePhoneCheckTimer from dependencies
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>

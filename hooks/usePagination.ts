@@ -1,5 +1,5 @@
 // hooks/usePagination.ts
-import { useMemo, useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export function usePagination<T>(data: T[], rowsPerPage: number) {
 	const [currentPage, setCurrentPage] = useState(1)

@@ -42,14 +42,29 @@ export default function PatientToolbar({
 	filterStatuses: string[]
 	setFilterStatuses: (statuses: string[]) => void
 	ageFilter: string | null
-	setAgeFilter: (val: string | null) => void
+	setAgeFilter: (val: 'lt5' | 'lt20' | 'gt50' | null) => void
 	filterRationColors: string[]
 	setFilterRationColors: (colors: string[]) => void
 	assignedFilter: 'assigned' | 'unassigned' | ''
 	setAssignedFilter: (val: 'assigned' | 'unassigned' | '') => void
 	transferFilter: 'transferred' | 'not_transferred' | ''
 	setTransferFilter: (val: 'transferred' | 'not_transferred' | '') => void
-	exportData: Patient[]
+	 exportData: {
+        id: string
+        name: string
+        phoneNumber: string[] | undefined
+        sex: string
+        dob: string
+        address: string
+        aadhaarId: string
+        rationCardColor: string
+        diseases: string
+        assignedPhc: string
+        assignedAsha: string
+        gpsLocation: string
+        followUps: string
+        status: string
+    }[]
 	setPatients: React.Dispatch<React.SetStateAction<Patient[]>>
 }) {
 	const pathname = usePathname()

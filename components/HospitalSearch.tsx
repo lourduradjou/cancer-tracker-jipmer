@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Check, ChevronsUpDown } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import {
     Command,
     CommandEmpty,
@@ -14,10 +13,11 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
-import { Button } from '@/components/ui/button'
 import { db } from '@/firebase'
-import { collection, getDocs } from 'firebase/firestore'
 import { cn } from '@/lib/utils'
+import { collection, getDocs } from 'firebase/firestore'
+import { Check, ChevronsUpDown } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 
 // Define the shape of a hospital object
