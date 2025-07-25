@@ -7,7 +7,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-import PatientTable from '@/components/PatientTable'
+import EntityManager from '@/components/EntityManager'
 import { Patient } from '@/types/patient'
 import { toast } from 'sonner'
 
@@ -83,7 +83,9 @@ export default function AdminPage() {
 
 	return (
 		<div className='px-8 py-4 lg:max-w-[1240px] mx-auto xl:max-w-[1400px]'>
-			<PatientTable patients={patients} setPatients={setPatients} />
+			<div className='p-4'>
+				<EntityManager />
+			</div>
 		</div>
 	)
 }

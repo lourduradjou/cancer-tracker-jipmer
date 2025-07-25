@@ -55,20 +55,21 @@ export default function PatientToolbar({
 	const pathname = usePathname()
 	let dashboardTitleContent
 	if (pathname.includes('/admin')) {
-		dashboardTitleContent = (
-			<div className='flex gap-4'>
-				{/* You can make these actual tabs with state management if needed */}
-				<Button variant='ghost' className='text-lg font-semibold'>
-					Patients
-				</Button>
-				<Button variant='ghost' className='text-lg font-semibold'>
-					Doctors
-				</Button>
-				<Button variant='ghost' className='text-lg font-semibold'>
-					Nurses
-				</Button>
-			</div>
-		)
+		dashboardTitleContent = ""
+		// dashboardTitleContent = (
+		// 	<div className='flex gap-4'>
+		// 		{/* You can make these actual tabs with state management if needed */}
+		// 		<Button variant='ghost' className='text-lg font-semibold'>
+		// 			Patients
+		// 		</Button>
+		// 		<Button variant='ghost' className='text-lg font-semibold'>
+		// 			Doctors
+		// 		</Button>
+		// 		<Button variant='ghost' className='text-lg font-semibold'>
+		// 			Nurses
+		// 		</Button>
+		// 	</div>
+		// )
 	} else {
 		const userRole = pathname.includes('/nurse')
 			? 'Nurse Dashboard'
@@ -80,7 +81,7 @@ export default function PatientToolbar({
 
 	return (
 		<div className='flex justify-between items-center mb-4'>
-			<h1 className='text-2xl font-bold'>{dashboardTitleContent}</h1>
+			{dashboardTitleContent}
 			<div className='flex gap-2 items-center'>
 				<PatientFilter
 					searchTerm={searchTerm}
