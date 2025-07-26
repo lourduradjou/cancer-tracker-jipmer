@@ -35,3 +35,5 @@ export type Patient = {
 	hasAadhaar?: boolean
 	transferred?: boolean
 }
+
+

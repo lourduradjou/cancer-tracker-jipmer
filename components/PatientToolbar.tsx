@@ -12,6 +12,7 @@ import { Patient } from '@/types/patient'
 import { usePathname } from 'next/navigation'
 import AddPatientDialog from './AddPatientDialog'
 import PatientFilter from './PatientFilter'
+import { generateDiseasePDF } from '@/lib/generateDiseaseReport'
 
 export default function PatientToolbar({
 	searchTerm,
@@ -49,28 +50,28 @@ export default function PatientToolbar({
 	setAssignedFilter: (val: 'assigned' | 'unassigned' | '') => void
 	transferFilter: 'transferred' | 'not_transferred' | ''
 	setTransferFilter: (val: 'transferred' | 'not_transferred' | '') => void
-	 exportData: {
-        id: string
-        name: string
-        phoneNumber: string[] | undefined
-        sex: string
-        dob: string
-        address: string
-        aadhaarId: string
-        rationCardColor: string
-        diseases: string
-        assignedPhc: string
-        assignedAsha: string
-        gpsLocation: string
-        followUps: string
-        status: string
-    }[]
+	exportData: {
+		id: string
+		name: string
+		phoneNumber: string[] | undefined
+		sex: string
+		dob: string
+		address: string
+		aadhaarId: string
+		rationCardColor: string
+		diseases: string
+		assignedPhc: string
+		assignedAsha: string
+		gpsLocation: string
+		followUps: string
+		status: string
+	}[]
 	setPatients: React.Dispatch<React.SetStateAction<Patient[]>>
 }) {
 	const pathname = usePathname()
 	let dashboardTitleContent
 	if (pathname.includes('/admin')) {
-		dashboardTitleContent = ""
+		dashboardTitleContent = ''
 		// dashboardTitleContent = (
 		// 	<div className='flex gap-4'>
 		// 		{/* You can make these actual tabs with state management if needed */}
@@ -140,6 +141,13 @@ export default function PatientToolbar({
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
+
+				<Button
+					variant='outline'
+					onClick={() => generateDiseasePDF(exportData)}
+				>
+					Report
+				</Button>
 			</div>
 		</div>
 	)

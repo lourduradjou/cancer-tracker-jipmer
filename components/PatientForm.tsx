@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { MinusCircle, PlusCircle } from 'lucide-react'
 import React from 'react'
-import HospitalSearch from './HospitalSearch'; // 1. Import the new component
+import HospitalSearch from './HospitalSearch' // 1. Import the new component
 import InsuranceInfo from './InsuranceInfo'
 import {
 	Select,
@@ -140,10 +140,13 @@ export default function PatientForm({
 	) => {
 		let val = e.target.value.replace(/\D/g, '')
 		if (val.length > 10) val = val.slice(0, 10)
-		const formatted = val.replace(
-			/^(\d{4})(\d{0,4})(\d{0,2})$/,
-			(_, g1, g2, g3) => [g1, g2, g3].filter(Boolean).join('-')
-		)
+
+		let formatted = val
+		if (val.length > 4 && val.length <= 8) {
+			formatted = `${val.slice(0, 4)}-${val.slice(4)}`
+		} else if (val.length > 8) {
+			formatted = `${val.slice(0, 4)}-${val.slice(4, 8)}-${val.slice(8)}`
+		}
 
 		setRawPhoneNumbers((prev) => {
 			const newNumbers = [...prev]
@@ -178,6 +181,9 @@ export default function PatientForm({
 						onChange={handleChange}
 						autoComplete='off'
 						aria-autocomplete='none'
+						required
+						pattern='^[A-Za-z\s]+$'
+						title='Only alphabets and spaces are allowed'
 					/>
 					{/* "No Aadhaar" Checkbox */}
 					<div className='flex items-center space-x-2 mt-2'>
@@ -284,6 +290,7 @@ export default function PatientForm({
 						value={formData.address}
 						onChange={handleChange}
 						autoComplete='off'
+						required
 					/>
 
 					<InsuranceInfo

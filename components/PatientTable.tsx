@@ -196,7 +196,7 @@ export default function PatientTable({
 							<PatientRow
 								key={patient.id}
 								patient={patient}
-								index={index}
+								index={(currentPage - 1) * rowsPerPage + index}
 								onView={(p) => {
 									setSelectedPatient(p)
 									setShowView(true)
