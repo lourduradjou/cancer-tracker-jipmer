@@ -18,8 +18,8 @@ export default function HomeNavbar() {
 		return (
 			<Link
 				href={href}
-				className={`block px-4 py-2 rounded hover:bg-gray-200 ${
-					isActive ? 'bg-gray-300 font-semibold' : ''
+				className={`block px-4 py-2 rounded  ${
+					isActive ? ' font-semibold' : ''
 				}`}
 			>
 				{label}
@@ -28,7 +28,7 @@ export default function HomeNavbar() {
 	};
 
 	return (
-		<nav className='flex items-center justify-between bg-gray-100 px-6 py-3 shadow'>
+		<nav className='flex items-center justify-between  px-6 py-3 shadow'>
 			<div className='flex items-center space-x-4'>
 				{navItem('Home', '/home', true)}
 				{navItem('About COMPASS', '/home/about')}
@@ -36,7 +36,7 @@ export default function HomeNavbar() {
 
 				{/* Dropdown with shadcn/ui */}
 				<DropdownMenu>
-					<DropdownMenuTrigger className='flex items-center px-4 py-2 rounded hover:bg-gray-200 focus:outline-none'>
+					<DropdownMenuTrigger className='flex items-center px-4 py-2 rounded focus:outline-none'>
 						Data Entry
 						<ChevronDown className='ml-1 h-4 w-4' />
 					</DropdownMenuTrigger>
@@ -49,6 +49,9 @@ export default function HomeNavbar() {
 						</DropdownMenuItem>
 						<DropdownMenuItem asChild>
 							<Link href='/asha'>ASHA</Link>
+						</DropdownMenuItem>
+						<DropdownMenuItem asChild>
+							<Link href='/admin'>Admin</Link>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>

@@ -1,129 +1,177 @@
 'use client'
 
 import PatientCard from '@/components/PatientCard'
-import Loading from '@/components/ui/loading'
-import { auth, db } from '@/firebase'
-import { FollowUp, Patient } from '@/types/patient' // Import FollowUp type
-import { onAuthStateChanged } from 'firebase/auth'
+import { db, auth } from '@/firebase'
+import { FollowUp, Patient } from '@/types/patient'
 import {
-    collection,
-    doc,
-    getDocs,
-    query,
-    updateDoc,
-    where,
-    Timestamp, // ✨ STEP 1: Import Timestamp
+	doc,
+	Timestamp,
+	updateDoc,
+	collection,
+	getDocs,
+	query,
+	where,
 } from 'firebase/firestore'
+import { onAuthStateChanged } from 'firebase/auth'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 export default function AshaPage() {
-    const router = useRouter()
-    const [checking, setChecking] = useState(true)
-    const [ashaEmail, setAshaEmail] = useState('')
-    const [patients, setPatients] = useState<Patient[]>([])
-    const [saving, setSaving] = useState(false)
+	const router = useRouter()
+	const [checking, setChecking] = useState(true)
+	const [ashaEmail, setAshaEmail] = useState('')
+	const [patients, setPatients] = useState<Patient[]>([])
+	const [saving, setSaving] = useState(false)
 
-    // The useEffect for auth and fetching patients remains the same...
-    useEffect(() => {
-        // ... no changes needed in this useEffect
-    }, [router])
+	// STEP 1: Auth listener and setting Asha email
+	useEffect(() => {
+		const unsubscribe = onAuthStateChanged(auth, (user) => {
+			if (user) {
+				setAshaEmail(user.email || '')
+				setChecking(false)
+			} else {
+				router.push('/') // Redirect to login if not authenticated
+			}
+		})
+		return () => unsubscribe()
+	}, [router])
 
-     useEffect(() => {
-        // ... no changes needed in this useEffect
-    }, [ashaEmail])
+	// STEP 2: Fetch patients assigned to the ASHA
+	useEffect(() => {
+		const fetchPatients = async () => {
+			try {
+				if (!ashaEmail) return
 
-    const handleInputChange = (
-        e: React.ChangeEvent<HTMLInputElement>,
-        patientId: string
-    ) => {
-        const { name, value } = e.target
-        setPatients((prev) =>
-            prev.map((p) => (p.id === patientId ? { ...p, [name]: value } : p))
-        )
-    }
+				const patientsRef = collection(db, 'patients')
+				const q = query(
+					patientsRef,
+					where('assignedAsha', '==', ashaEmail)
+				)
+				const querySnapshot = await getDocs(q)
 
-    // ✨ STEP 1: Create the handler for adding a new follow-up
-    const handleAddFollowUp = async (patientId: string, remark: string) => {
-        const newFollowUp: FollowUp = {
-            date: Timestamp.now(), // Use Firestore's server timestamp
-            remarks: remark,
-            // You can add other fields like who added it
-            // allotedAsha: ashaEmail, 
-        }
+				const patientsData: Patient[] = []
+				querySnapshot.forEach((docSnap) => {
+					patientsData.push({
+						id: docSnap.id,
+						...docSnap.data(),
+					} as Patient)
+				})
 
-        try {
-            const patientDocRef = doc(db, 'patients', patientId)
-            const patientToUpdate = patients.find(p => p.id === patientId)
-            const updatedFollowUps = [...(patientToUpdate?.followUps || []), newFollowUp]
+				setPatients(patientsData)
+			} catch (error) {
+				console.error('Error fetching patients:', error)
+				toast.error('Failed to fetch patients.')
+			}
+		}
 
-            // Update only the followUps field in Firestore
-            await updateDoc(patientDocRef, {
-                followUps: updatedFollowUps
-            });
+		fetchPatients()
+	}, [ashaEmail])
 
-            // Update local state to show the change immediately
-            setPatients(prev => prev.map(p => 
-                p.id === patientId 
-                ? { ...p, followUps: updatedFollowUps } 
-                : p
-            ));
+	// Handle input change in PatientCard
+	const handleInputChange = (
+		e: React.ChangeEvent<HTMLInputElement>,
+		patientId: string
+	) => {
+		const { name, value } = e.target
+		setPatients((prev) =>
+			prev.map((p) => (p.id === patientId ? { ...p, [name]: value } : p))
+		)
+	}
 
-            toast.success('Follow-up added successfully!')
-        } catch (error) {
-            console.error('Error adding follow-up:', error)
-            toast.error('Failed to add follow-up.')
-        }
-    }
+	// Add a new follow-up to the selected patient
+	const handleAddFollowUp = async (patientId: string, remark: string) => {
+		const now = Timestamp.now()
+		const newFollowUp: FollowUp = {
+			date: {
+				type: 'firestore/timestamp/1.0',
+				seconds: now.seconds,
+				nanoseconds: now.nanoseconds,
+			},
+			remarks: remark,
+			// Optional: allotedAsha: ashaEmail
+		}
 
-    const handleSave = async (patientId: string) => {
-        setSaving(true)
-        try {
-            const patient = patients.find((p) => p.id === patientId)
-            if (!patient) throw new Error("Patient not found")
-            
-            const { id, ...patientData } = patient; // Exclude ID from the data being written
-            const docRef = doc(db, 'patients', patientId)
+		try {
+			const patientDocRef = doc(db, 'patients', patientId)
+			const patientToUpdate = patients.find((p) => p.id === patientId)
+			const updatedFollowUps = [
+				...(patientToUpdate?.followUps || []),
+				newFollowUp,
+			]
 
-            await updateDoc(docRef, patientData)
-            toast.success('Patient updated successfully.')
-        } catch (error) {
-            console.error('Error updating patient:', error)
-            toast.error('Failed to update patient.')
-        }
-        setSaving(false)
-    }
+			await updateDoc(patientDocRef, {
+				followUps: updatedFollowUps,
+			})
 
-    if (checking) {
-        // ... no changes to the loading state
-    }
+			setPatients((prev) =>
+				prev.map((p) =>
+					p.id === patientId
+						? { ...p, followUps: updatedFollowUps }
+						: p
+				)
+			)
 
-    return (
-        <main className='p-4 mt-4'>
-            <h1 className='text-xl font-bold text-center mb-4'>
-                Your Assigned Patients
-            </h1>
+			toast.success('Follow-up added successfully!')
+		} catch (error) {
+			console.error('Error adding follow-up:', error)
+			toast.error('Failed to add follow-up.')
+		}
+	}
 
-            {patients.length === 0 ? (
-                <p className='text-center text-gray-500 text-sm'>
-                    No patients assigned to you.
-                </p>
-            ) : (
-                <div className='flex flex-col overflow-y-auto space-y-4 pb-4 w-full items-center'>
-                    {patients.map((patient) => (
-                        <PatientCard
-                            key={patient.id}
-                            patient={patient}
-                            onChange={handleInputChange}
-                            onSave={handleSave}
-                            isSaving={saving}
-                            // ✨ STEP 2: Pass the new handler as a prop
-                            onAddFollowUp={handleAddFollowUp}
-                        />
-                    ))}
-                </div>
-            )}
-        </main>
-    )
+	// Save edited patient info
+	const handleSave = async (patientId: string) => {
+		setSaving(true)
+		try {
+			const patient = patients.find((p) => p.id === patientId)
+			if (!patient) throw new Error('Patient not found')
+
+			const { id, ...patientData } = patient
+			const docRef = doc(db, 'patients', patientId)
+
+			await updateDoc(docRef, patientData)
+			toast.success('Patient updated successfully.')
+		} catch (error) {
+			console.error('Error updating patient:', error)
+			toast.error('Failed to update patient.')
+		}
+		setSaving(false)
+	}
+
+	// Show loading screen while checking auth
+	if (checking) {
+		return (
+			<main className='flex items-center justify-center h-screen'>
+				<p className='text-gray-500'>Checking authentication...</p>
+			</main>
+		)
+	}
+
+	// Render UI
+	return (
+		<main className='p-4 mt-4'>
+			<h1 className='text-xl font-bold text-center mb-4'>
+				Your Assigned Patients
+			</h1>
+
+			{patients.length === 0 ? (
+				<p className='text-center text-gray-500 text-sm'>
+					No patients assigned to you.
+				</p>
+			) : (
+				<div className='flex flex-col overflow-y-auto space-y-4 pb-4 w-full items-center'>
+					{patients.map((patient) => (
+						<PatientCard
+							key={patient.id}
+							patient={patient}
+							onChange={handleInputChange}
+							onSave={handleSave}
+							isSaving={saving}
+							onAddFollowUp={handleAddFollowUp}
+						/>
+					))}
+				</div>
+			)}
+		</main>
+	)
 }

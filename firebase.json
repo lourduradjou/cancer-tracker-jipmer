@@ -9,5 +9,6 @@
       "firebase-debug.*.log",
       "functions"
     ]
+    
   }
 }
