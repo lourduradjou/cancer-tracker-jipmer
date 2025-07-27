@@ -172,7 +172,7 @@ export default function PatientForm({
 			autoComplete='off'
 		>
 			<div className='flex flex-col md:flex-row gap-6 w-full'>
-				<div className='flex flex-col gap-4 md:w-1/3 border-r-2'>
+				<div className='flex flex-col gap-4 md:w-1/3 '>
 					<Input
 						ref={nameRef}
 						name='name'
@@ -283,7 +283,7 @@ export default function PatientForm({
 						autoComplete='off'
 					/>
 				</div>
-				<div className='flex flex-col gap-4 md:w-1/3 border-r-2'>
+				<div className='flex flex-col gap-4 md:w-1/3 border-x-2 px-4 mx-2'>
 					<Input
 						name='address'
 						placeholder='Address'
