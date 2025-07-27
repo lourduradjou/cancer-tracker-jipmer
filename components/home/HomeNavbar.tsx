@@ -28,7 +28,7 @@ export default function HomeNavbar() {
 	};
 
 	return (
-		<nav className='flex items-center justify-between  px-6 py-3 shadow'>
+		<nav className='flex items-center justify-between  px-6 py-3 border-b-2'>
 			<div className='flex items-center space-x-4'>
 				{navItem('Home', '/home', true)}
 				{navItem('About COMPASS', '/home/about')}

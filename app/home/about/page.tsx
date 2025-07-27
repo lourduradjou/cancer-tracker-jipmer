@@ -1,18 +1,18 @@
-import { TypographyH1, TypographyP } from '@/components/ui/typography'
+import { TypographyH1, TypographyH2, TypographyMuted, TypographyP } from '@/components/ui/typography'
 
 export default function AboutPage() {
 	return (
-		<div className='p-4 max-w-[1400px] mx-auto'>
-			<TypographyH1 className='text-2xl font-bold mb-4'>About COMPASS</TypographyH1>
+		<div className='mt-10 max-w-[1400px] mx-auto'>
+			<TypographyH2 className='text-2xl font-bold mb-4'>About COMPASS</TypographyH2>
 
-			<TypographyP>
+			<TypographyMuted>
 				The COMPASS project aims to improve patient-reported outcomes
 				and care experiences across thecancer care continuum in India
 				through a Community-Oriented Model of Patient Navigation
 				System.This hybrid implementation study addresses the rising
 				cancer burden in India, where fragmented carepathways and late
 				diagnoses contribute to high mortality rates.
-			</TypographyP>
+			</TypographyMuted>
 			<TypographyP>
 				The project&apos;s core concept involves introducing and integrating
 				both community and hospital navigators to create a conducive

@@ -52,7 +52,7 @@ export function TypographyH4({ children, className }: TypographyProps) {
 export function TypographyP({ children, className }: TypographyProps) {
   return (
     <p className={clsx(
-      "leading-7 [&:not(:first-child)]:mt-6",
+      "leading-7 [&:not(:first-child)]:mt-6 font-light",
       className
     )}>
       {children}
@@ -118,7 +118,7 @@ export function TypographySmall({ children, className }: TypographyProps) {
 export function TypographyMuted({ children, className }: TypographyProps) {
   return (
     <p className={clsx(
-      "text-muted-foreground text-sm",
+      "font-light text-md",
       className
     )}>
       {children}
