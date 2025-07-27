@@ -1,0 +1,27 @@
+# .editorconfig file for defining coding styles
+# EditorConfig helps maintain consistent coding styles for multiple developers working
+# on the same project across various editors and IDEs
+
+# This marks the root of the configuration, telling EditorConfig to stop looking for .editorconfig files
+# in parent directories.
+root = true
+
+# Apply settings to all file types
+[*]
+# Use spaces for indentation instead of tabs.
+indent_style = space
+
+# Set the number of spaces per indentation level to 4
+indent_size = 4
+
+# Use Unix-style line endings (LF) rather than Windows-style (CRLF)
+end_of_line = lf
+
+# Set the character encoding for the files to UTF-8
+charset = utf-8
+
+# Trim any trailing whitespace characters from the end of each line
+trim_trailing_whitespace = true
+
+# Ensure there is a newline at the end of each file
+insert_final_newline = true
