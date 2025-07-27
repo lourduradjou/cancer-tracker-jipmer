@@ -2,152 +2,173 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { auth, db } from '@/firebase'
+import { auth } from '@/firebase'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { collection, query, where, getDocs } from 'firebase/firestore'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { Eye, EyeOff } from 'lucide-react'
 import Image from 'next/image'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { FirebaseError } from 'firebase/app'
+
+const loginSchema = z.object({
+    email: z.string().trim().min(1, { message: 'Email is required.' }).email({ message: 'Please enter a valid email address.' }),
+    password: z
+        .string()
+        .min(1, { message: 'Password is required.' })
+        .min(6, 'Password must be at least 6 characters long.'),
+})
+
+// Infer the type from the schema for type safety
+type LoginFormInputs = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
-	const [email, setEmail] = useState('')
-	const [password, setPassword] = useState('')
-	const [showPassword, setShowPassword] = useState(false)
-	const [loading, setLoading] = useState(false)
-	const router = useRouter()
+    const [showPassword, setShowPassword] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const router = useRouter()
 
-	const isValidEmail = (email: string) =>
-		/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    // --- Initialize React Hook Form ---
+    const {
+        register, // Function to register inputs
+        handleSubmit, // Function to handle form submission
+        formState: { errors }, // Object containing validation errors
+        reset, // Function to reset form fields
+    } = useForm<LoginFormInputs>({
+        resolver: zodResolver(loginSchema), // Use Zod for validation
+        defaultValues: {
+            // Optional: Set initial form values
+            email: '',
+            password: '',
+        },
+    })
 
-	const handleLogin = async () => {
-		if (!email.trim() || !password.trim()) {
-			toast.error('Email and Password are required')
-			return
-		}
+    // --- On Submit Function (called only if validation passes) ---
+    const onSubmit = async (data: LoginFormInputs) => {
+        try {
+            setLoading(true)
 
-		if (!isValidEmail(email.trim())) {
-			toast.warning('Enter a valid email')
-			return
-		}
+            // Perform Firebase Authentication
+            await signInWithEmailAndPassword(
+                auth,
+                data.email.toLowerCase(), // Use the validated email from form data
+                data.password // Use the validated password from form data
+            )
 
-		if (password.length < 6) {
-			toast.error('Password must be at least 6 characters')
-			return
-		}
+            // If signInWithEmailAndPassword succeeds, the AuthContext's
+            // onAuthStateChanged listener will detect the new user, fetch
+            // their role, and handle the role-based redirection.
+            toast.success('Login successful! Redirecting...')
+            router.push('/') // Redirect to your root authenticated page (e.g., /home)
 
-		try {
-			setLoading(true)
+            reset() // Optionally reset form fields after successful login
+        } catch (error) {
+            console.error('Login error:', error)
 
-			const cred = await signInWithEmailAndPassword(
-				auth,
-				email.trim().toLowerCase(),
-				password
-			)
+            if (error instanceof FirebaseError) {
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                    case 'auth/invalid-credential':
+                        toast.error('Invalid email or password. Please try again.')
+                        break
+                    case 'auth/invalid-email':
+                        toast.error('The email address is not valid.')
+                        break
+                    case 'auth/user-disabled':
+                        toast.error('Your account has been disabled. Please contact support.')
+                        break
+                    case 'auth/too-many-requests':
+                        toast.error('Too many failed login attempts. Please try again later.')
+                        break
+                    default:
+                        toast.error('Login failed. Please check your credentials.')
+                        break
+                }
+            } else {
+                toast.error('An unexpected error occurred. Please try again.')
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
 
-			const q = query(
-				collection(db, 'users'),
-				where('email', '==', cred.user.email!.trim().toLowerCase())
-			)
-			const snap = await getDocs(q)
+    return (
+        <section className="relative min-h-screen w-full">
+            {/* Background Image */}
+            <Image
+                src="/login-bg.jpg"
+                alt="Login background"
+                layout="fill"
+                objectFit="cover"
+                priority
+                className="z-0"
+            />
 
-			if (snap.empty) {
-				toast.error('No user record found. Contact admin.')
-				return
-			}
+            {/* Overlay */}
+            <div className="absolute inset-0 z-10 bg-black/30"></div>
 
-			const userData = snap.docs[0].data()
-			const role = userData.role
+            {/* Form Container */}
+            <div className="relative z-20 flex min-h-screen items-center justify-center px-4">
+                <form
+                    onSubmit={handleSubmit(onSubmit)} // Use handleSubmit from react-hook-form
+                    className="bg-background w-full max-w-md space-y-6 rounded-lg p-6 opacity-90 shadow-md backdrop-blur-sm"
+                >
+                    <h1 className="text-center text-2xl font-bold">
+                        <span className="text-green-600">JIPMER</span> LOGIN
+                    </h1>
 
-			if (!role) {
-				toast.error('No role assigned. Contact admin.')
-				return
-			}
+                    {/* Email Input */}
+                    <div>
+                        <Input
+                            placeholder="Email"
+                            type="email"
+                            // Register the input with react-hook-form
+                            // { ...register('email') } binds the input to the 'email' field in your schema
+                            {...register('email')}
+                            className="border border-gray-300 bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                            disabled={loading}
+                        />
+                        {/* Display validation error if any */}
+                        {errors.email && (
+                            <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+                        )}
+                    </div>
 
-			toast.success('Signed in! Redirecting...')
+                    {/* Password Input */}
+                    <div className="relative">
+                        <Input
+                            placeholder="Password"
+                            type={showPassword ? 'text' : 'password'}
+                            {...register('password')} // Register the password input
+                            className="border border-gray-300 bg-gray-100 pr-10 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                            disabled={loading}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                            disabled={loading}
+                        >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                        {/* Display validation error if any */}
+                        {errors.password && (
+                            <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
+                        )}
+                    </div>
 
-			if (role === 'doctor') router.push('/doctor')
-			else if (role === 'asha') router.push('/asha')
-			else if (role === 'nurse') router.push('/nurse')
-			else if (role === 'admin') router.push('/admin')
-			else router.push('/')
-		} catch {
-			toast.error('Login failed')
-		} finally {
-			setLoading(false)
-		}
-	}
-
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-		if (e.key === 'Enter') handleLogin()
-	}
-
-	return (
-		<section
-			className='relative min-h-screen w-full'
-			onKeyDown={handleKeyDown}
-		>
-			{/* Background Image with lazy load */}
-			<Image
-				src='/login-bg.jpg'
-				alt='Login background'
-				layout='fill'
-				objectFit='cover'
-				priority
-				className='z-0'
-			/>
-
-			{/* Overlay */}
-			<div className='absolute inset-0 bg-black/30  z-10'></div>
-
-			{/* Form */}
-			<div className='relative z-20 flex items-center justify-center min-h-screen px-4'>
-				<div className='max-w-md w-full bg-background opacity-85 backdrop-blur p-6 rounded-lg shadow-md space-y-6'>
-					<h1 className='text-2xl font-bold text-center'>
-						<span className='text-green-600'>JIPMER</span> LOGIN
-					</h1>
-
-					{/* Email */}
-					<Input
-						placeholder='Email'
-						type='email'
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
-						className='bg-gray-200 focus:outline-none focus:ring-black'
-					/>
-
-					{/* Password */}
-					<div className='relative'>
-						<Input
-							placeholder='Password'
-							type={showPassword ? 'text' : 'password'}
-							value={password}
-							onChange={(e) => setPassword(e.target.value)}
-							className='bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-10'
-						/>
-						<button
-							type='button'
-							onClick={() => setShowPassword((prev) => !prev)}
-							className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600'
-						>
-							{showPassword ? (
-								<EyeOff size={18} />
-							) : (
-								<Eye size={18} />
-							)}
-						</button>
-					</div>
-
-					<Button
-						onClick={handleLogin}
-						className='w-full cursor-pointer'
-						disabled={loading}
-					>
-						{loading ? 'Signing In...' : 'Sign In'}
-					</Button>
-				</div>
-			</div>
-		</section>
-	)
+                    <Button
+                        type="submit" // Important: Set type to submit for form submission
+                        className="w-full cursor-pointer rounded-md bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+                        disabled={loading}
+                    >
+                        {loading ? 'Signing In...' : 'Sign In'}
+                    </Button>
+                </form>
+            </div>
+        </section>
+    )
 }

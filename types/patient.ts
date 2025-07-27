@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore"
+
 // Firestore timestamp type
 export type FirestoreTimestamp = {
 	type: 'firestore/timestamp/1.0'
@@ -6,7 +8,7 @@ export type FirestoreTimestamp = {
 }
 
 export type FollowUp = {
-	date?: FirestoreTimestamp
+	date?: Timestamp
 	remarks?: string
 	notifyDoctor?: string
 	allotedAsha?: string

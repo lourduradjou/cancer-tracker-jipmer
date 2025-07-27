@@ -1,92 +1,68 @@
 'use client'
 
 import Loading from '@/components/ui/loading'
-import { auth, db } from '@/firebase'
-import { onAuthStateChanged } from 'firebase/auth'
-import { collection, getDocs, query, where } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 import PatientTable from '@/components/PatientTable'
-import { Patient } from '@/types/patient'
+import { useAuth } from '@/contexts/AuthContext'
+import { usePatients } from '@/hooks/usePatients'
 import { toast } from 'sonner'
 
 export default function DoctorPage() {
-	const router = useRouter()
-	const [checking, setChecking] = useState(true)
-	const [patients, setPatients] = useState<Patient[]>([])
+    const router = useRouter()
+    const { user, role, orgId, isLoadingAuth } = useAuth()
 
-	useEffect(() => {
-		let didRedirect = false
+    useEffect(() => {
+        if (!isLoadingAuth && !user) {
+            router.push('/login')
+            return
+        }
 
-		const unsub = onAuthStateChanged(auth, async (user) => {
-			console.log(user)
-			if (!user) {
-				didRedirect = true
-				router.push('/login')
-				return
-			}
+        if (role !== 'doctor') {
+            let redirectPath = '/login'
+            if (role === 'nurse') redirectPath = '/nurse'
+            if (role === 'asha') redirectPath = '/asha'
+            if (role === 'admin') redirectPath = '/admin'
+            toast.warning('You are not allowed to view this page')
+            router.push(redirectPath)
+        }
+    }, [isLoadingAuth, user, role, router])
 
-			const q = query(
-				collection(db, 'users'),
-				where('email', '==', user.email!.trim().toLowerCase())
-			)
-			const snap = await getDocs(q)
+    //fetch patients if no errors
+    const {
+        data: patients,
+        isLoading: isLoadingPatients,
+        isError: isErrorPatients,
+        error: patientsError,
+    } = usePatients({ orgId, enabled: role === 'doctor' && !!orgId })
 
-			if (snap.empty) {
-				didRedirect = true
-				router.push('/login')
-				return
-			}
+    if (isErrorPatients) {
+        console.error('Failed to load patients for doctor:', patientsError)
+        toast.error('Failed to load patient data for your organization.')
+        // Optionally, show a more specific error message or component
+    }
 
-			const doctorData = snap.docs[0].data()
-			const role = doctorData.role
-			console.log('role' + role)
-			if (role !== 'doctor') {
-				if (role === 'nurse') {
-					router.push('/nurse')
-					toast.warning('You are not allowed to view this page')
-				} else if (role === 'asha') {
-					router.push('/asha')
-					toast.warning('You are not allowed to view this page')
-				} else router.push('/login')
-				return
-			}
+    // If still loading auth or if not a doctor (and redirection hasn't completed yet)
+    if (isLoadingAuth || role !== 'doctor') {
+        return (
+            <main className="flex h-screen flex-col items-center justify-center">
+                <Loading />
+                <p className="mt-4 text-gray-600">
+                    {isLoadingAuth ? 'Checking authentication...' : 'Loading your patients...'}
+                </p>
+            </main>
+        )
+    }
 
-
-			const orgId = doctorData.orgId
-
-			const patientsQuery = query(
-				collection(db, 'patients'),
-				where('assignedPhc', '==', orgId)
-			)
-
-			const patientsSnap = await getDocs(patientsQuery)
-
-			const patientList: Patient[] = patientsSnap.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data(),
-			})) as Patient[]
-
-			setPatients(patientList)
-			if (!didRedirect) setChecking(false)
-		})
-
-		return () => unsub()
-	}, [router])
-
-	if (checking) {
-		return (
-			<main className='flex flex-col items-center justify-center h-screen'>
-				<Loading />
-				<p className='text-gray-600 mt-4'>Loading your patients...</p>
-			</main>
-		)
-	}
-
-	return (
-		<div className='px-8 py-4 lg:max-w-[1240px] mx-auto xl:max-w-[1400px]'>
-			<PatientTable patients={patients} setPatients={setPatients} />
-		</div>
-	)
+    return (
+        <main className="mx-auto px-8 py-4 lg:max-w-[1240px] xl:max-w-[1400px]">
+            <PatientTable
+                patients={patients || []}
+                setPatients={() => {
+                    /* React Query handles updates, direct setPatients is often not needed here */
+                }}
+            />
+        </main>
+    )
 }
