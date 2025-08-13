@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const isPublicPath = publicPaths.some(
             (path) => path === currentPath || (path.endsWith('/') && currentPath.startsWith(path))
         )
-        
+
         if (!initialAuthLoading && !firebaseUser && !isPublicPath) {
             toast.error('You must be logged in to view this page.')
             router.push('/login')

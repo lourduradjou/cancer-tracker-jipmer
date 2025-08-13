@@ -1,93 +1,50 @@
 'use client'
-
-// import Loading from '@/components/ui/loading'
-// import { auth, db } from '@/firebase'
-// import { onAuthStateChanged } from 'firebase/auth'
-// import { collection, getDocs, query, where } from 'firebase/firestore'
-// import { useRouter } from 'next/navigation'
-// import { useEffect, useState } from 'react'
-// import { useState } from 'react'
-
-// import EntityManager from '@/components/EntityManager'
-// import { Patient } from '@/types/patient'
-// import { toast } from 'sonner'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import {
+    HOSPITAL_TABLE_HEADERS,
+    DOCTOR_TABLE_HEADERS,
+    NURSES_TABLE_HEADERS,
+    PATIENT_TABLE_HEADERS,
+    ASHA_TABLE_HEADERS,
+} from '@/constants/data' // adjust the path
+import PatientTable from '@/components/table/GenericTable'
 
 export default function AdminPage() {
-	// const router = useRouter()
-	// const [checking, setChecking] = useState(true)
-	// const [patients, setPatients] = useState<Patient[]>([])
+    const [activeTab, setActiveTab] = useState<
+        'hospitals' | 'doctors' | 'nurses' | 'ashas' | 'patients'
+    >('patients')
 
-	// useEffect(() => {
-	// 	let didRedirect = false
+    const headersMap = {
+        hospitals: HOSPITAL_TABLE_HEADERS,
+        doctors: DOCTOR_TABLE_HEADERS,
+        nurses: NURSES_TABLE_HEADERS,
+        ashas: ASHA_TABLE_HEADERS,
+        patients: PATIENT_TABLE_HEADERS,
+    }
 
-	// 	const unsub = onAuthStateChanged(auth, async (user) => {
-	// 		console.log(user)
-	// 		if (!user) {
-	// 			didRedirect = true
-	// 			router.push('/login')
-	// 			return
-	// 		}
+    const selectedHeaders = headersMap[activeTab]
 
-	// 		const q = query(
-	// 			collection(db, 'users'),
-	// 			where('email', '==', user.email!.trim().toLowerCase())
-	// 		)
-	// 		const snap = await getDocs(q)
+    return (
+        <div className="mx-auto px-8 py-4 lg:max-w-[1240px] xl:max-w-[1400px]">
+            {/* Tabs */}
+            <div className="space-x-4">
+                {(['hospitals', 'doctors', 'nurses', 'ashas', 'patients'] as const).map((tab) => (
+                    <Button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        variant={'simple'}
+                        className={activeTab === tab ? 'bg-muted-foreground' : 'bg-border'} // highlight active
+                    >
+                        <p className="uppercase">{tab}</p>
+                    </Button>
+                ))}
+            </div>
 
-	// 		if (snap.empty) {
-	// 			didRedirect = true
-	// 			router.push('/login')
-	// 			return
-	// 		}
-
-	// 		const doctorData = snap.docs[0].data()
-	// 		const role = doctorData.role
-	// 		console.log('role' + role)
-	// 		if (role !== 'admin') {
-	// 			if (role === 'nurse') {
-	// 				router.push('/nurse')
-	// 			} else if (role === 'asha') {
-	// 				router.push('/asha')
-	// 			} else if (role === 'doctor') {
-	// 				router.push('/doctor')
-	// 			} else router.push('/login')
-	// 			toast.warning('You are not allowed to view this page')
-	// 			return
-	// 		}
-
-	// 		const orgId = doctorData.orgId
-
-	// 		const patientsQuery = query(collection(db, 'patients'))
-
-	// 		const patientsSnap = await getDocs(patientsQuery)
-
-	// 		const patientList: Patient[] = patientsSnap.docs.map((doc) => ({
-	// 			id: doc.id,
-	// 			...doc.data(),
-	// 		})) as Patient[]
-
-	// 		setPatients(patientList)
-	// 		if (!didRedirect) setChecking(false)
-	// 	})
-
-	// 	return () => unsub()
-	// }, [router])
-
-	// if (checking) {
-	// 	return (
-	// 		<main className='flex flex-col items-center justify-center h-screen'>
-	// 			<Loading />
-	// 			<p className='text-gray-600 mt-4'>Loading your patients...</p>
-	// 		</main>
-	// 	)
-	// }
-
-	return (
-		<div className='px-8 py-4 lg:max-w-[1240px] mx-auto xl:max-w-[1400px]'>
-			<div className='p-4'>
-				{/* <EntityManager /> */}
-				<p>Under construction</p>
-			</div>
-		</div>
-	)
+            {/* Content */}
+            <div className="p-4">
+                <PatientTable headers={selectedHeaders} activeTab={activeTab} />
+            </div>
+        </div>
+    )
 }

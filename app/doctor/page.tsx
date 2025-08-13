@@ -4,10 +4,11 @@ import Loading from '@/components/ui/loading'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
-import PatientTable from '@/components/PatientTable'
+import PatientTable from '@/components/table/GenericTable'
 import { useAuth } from '@/contexts/AuthContext'
-import { usePatients } from '@/hooks/usePatients'
+// import { useTableData } from '@/hooks/useTableData'
 import { toast } from 'sonner'
+import { PATIENT_TABLE_HEADERS } from '@/constants/data'
 
 export default function DoctorPage() {
     const router = useRouter()
@@ -29,19 +30,19 @@ export default function DoctorPage() {
         }
     }, [isLoadingAuth, user, role, router])
 
-    //fetch patients if no errors
-    const {
-        data: patients,
-        isLoading: isLoadingPatients,
-        isError: isErrorPatients,
-        error: patientsError,
-    } = usePatients({ orgId, enabled: role === 'doctor' && !!orgId })
+    // //fetch patients if no errors
+    // const {
+    //     data: patients,
+    //     isLoading: isLoadingPatients,
+    //     isError: isErrorPatients,
+    //     error: patientsError,
+    // } = useTableData({ orgId, enabled: role === 'doctor' && !!orgId })
 
-    if (isErrorPatients) {
-        console.error('Failed to load patients for doctor:', patientsError)
-        toast.error('Failed to load patient data for your organization.')
-        // Optionally, show a more specific error message or component
-    }
+    // if (isErrorPatients) {
+    //     console.error('Failed to load patients for doctor:', patientsError)
+    //     toast.error('Failed to load patient data for your organization.')
+    //     // Optionally, show a more specific error message or component
+    // }
 
     // If still loading auth or if not a doctor (and redirection hasn't completed yet)
     if (isLoadingAuth || role !== 'doctor') {
@@ -57,12 +58,7 @@ export default function DoctorPage() {
 
     return (
         <main className="mx-auto px-8 py-4 lg:max-w-[1240px] xl:max-w-[1400px]">
-            <PatientTable
-                patients={patients || []}
-                setPatients={() => {
-                    /* React Query handles updates, direct setPatients is often not needed here */
-                }}
-            />
+            <PatientTable headers={PATIENT_TABLE_HEADERS} activeTab="patients" />
         </main>
     )
 }

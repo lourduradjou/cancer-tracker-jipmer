@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
-import { usePatients } from '@/hooks/usePatients'
+import { usePatients } from '@/hooks/useTableData'
 import Loading from '@/components/ui/loading'
 
 export default function AshaPage() {
@@ -147,9 +147,9 @@ export default function AshaPage() {
             <h1 className="mb-4 text-center text-xl font-bold">Your Assigned Patients</h1>
 
             {patients?.length === 0 ? (
-                <p className="text-center text-sm text-gray-500">No patients assigned to you.</p>
+                <p className="text-center text-sm">No patients assigned to you.</p>
             ) : (
-                <div className="flex w-full flex-col items-center space-y-4 overflow-y-auto pb-4">
+                <div className="mx-auto flex max-w-[1400px] flex-col items-center gap-4 overflow-auto md:flex-row">
                     {patients?.map((patient) => (
                         <PatientCard
                             key={patient.id}

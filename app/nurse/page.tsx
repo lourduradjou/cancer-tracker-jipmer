@@ -4,9 +4,9 @@ import Loading from '@/components/ui/loading'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
-import PatientTable from '@/components/PatientTable'
+import PatientTable from '@/components/table/GenericTable'
 import { useAuth } from '@/contexts/AuthContext'
-import { usePatients } from '@/hooks/usePatients'
+import { usePatients } from '@/hooks/useTableData'
 import { toast } from 'sonner'
 
 export default function NursePage() {

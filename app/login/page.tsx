@@ -84,7 +84,7 @@ export default function LoginPage() {
                         toast.error('Too many failed login attempts. Please try again later.')
                         break
                     default:
-                        toast.error('Login failed. Please check your credentials.')
+                        toast.error('Login failed. Please check your Internet Connection.')
                         break
                 }
             } else {
