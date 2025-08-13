@@ -12,6 +12,7 @@ import { ChevronDown, ChevronUp, Plus } from 'lucide-react'
 import { Patient } from '@/types/patient'
 
 import { Timestamp } from 'firebase/firestore'
+import { toast } from 'sonner'
 type FirestoreTimestamp = {
 	seconds: number
 	nanoseconds: number
@@ -76,7 +77,7 @@ export default function PatientCard({
 
 	const handleSaveNewFollowUp = () => {
 		if (!newRemark.trim()) {
-			alert('Remark cannot be empty.')
+			toast.warning('Remarks cannot be empty.')
 			return
 		}
 		onAddFollowUp?.(patient.id, newRemark)
@@ -86,7 +87,7 @@ export default function PatientCard({
 
 	const saveLocation = async () => {
 		if (!navigator.geolocation) {
-			alert('Geolocation is not supported by your browser')
+			toast.warning('Geolocation is not supported by your browser')
 			return
 		}
 		setSavingLocation(true)
@@ -146,6 +147,7 @@ export default function PatientCard({
 								{ label: 'Address', name: 'address' },
 								{ label: 'Ration Card Color', name: 'rationCardColor' },
 							]
+                            
 							return fields.map(({ label, name }) => (
 								<div key={name}>
 									<Label className='text-sm'>{label}</Label>

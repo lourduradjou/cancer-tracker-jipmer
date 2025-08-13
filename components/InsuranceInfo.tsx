@@ -16,7 +16,7 @@ interface InsuranceInfoProps {
 }
 
 export default function InsuranceInfo({
-	insuranceType,
+	insuranceType = 'none',
 	setInsuranceType,
 	insuranceId,
 	setInsuranceId,
@@ -26,14 +26,13 @@ export default function InsuranceInfo({
 			<div>
 				<Select onValueChange={setInsuranceType} value={insuranceType}>
 					<SelectTrigger className='w-full text-sm font-medium text-muted-foreground'>
-						<SelectValue className='text-sm'>
+						<SelectValue className='text-sm capitalize'>
 							{insuranceType === 'none'
-								? 'Insurance Type'
-								: capitalize(insuranceType)}
+								? 'Insurance Type (default: none)'
+								: insuranceType}
 						</SelectValue>
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value='none'>None</SelectItem>
 						<SelectItem value='private'>Private</SelectItem>
 						<SelectItem value='government'>Government</SelectItem>
 					</SelectContent>
@@ -60,8 +59,4 @@ export default function InsuranceInfo({
 			)}
 		</div>
 	)
-}
-
-function capitalize(str: string) {
-	return str.charAt(0).toUpperCase() + str.slice(1)
 }

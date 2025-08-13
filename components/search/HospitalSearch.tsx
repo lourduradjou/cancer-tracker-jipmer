@@ -8,17 +8,19 @@ import {
     CommandInput,
     CommandItem,
 } from '@/components/ui/command'
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { db } from '@/firebase'
 import { cn } from '@/lib/utils'
 import { collection, getDocs } from 'firebase/firestore'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+/*
+    todo:
+        1) make this component debounce search value instead of getting all hospitals once  when the component mounts.
+    todo:
+        2) stop fetching all the hospitals initially to cut api call's and only search when they type it.
+*/
 
 // Define the shape of a hospital object
 type Hospital = {
@@ -33,10 +35,7 @@ interface HospitalSearchProps {
     onValueChange: (value: string) => void // Function to call when a hospital is selected
 }
 
-export default function HospitalSearch({
-    value,
-    onValueChange,
-}: HospitalSearchProps) {
+export default function HospitalSearch({ value, onValueChange }: HospitalSearchProps) {
     const [hospitals, setHospitals] = useState<Hospital[]>([])
     const [open, setOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
@@ -58,31 +57,35 @@ export default function HospitalSearch({
         fetchHospitals()
     }, [])
 
-    // Filter hospitals based on the search term, showing top 5 matches
+    // Filter hospitals based on the search term for the name and address of the hospital, showing top 5 matches
+    const lowerCasedSearchTerm = searchTerm.toLowerCase()
     const filteredHospitals = hospitals
-        .filter((h) => h.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        .filter(
+            (hospital) =>
+                hospital.name.toLowerCase().includes(lowerCasedSearchTerm) ||
+                hospital.address.toLowerCase().includes(lowerCasedSearchTerm)
+        )
         .slice(0, 5)
 
-    const selectedHospitalName =
-        hospitals.find((h) => h.id === value)?.name || 'Select Hospital...'
+    const selectedHospitalName = hospitals.find((hospital) => hospital.id === value)?.name || 'Select Hospital...'
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button
-                    variant='outline'
-                    role='combobox'
+                    variant="outline"
+                    role="combobox"
                     aria-expanded={open}
-                    className='w-full justify-between'
+                    className="w-full justify-between"
                 >
-                    <span className='truncate'>{selectedHospitalName}</span>
-                    <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                    <span className="truncate">{selectedHospitalName}</span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className='w-[--radix-popover-trigger-width] p-0'>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                 <Command>
                     <CommandInput
-                        placeholder='Search hospital...'
+                        placeholder="Search hospital..."
                         onValueChange={(search) => setSearchTerm(search)}
                     />
                     <CommandEmpty>No hospital found.</CommandEmpty>
@@ -99,14 +102,12 @@ export default function HospitalSearch({
                                 <Check
                                     className={cn(
                                         'mr-2 h-4 w-4',
-                                        value === hospital.id
-                                            ? 'opacity-100'
-                                            : 'opacity-0'
+                                        value === hospital.id ? 'opacity-100' : 'opacity-0'
                                     )}
                                 />
                                 <div>
-                                    <p className='font-medium'>{hospital.name}</p>
-                                    <p className='text-xs text-muted-foreground'>
+                                    <p className="font-medium">{hospital.name}</p>
+                                    <p className="text-muted-foreground text-xs">
                                         {hospital.address}
                                     </p>
                                 </div>
