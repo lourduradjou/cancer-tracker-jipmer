@@ -8,8 +8,7 @@
     "build": "next build --no-lint",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest run",
-    "test:ci": "vitest run --reporter=dot",
+    "test": "vitest",
     "prepare": "husky"
   },
   "dependencies": {
