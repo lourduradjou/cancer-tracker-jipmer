@@ -28,7 +28,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.13.1
+          version: 9
           run_install: false
 
       - name: Install dependencies
@@ -40,7 +40,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        shard: [1, 2, 3] # run tests in parallel
+        shard: [1, 2, 3]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -54,7 +54,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.13.1
+          version: 9
           run_install: false
 
       - name: Install dependencies
