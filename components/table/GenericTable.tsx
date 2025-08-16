@@ -28,6 +28,7 @@ import { userFields } from '@/constants/user'
 import { useSearch } from '@/hooks/useSearch'
 import { useStats } from '@/hooks/useStats'
 import GenericPagination from './GenericPagination'
+import { UserDoc } from '@/schema/user'
 
 export default function GenericTable({
     headers,
@@ -101,12 +102,21 @@ export default function GenericTable({
     // ✅ Choose correct baseData (patients → filtered first, others → raw data)
     const baseData = isPatientTab ? filteredPatients : (data ?? [])
 
-    // ✅ Single useSearch call for everything
+    type TabDataMap = {
+        patients: Patient
+        hospitals: Hospital
+        doctors: UserDoc
+        nurses: UserDoc
+        ashas: UserDoc
+    }
+
+    type ActiveDataType = TabDataMap[typeof activeTab] // infer based on activeTab
+
     const {
         filteredRows: searchedData,
         searchTerm,
         setSearchTerm,
-    } = useSearch<typeof baseData extends (infer U)[] ? U : never>(baseData, searchFields)
+    } = useSearch<ActiveDataType>(baseData, searchFields)
 
     // ✅ Use searchedData for pagination
     const dataToPaginate = useMemo(() => searchedData, [searchedData])

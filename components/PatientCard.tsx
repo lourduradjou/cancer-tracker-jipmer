@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { db } from '@/firebase'
 import { doc, updateDoc } from 'firebase/firestore'
 import { ChevronDown, ChevronUp, Plus } from 'lucide-react'
-import { Patient } from '@/types/patient'
+import { Patient } from '@/schema/patient'
 
 import { Timestamp } from 'firebase/firestore'
 import { toast } from 'sonner'
@@ -30,24 +30,14 @@ function isFirestoreTimestamp(obj: unknown): obj is Timestamp {
 }
 
 // 🗓️ Safe date formatter
-export const formatDate = (date: FirestoreDate): string => {
+export const formatDate = (date: Date): string => {
     if (!date) return 'No date specified'
 
-    if (typeof date === 'string') {
-        return new Date(date).toLocaleString('en-IN', {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-        })
-    }
-
-    if (isFirestoreTimestamp(date)) {
-        return date.toDate().toLocaleString('en-IN', {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-        })
-    }
-
-    return 'Invalid Date'
+    const dateObject = new Date(date)
+    const year = dateObject.getFullYear()
+    const month = String(dateObject.getMonth() + 1).padStart(2, '0')
+    const day = String(dateObject.getDate()).padStart(2, '0')
+    return `${day}/${month}/${year}`
 }
 
 interface Props {
@@ -153,7 +143,7 @@ export default function PatientCard({ patient, onChange, onSave, isSaving, onAdd
                                     <Label className="text-sm">{label}</Label>
                                     <Input
                                         name={name}
-                                        value={patient[name] || ''}
+                                        value={(patient[name] as string) || ''}
                                         onChange={(e) => onChange(e, patient.id)}
                                         placeholder={label}
                                     />
@@ -172,11 +162,11 @@ export default function PatientCard({ patient, onChange, onSave, isSaving, onAdd
                     {/* Medical Info Tab with Restored Details and New Follow-Up System */}
                     <TabsContent value="medical" className="space-y-4">
                         {/* RESTORED Medical Details */}
-                        {patient.assignedPhc && (
+                        {patient.assignedHospitalName && (
                             <div>
-                                <Label className="text-sm">Assigned PHC</Label>
+                                <Label className="text-sm">Assigned Hospital</Label>
                                 <p className="text-muted-foreground text-sm">
-                                    {patient.assignedPhc}
+                                    {patient.assignedHospitalName}
                                 </p>
                             </div>
                         )}
@@ -240,20 +230,21 @@ export default function PatientCard({ patient, onChange, onSave, isSaving, onAdd
                                 <div className="max-h-72 space-y-4 overflow-y-auto pr-2">
                                     {(patient.followUps ?? [])
                                         .slice()
-                                        .sort(
-                                            (a, b) =>
-                                                (b.date?.seconds ?? 0) - (a.date?.seconds ?? 0)
-                                        )
+                                        .sort((a, b) => {
+                                            const dateA = new Date(a?.date ?? 0)
+                                            const dateB = new Date(b?.date ?? 0)
+                                            return dateB.getTime() - dateA.getTime()
+                                        })
                                         .map((followUp, idx) => (
                                             <div
                                                 key={idx}
                                                 className="border-primary border-l-2 pl-3 text-sm"
                                             >
                                                 <p className="text-foreground font-semibold">
-                                                    {formatDate(followUp.date)}
+                                                    {formatDate(new Date(followUp?.date ?? 0))}
                                                 </p>
                                                 <p className="text-muted-foreground">
-                                                    {followUp.remarks}
+                                                    {followUp?.remarks}
                                                 </p>
                                             </div>
                                         ))}

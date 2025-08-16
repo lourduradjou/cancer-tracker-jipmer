@@ -90,7 +90,6 @@ export const useTableData = ({
             )
             const usersSnap = await getDocs(usersQuery)
             return usersSnap.docs.map((user) => ({
-                id: user.id,
                 ...(user.data() as UserDoc),
             })) as UserDoc[]
         },

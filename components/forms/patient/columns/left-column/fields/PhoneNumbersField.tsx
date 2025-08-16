@@ -59,7 +59,7 @@ export default function PhoneNumbersField({ form }: PhoneNumbersFieldProps) {
                         type="button"
                         variant="ghost"
                         className="w-fit px-2"
-                        onClick={() => append({ date: '', remarks: '' })}
+                        onClick={() => append({ date: new Date(), remarks: '' })}
                     >
                         <PlusCircle className="mr-1 h-4 w-4" />
                         Add phone

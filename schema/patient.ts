@@ -9,7 +9,7 @@ export const InsuranceSchema = z
 
 export const FollowUpSchema = z
     .object({
-        date: z.union([z.string(), z.date()]),
+        date: z.union([z.date()]),
         remarks: z.string(),
     })
     .optional()

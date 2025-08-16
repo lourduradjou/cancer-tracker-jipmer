@@ -56,7 +56,7 @@ export default function AdminPage() {
                             onClick={() => handleTabChange(tab)}
                             variant={'simple'}
                             className={
-                                activeTab === tab ? 'bg-muted-foreground' : 'bg-border'
+                                activeTab === tab ? 'bg-muted-foreground/70' : 'bg-border'
                             }
                         >
                             <p className="uppercase">{tab}</p>

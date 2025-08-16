@@ -64,7 +64,7 @@ export default function Navbar() {
 
                 <div className="flex flex-col md:flex-row md:items-center md:space-x-4">
                     {username && (
-                        <span className="mb-2 font-medium text-gray-700 capitalize select-none md:mb-0">
+                        <span className="mb-2 font-medium text-foreground capitalize select-none md:mb-0">
                             Hello, {username}
                         </span>
                     )}
