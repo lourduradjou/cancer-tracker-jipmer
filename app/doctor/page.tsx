@@ -6,13 +6,12 @@ import { useEffect } from 'react'
 
 import PatientTable from '@/components/table/GenericTable'
 import { useAuth } from '@/contexts/AuthContext'
-// import { useTableData } from '@/hooks/useTableData'
 import { toast } from 'sonner'
-import { PATIENT_TABLE_HEADERS } from '@/constants/data'
+import { PATIENT_TABLE_HEADERS } from '@/constants/headers'
 
 export default function DoctorPage() {
     const router = useRouter()
-    const { user, role, orgId, isLoadingAuth } = useAuth()
+    const { user, role, isLoadingAuth } = useAuth()
 
     useEffect(() => {
         if (!isLoadingAuth && !user) {
@@ -30,21 +29,6 @@ export default function DoctorPage() {
         }
     }, [isLoadingAuth, user, role, router])
 
-    // //fetch patients if no errors
-    // const {
-    //     data: patients,
-    //     isLoading: isLoadingPatients,
-    //     isError: isErrorPatients,
-    //     error: patientsError,
-    // } = useTableData({ orgId, enabled: role === 'doctor' && !!orgId })
-
-    // if (isErrorPatients) {
-    //     console.error('Failed to load patients for doctor:', patientsError)
-    //     toast.error('Failed to load patient data for your organization.')
-    //     // Optionally, show a more specific error message or component
-    // }
-
-    // If still loading auth or if not a doctor (and redirection hasn't completed yet)
     if (isLoadingAuth || role !== 'doctor') {
         return (
             <main className="flex h-screen flex-col items-center justify-center">

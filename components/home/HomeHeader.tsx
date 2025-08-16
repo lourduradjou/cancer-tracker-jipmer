@@ -4,7 +4,7 @@ import { ModeToggle } from '../ui/toggle'
 
 export default function HomeHeader() {
     return (
-        <header className="text-white flex w-full items-center justify-between bg-[#0e65bc] px-4 py-3 shadow">
+        <header className="flex w-full items-center justify-between bg-[#0e65bc] px-4 py-3 text-white shadow">
             <div className="flex items-center space-x-3">
                 <Image
                     src="/jipmer-logo.png"
@@ -29,7 +29,7 @@ export default function HomeHeader() {
             </div>
 
             {/* ICMR Logo - Hidden on small screens */}
-            <div className="hidden sm:flex items-center space-x-4">
+            <div className="hidden items-center space-x-4 sm:flex">
                 <div className="text-foreground">
                     <ModeToggle />
                 </div>

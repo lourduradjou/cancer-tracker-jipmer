@@ -29,10 +29,15 @@ type Hospital = {
     address: string
 }
 
+interface HospitalOption {
+    id: string
+    name: string
+}
+
 // Define the props for our new component
 interface HospitalSearchProps {
-    value: string // The currently selected hospital ID
-    onValueChange: (value: string) => void // Function to call when a hospital is selected
+    value: HospitalOption // The currently selected hospital ID
+    onValueChange: (value: HospitalOption) => void // Function to call when a hospital is selected
 }
 
 export default function HospitalSearch({ value, onValueChange }: HospitalSearchProps) {
@@ -67,7 +72,8 @@ export default function HospitalSearch({ value, onValueChange }: HospitalSearchP
         )
         .slice(0, 5)
 
-    const selectedHospitalName = hospitals.find((hospital) => hospital.id === value)?.name || 'Select Hospital...'
+    const selectedHospitalName =
+        hospitals.find((hospital) => hospital.id === value.id)?.name || 'Select Hospital...'
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -95,14 +101,17 @@ export default function HospitalSearch({ value, onValueChange }: HospitalSearchP
                                 key={hospital.id}
                                 value={hospital.name} // Command uses this for internal filtering/search
                                 onSelect={() => {
-                                    onValueChange(hospital.id) // Update the parent form's state
-                                    setOpen(false) // Close the popover
+                                    onValueChange({
+                                        id: hospital.id,
+                                        name: hospital.name,
+                                    })
+                                    setOpen(false)
                                 }}
                             >
                                 <Check
                                     className={cn(
                                         'mr-2 h-4 w-4',
-                                        value === hospital.id ? 'opacity-100' : 'opacity-0'
+                                        value?.id === hospital.id ? 'opacity-100' : 'opacity-0'
                                     )}
                                 />
                                 <div>

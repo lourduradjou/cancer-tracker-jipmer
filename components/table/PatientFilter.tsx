@@ -2,377 +2,112 @@
 
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover'
-import { ListFilter, Search } from 'lucide-react'
+    DISEASE_OPTIONS,
+    HEALTH_STATUS_OPTIONS,
+    RATION_COLORS_OPTIONS,
+    SEX_OPTIONS,
+} from '@/constants/form-fields'
+import { usePatientFilterStore } from '@/store/usePatientFilterStore'
+import { ListFilter } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 
-type Props = {
-	searchTerm: string
-	setSearchTerm: (val: string) => void
-	filterSexes: string[]
-	setFilterSexes: (val: string[]) => void
-	filterDiseases: string[]
-	setFilterDiseases: (val: string[]) => void
-	filterStatuses: string[]
-	setFilterStatuses: (val: string[]) => void
-	ageFilter: string | null
-	setAgeFilter: (val: 'lt5' | 'lt20' | 'gt50' | null) => void
-	assignedFilter: 'assigned' | 'unassigned' | ''
-	setAssignedFilter: (val: 'assigned' | 'unassigned' | '') => void
-	transferFilter: 'transferred' | 'not_transferred' | ''
-	setTransferFilter: (val: 'transferred' | 'not_transferred' | '') => void
-	filterRationColors: string[]
-	setFilterRationColors: (val: string[]) => void
+export default function PatientFilter() {
+    const searchRef = useRef<HTMLInputElement>(null)
+    const { filters, setFilter, toggleFilterItem, reset } = usePatientFilterStore()
+
+    useEffect(() => {
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.ctrlKey && e.key.toLowerCase() === 'k') {
+                e.preventDefault()
+                searchRef.current?.focus()
+            }
+        }
+        window.addEventListener('keydown', handleKey)
+        return () => window.removeEventListener('keydown', handleKey)
+    }, [])
+
+    return (
+        <div className="flex flex-col gap-4 md:flex-row md:items-center">
+            {/* Filters */}
+            <Popover>
+                <PopoverTrigger asChild>
+                    <Button className="cursor-pointer" variant="outline">
+                        <ListFilter className="mr-1 h-4 w-4" />
+                        Filters
+                    </Button>
+                </PopoverTrigger>
+
+                <PopoverContent className="w-[650px] px-10 py-4">
+                    <div className="flex flex-wrap gap-6">
+                        {/* Sex */}
+                        <FilterGroup
+                            label="Sex"
+                            options={SEX_OPTIONS}
+                            selected={filters.sexes}
+                            onToggle={(val) => toggleFilterItem('sexes', val)}
+                        />
+
+                        {/* Disease */}
+                        <FilterGroup
+                            label="Disease"
+                            options={DISEASE_OPTIONS}
+                            selected={filters.diseases}
+                            onToggle={(val) => toggleFilterItem('diseases', val)}
+                        />
+
+                        {/* Status */}
+                        <FilterGroup
+                            label="Status"
+                            options={HEALTH_STATUS_OPTIONS}
+                            selected={filters.statuses}
+                            onToggle={(val) => toggleFilterItem('statuses', val)}
+                        />
+
+                        {/* Ration Card */}
+                        <FilterGroup
+                            label="Ration Card"
+                            options={RATION_COLORS_OPTIONS}
+                            selected={filters.rationColors}
+                            onToggle={(val) => toggleFilterItem('rationColors', val)}
+                        />
+                    </div>
+                </PopoverContent>
+            </Popover>
+        </div>
+    )
 }
 
-const SEX_OPTIONS = ['male', 'female', 'other']
-const DISEASE_OPTIONS = [
-	'breast cancer',
-	'lung cancer',
-	'colorectal cancer',
-	'prostate cancer',
-	'stomach cancer',
-	'cervical cancer',
-	'thyroid cancer',
-	'brain cancer',
-	'oral cancer',
-]
-const STATUS = ['alive', 'death', 'ongoing', 'followup']
-const RATION_COLORS = ['red', 'yellow', 'none']
-
-export default function PatientFilter({
-	searchTerm,
-	setSearchTerm,
-	filterSexes,
-	setFilterSexes,
-	filterDiseases,
-	setFilterDiseases,
-	filterStatuses,
-	setFilterStatuses,
-	ageFilter,
-	setAgeFilter,
-	filterRationColors,
-	setFilterRationColors,
-	assignedFilter,
-	setAssignedFilter,
-	setTransferFilter,
-	transferFilter,
-}: Props) {
-	const searchRef = useRef<HTMLInputElement>(null)
-
-	const toggleSelection = (
-		val: string,
-		list: string[],
-		setList: (v: string[]) => void
-	) => {
-		if (list.includes(val)) {
-			setList(list.filter((item) => item !== val))
-		} else {
-			setList([...list, val])
-		}
-	}
-
-	useEffect(() => {
-		const handleKey = (e: KeyboardEvent) => {
-			if (e.ctrlKey && e.key.toLowerCase() === 'k') {
-				e.preventDefault()
-				searchRef.current?.focus()
-			}
-		}
-		window.addEventListener('keydown', handleKey)
-		return () => window.removeEventListener('keydown', handleKey)
-	}, [])
-
-	return (
-		<div className='flex flex-col md:flex-row md:items-center gap-4'>
-			<div className='relative w-full md:w-[450px]'>
-				<Search className='absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-				<Input
-					ref={searchRef}
-					value={searchTerm}
-					onChange={(e) => setSearchTerm(e.target.value)}
-					placeholder='Search via name, aadhaar, aabha number (shortcut: Ctrl + K)'
-					className='pl-8  w-full'
-				/>
-			</div>
-
-			<Popover>
-				<PopoverTrigger asChild>
-					<Button className=' cursor-pointer ' variant='outline'>
-						<ListFilter className='mr-1 h-4 w-4' />
-						Filters
-					</Button>
-				</PopoverTrigger>
-
-				<PopoverContent className='w-[650px] px-10 py-4'>
-					<div className='flex flex-wrap gap-6'>
-						{/* Sex Filter */}
-						<div className='min-w-[150px]'>
-							<Label className='text-sm font-medium'>Sex</Label>
-							<div className='mt-2 space-y-1'>
-								{SEX_OPTIONS.map((option) => (
-									<div
-										key={option}
-										className='flex items-center space-x-2'
-									>
-										<Checkbox
-											id={`sex-${option}`}
-											checked={filterSexes.includes(
-												option
-											)}
-											onCheckedChange={() =>
-												toggleSelection(
-													option,
-													filterSexes,
-													setFilterSexes
-												)
-											}
-										/>
-										<Label
-											htmlFor={`sex-${option}`}
-											className='capitalize'
-										>
-											{option}
-										</Label>
-									</div>
-								))}
-							</div>
-						</div>
-
-						{/* Disease Filter */}
-						<div className='min-w-[180px]'>
-							<Label className='text-sm font-medium'>
-								Disease
-							</Label>
-							<div className='mt-2 space-y-1'>
-								{DISEASE_OPTIONS.map((option) => (
-									<div
-										key={option}
-										className='flex items-center space-x-2'
-									>
-										<Checkbox
-											id={`disease-${option}`}
-											checked={filterDiseases.includes(
-												option
-											)}
-											onCheckedChange={() =>
-												toggleSelection(
-													option,
-													filterDiseases,
-													setFilterDiseases
-												)
-											}
-										/>
-										<Label
-											htmlFor={`disease-${option}`}
-											className='capitalize'
-										>
-											{option}
-										</Label>
-									</div>
-								))}
-							</div>
-						</div>
-
-						{/* Status Filter */}
-						<div className='min-w-[150px]'>
-							<Label className='text-sm font-medium'>
-								Status
-							</Label>
-							<div className='mt-2 space-y-1'>
-								{STATUS.map((option) => (
-									<div
-										key={option}
-										className='flex items-center space-x-2'
-									>
-										<Checkbox
-											id={`status-${option}`}
-											checked={filterStatuses.includes(
-												option
-											)}
-											onCheckedChange={() =>
-												toggleSelection(
-													option,
-													filterStatuses,
-													setFilterStatuses
-												)
-											}
-										/>
-										<Label
-											htmlFor={`status-${option}`}
-											className='capitalize'
-										>
-											{option}
-										</Label>
-									</div>
-								))}
-							</div>
-						</div>
-
-						<section className='flex '>
-							{/* Age Filter */}
-							<div className='min-w-[180px]'>
-								<Label className='text-sm font-medium'>
-									Age
-								</Label>
-								<div className='mt-2 space-y-1'>
-									<div className='flex items-center space-x-2'>
-										<Checkbox
-											id='age-lt5'
-											checked={ageFilter === 'lt5'}
-											onCheckedChange={() =>
-												setAgeFilter(
-													ageFilter === 'lt5'
-														? null
-														: 'lt5'
-												)
-											}
-										/>
-										<Label htmlFor='age-lt5'>
-											Less than 5 years
-										</Label>
-									</div>
-									<div className='flex items-center space-x-2'>
-										<Checkbox
-											id='age-lt20'
-											checked={ageFilter === 'lt20'}
-											onCheckedChange={() =>
-												setAgeFilter(
-													ageFilter === 'lt20'
-														? null
-														: 'lt20'
-												)
-											}
-										/>
-										<Label htmlFor='age-lt20'>
-											Less than 20 years
-										</Label>
-									</div>
-								</div>
-							</div>
-
-							{/* Ration Card Filter */}
-							<div className='min-w-[110px]'>
-								<Label className='text-sm font-medium'>
-									Ration Card
-								</Label>
-								<div className='mt-2 space-y-1'>
-									{RATION_COLORS.map((color) => (
-										<div
-											key={color}
-											className='flex items-center space-x-2'
-										>
-											<Checkbox
-												id={`ration-${color}`}
-												checked={filterRationColors.includes(
-													color
-												)}
-												onCheckedChange={() =>
-													toggleSelection(
-														color,
-														filterRationColors,
-														setFilterRationColors
-													)
-												}
-											/>
-											<Label
-												htmlFor={`ration-${color}`}
-												className='capitalize'
-											>
-												{color}
-											</Label>
-										</div>
-									))}
-								</div>
-							</div>
-
-							{/* Assigned Filter */}
-							<div className='min-w-[140px]'>
-								<Label className='text-sm font-medium'>
-									Assigned
-								</Label>
-								<div className='mt-2 space-y-1'>
-									{['assigned', 'unassigned'].map(
-										(option) => (
-											<div
-												key={option}
-												className='flex items-center space-x-2'
-											>
-												<Checkbox
-													id={`assigned-${option}`}
-													checked={
-														assignedFilter ===
-														option
-													}
-													onCheckedChange={() =>
-														setAssignedFilter(
-															assignedFilter ===
-																option
-																? ''
-																: (option as 'assigned' | 'unassigned')
-														)
-													}
-												/>
-												<Label
-													htmlFor={`assigned-${option}`}
-													className='capitalize'
-												>
-													{option}
-												</Label>
-											</div>
-										)
-									)}
-								</div>
-							</div>
-
-							{/* Transferred Filter */}
-							<div className='min-w-[150px]'>
-								<Label className='text-sm font-medium'>
-									Transferred
-								</Label>
-								<div className='mt-2 space-y-1'>
-									{['transferred', 'not_transferred'].map(
-										(option) => (
-											<div
-												key={option}
-												className='flex items-center space-x-2'
-											>
-												<Checkbox
-													id={`transfer-${option}`}
-													checked={
-														transferFilter ===
-														option
-													}
-													onCheckedChange={() =>
-														setTransferFilter(
-															transferFilter ===
-																option
-																? ''
-																: (option as 'transferred' | 'not_transferred')
-														)
-													}
-												/>
-												<Label
-													htmlFor={`transfer-${option}`}
-													className='capitalize'
-												>
-													{option.replace('_', ' ')}
-												</Label>
-											</div>
-										)
-									)}
-								</div>
-							</div>
-						</section>
-					</div>
-				</PopoverContent>
-			</Popover>
-		</div>
-	)
+function FilterGroup({
+    label,
+    options,
+    selected,
+    onToggle,
+}: {
+    label: string
+    options: string[]
+    selected: string[]
+    onToggle: (val: string) => void
+}) {
+    return (
+        <div className="min-w-[150px]">
+            <Label className="text-sm font-medium">{label}</Label>
+            <div className="mt-2 space-y-1">
+                {options.map((option) => (
+                    <div key={option} className="flex items-center space-x-2">
+                        <Checkbox
+                            id={`${label}-${option}`}
+                            checked={selected.includes(option)}
+                            onCheckedChange={() => onToggle(option)}
+                        />
+                        <Label htmlFor={`${label}-${option}`} className="capitalize">
+                            {option}
+                        </Label>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
 }

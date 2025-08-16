@@ -1,14 +1,6 @@
 'use client'
 
 import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from '@/components/ui/pagination'
-import {
     Table,
     TableBody,
     TableCell,
@@ -16,20 +8,26 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import { useAuth } from '@/contexts/AuthContext'
 import { useFilteredPatients } from '@/hooks/useFilteredPatients'
 import { usePagination } from '@/hooks/usePagination'
-import { usePatientStats } from '@/hooks/usePatientStats'
-import { Patient } from '@/types/patient'
-import { useEffect, useState } from 'react'
-import DeletePatientDialog from '../dialogs/DeletePatientDialog'
-import GenericRow from './GenericRow'
-import PatientToolbar from './PatientToolbar'
-import UpdatePatientDialog from '../dialogs/UpdatePatientDialog'
-import ViewPatientDialog from '../dialogs/ViewPatientDialog'
+
+import DeleteEntityDialog from '@/components/dialogs/DeleteEntityDialog'
 import { useTableData } from '@/hooks/useTableData'
-import { useAuth } from '@/contexts/AuthContext'
-import { Hospital } from '@/types/schema/hospital'
-import { UserDoc } from '@/types/user'
+import { Hospital } from '@/schema/hospital'
+import { Patient } from '@/schema/patient'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import ViewDetailsDialog from '../dialogs/ViewDetailsDialog'
+import GenericRow from './GenericRow'
+import GenericToolbar from './GenericToolbar'
+
+import { hospitalFields } from '@/constants/hospital'
+import { patientFields } from '@/constants/patient'
+import { SEARCH_FIELDS } from '@/constants/search-bar'
+import { userFields } from '@/constants/user'
+import { useSearch } from '@/hooks/useSearch'
+import { useStats } from '@/hooks/useStats'
+import GenericPagination from './GenericPagination'
 
 export default function GenericTable({
     headers,
@@ -41,25 +39,30 @@ export default function GenericTable({
     }[]
     activeTab: 'ashas' | 'doctors' | 'nurses' | 'hospitals' | 'patients'
 }) {
+    const stableHeaders = useMemo(() => headers, [headers])
     console.log('Hi from tables')
     const [rowsPerPage, setRowsPerPage] = useState(8) // Initial default
     const { user, role, orgId, isLoadingAuth } = useAuth()
 
-    // Use a single useTableData call with conditional props.
     const queryProps = {
         orgId,
         ashaEmail: role === 'asha' ? user?.email : null,
-        enabled: !isLoadingAuth, // Enable once auth is loaded
-
-        // Set the adminRequiredData prop based on the activeTab for admin users.
+        enabled: !isLoadingAuth,
         adminRequiredData: activeTab,
     }
 
-    // Correctly destructure the react-query result.
-    // The type of `data` will be inferred based on the `adminRequiredData` prop.
-    const { data, isLoading, isError } = useTableData(queryProps)
+    const fieldsMap = {
+        patients: patientFields,
+        hospitals: hospitalFields,
+        doctors: userFields,
+        nurses: userFields,
+        ashas: userFields,
+    } as const
 
-    // Responsive row count based on screen
+    const fieldsToDisplay = fieldsMap[activeTab]
+
+    const { data } = useTableData(queryProps)
+
     useEffect(() => {
         let resizeTimeout: NodeJS.Timeout
 
@@ -86,108 +89,86 @@ export default function GenericTable({
         }
     }, [])
 
-    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
+    const [selectedRowData, setSelectedRowData] = useState<any | null>(null)
     const [showView, setShowView] = useState(false)
-    const [showUpdate, setShowUpdate] = useState(false)
-    const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null)
 
-    const [searchTerm, setSearchTerm] = useState('')
-    const [filterSexes, setFilterSexes] = useState<string[]>([])
-    const [filterDiseases, setFilterDiseases] = useState<string[]>([])
-    const [filterStatuses, setFilterStatuses] = useState<string[]>([])
+    const searchFields = SEARCH_FIELDS[activeTab]
 
-    const [ageFilter, setAgeFilter] = useState<'lt5' | 'lt20' | 'gt50' | null>(null)
-    const [assignedFilter, setAssignedFilter] = useState<'assigned' | 'unassigned' | ''>('')
-    const [transferFilter, setTransferFilter] = useState<'transferred' | 'not_transferred' | ''>('')
+    const isPatientTab = activeTab === 'patients'
+    const patients = (data as Patient[]) ?? []
+    const filteredPatients = useFilteredPatients(isPatientTab ? patients : [])
 
-    const [filterRationColors, setFilterRationColors] = useState<string[]>([])
+    // ✅ Choose correct baseData (patients → filtered first, others → raw data)
+    const baseData = isPatientTab ? filteredPatients : (data ?? [])
 
-    // const isPatientTab = role !== 'admin'
-    const isPatientTab = true
-    const patients = isPatientTab ? (data as Patient[]) : undefined
+    // ✅ Single useSearch call for everything
+    const {
+        filteredRows: searchedData,
+        searchTerm,
+        setSearchTerm,
+    } = useSearch<typeof baseData extends (infer U)[] ? U : never>(baseData, searchFields)
 
-    // Filtering
+    // ✅ Use searchedData for pagination
+    const dataToPaginate = useMemo(() => searchedData, [searchedData])
 
-    const filteredPatients =
-        isPatientTab &&
-        useFilteredPatients(patients ?? [], {
-            searchTerm,
-            filterSexes,
-            filterDiseases,
-            filterStatuses,
-            filterRationColors,
-            ageFilter,
-            assignedFilter,
-            transferFilter,
-        })
-
-    let tableData
-    if (isPatientTab) {
-        tableData = isPatientTab && usePagination(filteredPatients, rowsPerPage)
-    } else {
-        let typedData: any[] = []
-        if (activeTab === 'hospitals') {
-            typedData = (data ?? []) as Hospital[]
-        } else if (activeTab === 'doctors' || activeTab === 'ashas' || activeTab === 'nurses') {
-            typedData = (data ?? []) as UserDoc[]
-        } else if (activeTab === 'patients') {
-            typedData = (data ?? []) as Patient[]
-        }
-        tableData = usePagination(typedData, rowsPerPage)
-    }
+    const tableData = usePagination<(typeof dataToPaginate)[number]>(dataToPaginate, rowsPerPage)
 
     const { paginated: paginatedData, currentPage, totalPages, setCurrentPage } = tableData
 
-    // Stats
-    const patientStats = usePatientStats(filteredPatients)
+    const tableStats = useStats({
+        TableData: paginatedData ?? [],
+        isPatientTab,
+    })
 
     useEffect(() => {
         setCurrentPage(1)
     }, [filteredPatients.length, setCurrentPage])
 
-    const exportData = filteredPatients.map((p) => ({
-        id: p.id,
-        name: p.name,
-        phoneNumber: p.phoneNumber,
-        sex: p.sex || 'Not specified',
-        dob: p.dob || 'Not specified',
-        address: p.address || 'Not specified',
-        aadhaarId: p.aadhaarId || 'Not specified',
-        rationCardColor: p.rationCardColor || 'Not specified',
-        diseases: p.diseases?.length ? p.diseases.join(', ') : 'None',
-        assignedPhc: p.assignedPhc || 'Not assigned',
-        assignedAsha: p.assignedAsha || 'Not assigned',
-        gpsLocation: p.gpsLocation ? `${p.gpsLocation.lat}, ${p.gpsLocation.lng}` : 'Not available',
-        followUps: p.followUps?.length
-            ? p.followUps.map((f, i) => `#${i + 1}: ${f.date} - ${f.remarks}`).join(' | ')
-            : 'None',
-        status: p.status || 'Not specified',
-    }))
+    interface RowDataType {
+        id: string | number
+        [key: string]: any
+    }
+
+    type HandleViewFn = (d: RowDataType) => void
+
+    const handleView: HandleViewFn = useCallback((d) => {
+        setSelectedRowData(d)
+        setShowView(true)
+    }, [])
+
+    interface HandleUpdateFn {
+        (d: RowDataType): void
+    }
+
+    const [showUpdate, setShowUpdate] = useState<boolean>(false)
+
+    const handleUpdate: HandleUpdateFn = useCallback((d) => {
+        setSelectedRowData(d)
+        setShowUpdate(true)
+    }, [])
+
+    interface HandleDeleteFn {
+        (d: RowDataType): void
+    }
+
+    const handleDelete: HandleDeleteFn = useCallback((d) => {
+        setSelectedRowData(d) // or setPatientToDelete(d) if delete uses that
+    }, [])
 
     return (
-        <div className="">
-            <PatientToolbar
-                isPatientTab={isPatientTab}
+        <div className="flex min-h-screen flex-col">
+            <GenericToolbar
+                activeTab={activeTab}
+                getExportData={() => {
+                    if (activeTab === 'patients') return filteredPatients
+                    if (activeTab === 'hospitals') return (data ?? []) as Hospital[]
+                    return data ?? [] // doctors, nurses, ashas
+                }}
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
-                filterSexes={filterSexes}
-                setFilterSexes={setFilterSexes}
-                filterDiseases={filterDiseases}
-                setFilterDiseases={setFilterDiseases}
-                filterStatuses={filterStatuses}
-                setFilterStatuses={setFilterStatuses}
-                ageFilter={ageFilter}
-                setAgeFilter={setAgeFilter}
-                filterRationColors={filterRationColors}
-                setFilterRationColors={setFilterRationColors}
-                assignedFilter={assignedFilter}
-                setAssignedFilter={setAssignedFilter}
-                transferFilter={transferFilter}
-                setTransferFilter={setTransferFilter}
-                exportData={exportData}
             />
 
-            <Table className="border-border rounded-md border">
+            <Table className="border-border flex-1 overflow-auto rounded-md border">
                 <TableHeader className="bg-muted">
                     <TableRow className="border-border border-b">
                         <TableHead className="border-border w-12 border-r text-center">
@@ -212,16 +193,10 @@ export default function GenericTable({
                                 key={data.id}
                                 rowData={data}
                                 index={(currentPage - 1) * rowsPerPage + index}
-                                onView={(p) => {
-                                    setSelectedPatient(p)
-                                    setShowView(true)
-                                }}
-                                onUpdate={(p) => {
-                                    setSelectedPatient(p)
-                                    setShowUpdate(true)
-                                }}
-                                onDelete={(p) => setPatientToDelete(p)}
-                                headers={headers}
+                                onView={handleView}
+                                onUpdate={handleUpdate}
+                                onDelete={handleDelete}
+                                headers={stableHeaders}
                             />
                         ))
                     ) : (
@@ -237,117 +212,43 @@ export default function GenericTable({
                 </TableBody>
             </Table>
 
-            {totalPages > 1 && (
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-                    {/* Stats Section */}
-                    <div className="flex w-full justify-between text-sm font-light md:flex-row">
-                        <section className="flex space-x-4">
-                            <div className="border px-2 py-1 tracking-wider">
-                                Total Patients: {patientStats.total}
-                            </div>
-                            <div className="border px-2 py-1 tracking-wider">
-                                Male: {patientStats.male}
-                            </div>
-                            <div className="border px-2 py-1 tracking-wider">
-                                Female: {patientStats.female}
-                            </div>
-                            <div className="border px-2 py-1 tracking-wider">
-                                Others: {patientStats.others}
-                            </div>
-                        </section>
-
-                        <section className="flex space-x-4">
-                            <div className="border px-2 py-1 tracking-wider">
-                                Assigned: {patientStats.assigned}
-                            </div>
-                            <div className="border px-2 py-1 tracking-wider">
-                                Unassigned: {patientStats.unassigned}
-                            </div>
-                            <div className="border px-2 py-1 tracking-wider">
-                                Alive: {patientStats.alive}
-                            </div>
-                            <div className="border px-2 py-1 tracking-wider">
-                                Death: {patientStats.deceased}
-                            </div>
-                        </section>
-                    </div>
-
-                    {/* Pagination UI */}
-                    <Pagination>
-                        <PaginationContent>
-                            <PaginationItem>
-                                <PaginationPrevious
-                                    href="#"
-                                    onClick={(e) => {
-                                        e.preventDefault()
-                                        setCurrentPage((prev) => Math.max(prev - 1, 1))
-                                    }}
-                                    className={
-                                        currentPage === 1
-                                            ? 'pointer-events-none opacity-50'
-                                            : undefined
-                                    }
-                                />
-                            </PaginationItem>
-
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                <PaginationItem key={page}>
-                                    <PaginationLink
-                                        href="#"
-                                        onClick={(e) => {
-                                            e.preventDefault()
-                                            setCurrentPage(page)
-                                        }}
-                                        isActive={currentPage === page}
-                                    >
-                                        {page}
-                                    </PaginationLink>
-                                </PaginationItem>
-                            ))}
-
-                            <PaginationItem>
-                                <PaginationNext
-                                    href="#"
-                                    onClick={(e) => {
-                                        e.preventDefault()
-                                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                                    }}
-                                    className={
-                                        currentPage === totalPages
-                                            ? 'pointer-events-none opacity-50'
-                                            : undefined
-                                    }
-                                />
-                            </PaginationItem>
-                        </PaginationContent>
-                    </Pagination>
-                </div>
-            )}
+            <div className="">
+                <GenericPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    stats={tableStats} // only show stats for patients
+                    isPatientTab={isPatientTab}
+                />
+            </div>
 
             {/* Modals and Dialogs */}
-            {selectedPatient && (
+            {selectedRowData && (
                 <>
-                    <ViewPatientDialog
+                    <ViewDetailsDialog
                         open={showView}
                         onOpenChange={setShowView}
-                        patient={selectedPatient}
+                        // Pass the selected data directly
+                        rowData={selectedRowData}
+                        fieldsToDisplay={fieldsToDisplay}
                     />
-                    <UpdatePatientDialog
+                    {/* <UpdateDetailsDialog
                         open={showUpdate}
                         onOpenChange={setShowUpdate}
-                        patient={selectedPatient}
-                        setPatient={setSelectedPatient}
-                        setPatients={setPatients}
-                    />
+                        // rowData={selectedRowData}
+                        // fieldsToDisplay={fieldsToDisplay}
+                    /> */}
                 </>
             )}
-
-            <DeletePatientDialog
-                patient={patientToDelete}
-                onClose={() => setPatientToDelete(null)}
-                onDeleted={(deletedId) =>
-                    setPatients((prev) => prev.filter((p) => p.id !== deletedId))
-                }
+            <DeleteEntityDialog
+                entity={selectedRowData}
+                collectionName={activeTab} // "patients" | "hospitals" | "doctors" | ...
+                displayField="name" // or "hospitalName", "email", etc. if needed
+                onClose={() => setSelectedRowData(null)}
+                onDeleted={(deletedId) => {
+                    // Optional: remove from local state if you keep data locally
+                    console.log('Deleted:', deletedId)
+                }}
             />
         </div>
     )

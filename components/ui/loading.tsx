@@ -1,9 +1,9 @@
 function Loading() {
-	return (
-		<div className="h-12 w-12 border-6 border-t-transparent animate-spin rounded-full border-primary">
-			<span className='sr-only'>Loading...</span>
-		</div>
-	)
+    return (
+        <div className="border-primary h-12 w-12 animate-spin rounded-full border-6 border-t-transparent">
+            <span className="sr-only">Loading...</span>
+        </div>
+    )
 }
 
 export default Loading

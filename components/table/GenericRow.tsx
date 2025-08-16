@@ -1,19 +1,17 @@
 'use client'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Eye, Pencil, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { db } from '@/firebase'
-import { Patient } from '@/types/patient'
+import { dobToAgeUtil } from '@/lib/patient/dobToAge'
 import { doc, updateDoc } from 'firebase/firestore'
 import { usePathname } from 'next/navigation'
+import { memo } from 'react'
 import { toast } from 'sonner'
-import PhoneCell from './PhoneCell'
 import TransferDialog from '../dialogs/TransferDialog'
-import { dobToAgeUtil } from '@/lib/patient/dobToAge'
-import { UserDoc } from '@/types/user'
 import DiseasesCell from './DiseasesCell'
+import PhoneCell from './PhoneCell'
 import StatusCell from './StatusCell'
 
 type Header = {
@@ -21,23 +19,31 @@ type Header = {
     key: string
 }
 
-export default function GenericRow<RowDataType>({
-    isPatientTab,
-    rowData,
-    index,
-    onView,
-    onUpdate,
-    onDelete,
-    headers,
-}: {
+type RowDataBase = {
+    id: string
+    name?: string
+    phoneNumber?: string[]
+    contactNumber?: string[]
+    dob?: string
+    diseases?: string[]
+    status?: string
+    [key: string]: unknown
+}
+
+import type { Patient } from '@/schema/patient' // adjust the import path as needed
+
+type GenericRowProps<RowDataType extends RowDataBase> = {
     isPatientTab: boolean
     rowData: RowDataType
     index: number
-    onView: (patient: Patient) => void
-    onUpdate: (patient: Patient) => void
-    onDelete: (patient: Patient) => void
+    onView: (data: RowDataType) => void
+    onUpdate: (data: RowDataType) => void
+    onDelete: (data: RowDataType) => void
     headers: Header[]
-}) {
+}
+
+const GenericRow = memo(function GenericRow<RowDataType extends RowDataBase>(props: GenericRowProps<RowDataType>) {
+    const { isPatientTab, rowData, index, onView, onUpdate, onDelete, headers } = props
     const pathname = usePathname()
     const isNurse = pathname.startsWith('/nurse')
 
@@ -75,61 +81,55 @@ export default function GenericRow<RowDataType>({
                 </TableCell>
             ))}
             <TableCell className="space-x-2 text-center">
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button size="icon" variant="outline" onClick={() => onView(patient)}>
-                                <Eye className="h-4 w-4" />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>View</TooltipContent>
-                    </Tooltip>
+                {/* view button */}
 
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button size="icon" variant="outline" onClick={() => onUpdate(rowData)}>
-                                <Pencil className="h-4 w-4" />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Update</TooltipContent>
-                    </Tooltip>
-                    {isPatientTab && (
-                        <TransferDialog
-                            rowData={rowData}
-                            onTransfer={async (phc) => {
-                                try {
-                                    if (!rowData.id) throw new Error('Missing patient document ID')
-                                    const patientRef = doc(db, 'patients', rowData.id)
-                                    await updateDoc(patientRef, {
-                                        assignedPhc: phc,
-                                        assignedAsha: '',
-                                    })
+                <Button size="icon" variant="outline" onClick={() => onView(rowData)} title="View">
+                    <Eye className="h-4 w-4" />
+                </Button>
 
-                                    toast.success(`Transferred ${rowData.name} to new PHC.`)
-                                } catch (err) {
-                                    toast.error('Transfer failed. See console for details.' + err)
-                                }
-                            }}
-                        />
-                    )}
+                {/* update button */}
 
-                    {!isNurse && (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    size="icon"
-                                    variant="destructive"
-                                    className="text-white"
-                                    onClick={() => onDelete(rowData)}
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Delete</TooltipContent>
-                        </Tooltip>
-                    )}
-                </TooltipProvider>
+                <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={() => onUpdate(rowData)}
+                    title="Update"
+                >
+                    <Pencil className="h-4 w-4" />
+                </Button>
+
+                {/* transfer button */}
+                {isPatientTab && (
+                    <TransferDialog
+                        patient={rowData as unknown as Patient}
+                        onTransfer={async (hospitalId) => {
+                            try {
+                                if (!rowData.id) throw new Error('Missing patient document ID')
+                                const patientRef = doc(db, 'patients', rowData.id)
+                                await updateDoc(patientRef, {
+                                    assignedPhc: hospitalId,
+                                    assignedAsha: '',
+                                })
+
+                                toast.success(`Transferred ${rowData.name} to new PHC.`)
+                            } catch (err) {
+                                toast.error('Transfer failed. See console for details.' + err)
+                            }
+                        }}
+                    />
+                )}
+                <Button
+                    size="icon"
+                    variant="destructive"
+                    className="text-white"
+                    onClick={() => onDelete(rowData)}
+                    title="Delete Record"
+                >
+                    <Trash2 className="h-4 w-4" />
+                </Button>
             </TableCell>
         </TableRow>
     )
-}
+})
+
+export default GenericRow

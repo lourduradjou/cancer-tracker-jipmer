@@ -1,5 +1,5 @@
 import { db } from '@/firebase'
-import { Patient } from '@/types/patient';
+import { Patient } from '@/schema/patient'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { toast } from 'sonner'
 
@@ -58,7 +58,6 @@ export const checkAadhaarDuplicateUtil = async (
         we can either stop with notification or go one step further of transfer here, or request transfer to the respective hospital
 */
 
-
 export const checkNamePhoneDuplicate = async (
     name: string,
     phoneNumbers: string[]
@@ -93,8 +92,7 @@ export const checkNamePhoneDuplicate = async (
 
         const phoneMatch = cleanedPhoneNumbers.some((num) => patientPhoneNumbers.includes(num))
 
-
-        if ((nameMatch && phoneMatch) || (cleanedName.length > 0)) {
+        if ((nameMatch && phoneMatch) || cleanedName.length > 0) {
             possibleMatchFound = true
             matchedPatientId = doc.id
             break

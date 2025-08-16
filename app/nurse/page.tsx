@@ -6,12 +6,12 @@ import { useEffect } from 'react'
 
 import PatientTable from '@/components/table/GenericTable'
 import { useAuth } from '@/contexts/AuthContext'
-import { usePatients } from '@/hooks/useTableData'
 import { toast } from 'sonner'
+import { PATIENT_TABLE_HEADERS } from '@/constants/headers'
 
 export default function NursePage() {
     const router = useRouter()
-    const { user, role, orgId, isLoadingAuth } = useAuth()
+    const { user, role, isLoadingAuth } = useAuth()
 
     useEffect(() => {
         if (!isLoadingAuth && !user) {
@@ -29,21 +29,6 @@ export default function NursePage() {
         }
     }, [isLoadingAuth, user, role, router])
 
-    //fetch patients if no errors
-    const {
-        data: patients,
-        isLoading: isLoadingPatients,
-        isError: isErrorPatients,
-        error: patientsError,
-    } = usePatients({ orgId, enabled: role === 'nurse' && !!orgId })
-
-    if (isErrorPatients) {
-        console.error('Failed to load patients for nurse:', patientsError)
-        toast.error('Failed to load patient data for your organization.')
-        // Optionally, show a more specific error message or component
-    }
-
-    // If still loading auth or if not a nurse (and redirection hasn't completed yet)
     if (isLoadingAuth || role !== 'nurse') {
         return (
             <main className="flex h-screen flex-col items-center justify-center">
@@ -57,12 +42,7 @@ export default function NursePage() {
 
     return (
         <main className="mx-auto px-8 py-4 lg:max-w-[1240px] xl:max-w-[1400px]">
-            <PatientTable
-                patients={patients || []}
-                setPatients={() => {
-                    /* React Query handles updates, direct setPatients is often not needed here */
-                }}
-            />
+            <PatientTable headers={PATIENT_TABLE_HEADERS} activeTab="patients" />
         </main>
     )
 }
