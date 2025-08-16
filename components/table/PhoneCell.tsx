@@ -1,48 +1,46 @@
 import { useState } from 'react'
 
 export default function PhoneCell({ phoneNumbers }: { phoneNumbers: string[] | string }) {
-	const [showAll, setShowAll] = useState(false)
+    const [showAll, setShowAll] = useState(false)
 
-	const MAX_DISPLAY = 2
-	const MAX_ALLOWED = 10
+    const MAX_DISPLAY = 2
+    const MAX_ALLOWED = 10
 
-	const numbers = Array.isArray(phoneNumbers)
-		? phoneNumbers
-		: phoneNumbers
-		? [phoneNumbers]
-		: []
+    const numbers = Array.isArray(phoneNumbers) ? phoneNumbers : phoneNumbers ? [phoneNumbers] : []
 
-	if (numbers.length > MAX_ALLOWED) {
-		console.warn(`Too many phone numbers! Max allowed is ${MAX_ALLOWED}.`)
-	}
+    if (numbers.length > MAX_ALLOWED) {
+        console.warn(`Too many phone numbers! Max allowed is ${MAX_ALLOWED}.`)
+    }
 
-	const trimmed = numbers.slice(0, MAX_ALLOWED)
-	const displayNumbers = showAll ? trimmed : trimmed.slice(0, MAX_DISPLAY)
-	const remaining = trimmed.length - MAX_DISPLAY
+    const trimmed = numbers.slice(0, MAX_ALLOWED)
+    const displayNumbers = showAll ? trimmed : trimmed.slice(0, MAX_DISPLAY)
+    const remaining = trimmed.length - MAX_DISPLAY
 
-	return (
-		<div className="border-border whitespace-pre-wrap">
-			{displayNumbers.map((num, i) => (
-				<div key={i}>{num}</div>
-			))}
+    return (
+        <div className="border-border whitespace-pre-wrap">
+            {displayNumbers.map((num, i) => (
+                <div key={i}>{num}</div>
+            ))}
 
-			{!showAll && remaining > 0 && (
-				<div
-					className="text-blue-500 cursor-pointer underline"
-					onClick={() => setShowAll(true)}
-				>
-					... {remaining} more
-				</div>
-			)}
+            {phoneNumbers.length === 0 && <p>N/A</p>}
 
-			{showAll && trimmed.length > MAX_DISPLAY && (
-				<div
-					className="text-blue-500 cursor-pointer underline"
-					onClick={() => setShowAll(false)}
-				>
-					Show less
-				</div>
-			)}
-		</div>
-	)
+            {!showAll && remaining > 0 && (
+                <div
+                    className="cursor-pointer text-blue-500 underline"
+                    onClick={() => setShowAll(true)}
+                >
+                    ... {remaining} more
+                </div>
+            )}
+
+            {showAll && trimmed.length > MAX_DISPLAY && (
+                <div
+                    className="cursor-pointer text-blue-500 underline"
+                    onClick={() => setShowAll(false)}
+                >
+                    Show less
+                </div>
+            )}
+        </div>
+    )
 }

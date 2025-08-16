@@ -2,7 +2,7 @@
 
 import Loading from '@/components/ui/loading'
 import { auth, db } from '@/firebase'
-import { AuthState, UserDoc } from '@/types/user'
+import { AuthState, UserDoc } from '@/schema/user'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { User as FirebaseAuthUser, onAuthStateChanged } from 'firebase/auth'
 import { collection, getDocs, query, where } from 'firebase/firestore'
@@ -26,9 +26,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         })
         return () => unsubscribe()
     }, [])
-
-    // Use React Query to fetch the user's Firestore document (which contains the role)
-    // This query is enabled only when firebaseUser is known (not null)
 
     const {
         data: userDoc,

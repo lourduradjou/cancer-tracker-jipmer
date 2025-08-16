@@ -15,7 +15,11 @@ import { z } from 'zod'
 import { FirebaseError } from 'firebase/app'
 
 const loginSchema = z.object({
-    email: z.string().trim().min(1, { message: 'Email is required.' }).email({ message: 'Please enter a valid email address.' }),
+    email: z
+        .string()
+        .trim()
+        .min(1, { message: 'Email is required.' })
+        .email({ message: 'Please enter a valid email address.' }),
     password: z
         .string()
         .min(1, { message: 'Password is required.' })
@@ -28,42 +32,28 @@ type LoginFormInputs = z.infer<typeof loginSchema>
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
-    const router = useRouter()
 
-    // --- Initialize React Hook Form ---
     const {
-        register, // Function to register inputs
-        handleSubmit, // Function to handle form submission
-        formState: { errors }, // Object containing validation errors
-        reset, // Function to reset form fields
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset,
     } = useForm<LoginFormInputs>({
-        resolver: zodResolver(loginSchema), // Use Zod for validation
+        resolver: zodResolver(loginSchema),
         defaultValues: {
-            // Optional: Set initial form values
             email: '',
             password: '',
         },
     })
 
-    // --- On Submit Function (called only if validation passes) ---
     const onSubmit = async (data: LoginFormInputs) => {
         try {
             setLoading(true)
 
             // Perform Firebase Authentication
-            await signInWithEmailAndPassword(
-                auth,
-                data.email.toLowerCase(), // Use the validated email from form data
-                data.password // Use the validated password from form data
-            )
-
-            // If signInWithEmailAndPassword succeeds, the AuthContext's
-            // onAuthStateChanged listener will detect the new user, fetch
-            // their role, and handle the role-based redirection.
+            await signInWithEmailAndPassword(auth, data.email.toLowerCase(), data.password)
             toast.success('Login successful! Redirecting...')
-            router.push('/') // Redirect to your root authenticated page (e.g., /home)
-
-            reset() // Optionally reset form fields after successful login
+            reset()
         } catch (error) {
             console.error('Login error:', error)
 

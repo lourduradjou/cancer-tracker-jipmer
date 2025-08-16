@@ -1,17 +1,16 @@
 'use client'
 
 import PatientCard from '@/components/PatientCard'
-import { db, auth } from '@/firebase'
-import { FollowUp, Patient } from '@/types/patient'
-import { doc, Timestamp, updateDoc, collection, getDocs, query, where } from 'firebase/firestore'
-import { onAuthStateChanged } from 'firebase/auth'
+import Loading from '@/components/ui/loading'
+import { useAuth } from '@/contexts/AuthContext'
+import { db } from '@/firebase'
+import { useTableData } from '@/hooks/useTableData'
+import { Patient } from '@/schema/patient'
+import { useQueryClient } from '@tanstack/react-query'
+import { doc, Timestamp, updateDoc } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { useQueryClient } from '@tanstack/react-query'
-import { useAuth } from '@/contexts/AuthContext'
-import { usePatients } from '@/hooks/useTableData'
-import Loading from '@/components/ui/loading'
 
 export default function AshaPage() {
     const router = useRouter()
@@ -41,7 +40,7 @@ export default function AshaPage() {
         isLoading: isLoadingPatients,
         isError: isErrorPatients,
         error: patientsError,
-    } = usePatients({ ashaEmail: user?.email || null, enabled: role === 'asha' })
+    } = useTableData({ ashaEmail: user?.email || null, enabled: role === 'asha' })
 
     // Handle input change in PatientCard
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, patientId: string) => {
@@ -56,10 +55,10 @@ export default function AshaPage() {
 
     const handleAddFollowUp = async (patientId: string, remark: string) => {
         const now = Timestamp.now()
-        const newFollowUp: FollowUp = {
-            date: now,
-            remarks: remark,
-        }
+        // const newFollowUp: FollowUp = {
+        //     date: now,
+        //     remarks: remark,
+        // }
 
         try {
             setSaving(true)
@@ -80,7 +79,8 @@ export default function AshaPage() {
                 return
             }
 
-            const updatedFollowUps = [...(currentPatient?.followUps || []), newFollowUp]
+            // const updatedFollowUps = [...(currentPatient?.followUps || []), newFollowUp]
+            const updatedFollowUps = [...(currentPatient?.followUps || [])]
 
             await updateDoc(patientDocRef, {
                 followUps: updatedFollowUps,

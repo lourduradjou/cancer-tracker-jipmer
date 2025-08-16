@@ -1,6 +1,5 @@
 import {
     TypographyH2,
-    TypographyH3,
     TypographyH4,
     TypographyLarge,
     TypographyMuted,

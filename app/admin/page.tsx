@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import {
     HOSPITAL_TABLE_HEADERS,
@@ -7,13 +7,33 @@ import {
     NURSES_TABLE_HEADERS,
     PATIENT_TABLE_HEADERS,
     ASHA_TABLE_HEADERS,
-} from '@/constants/data' // adjust the path
+} from '@/constants/headers'
 import PatientTable from '@/components/table/GenericTable'
+
+const TAB_KEY = 'adminPageActiveTab' // key in localStorage
 
 export default function AdminPage() {
     const [activeTab, setActiveTab] = useState<
         'hospitals' | 'doctors' | 'nurses' | 'ashas' | 'patients'
-    >('patients')
+    >('hospitals')
+
+    // Load last active tab from localStorage on mount
+    useEffect(() => {
+        const storedTab = localStorage.getItem(TAB_KEY) as
+            | 'hospitals'
+            | 'doctors'
+            | 'nurses'
+            | 'ashas'
+            | 'patients'
+            | null
+        if (storedTab) setActiveTab(storedTab)
+    }, [])
+
+    // Save active tab to localStorage whenever it changes
+    const handleTabChange = (tab: typeof activeTab) => {
+        setActiveTab(tab)
+        localStorage.setItem(TAB_KEY, tab)
+    }
 
     const headersMap = {
         hospitals: HOSPITAL_TABLE_HEADERS,
@@ -29,16 +49,20 @@ export default function AdminPage() {
         <div className="mx-auto px-8 py-4 lg:max-w-[1240px] xl:max-w-[1400px]">
             {/* Tabs */}
             <div className="space-x-4">
-                {(['hospitals', 'doctors', 'nurses', 'ashas', 'patients'] as const).map((tab) => (
-                    <Button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        variant={'simple'}
-                        className={activeTab === tab ? 'bg-muted-foreground' : 'bg-border'} // highlight active
-                    >
-                        <p className="uppercase">{tab}</p>
-                    </Button>
-                ))}
+                {(['hospitals', 'doctors', 'nurses', 'ashas', 'patients'] as const).map(
+                    (tab) => (
+                        <Button
+                            key={tab}
+                            onClick={() => handleTabChange(tab)}
+                            variant={'simple'}
+                            className={
+                                activeTab === tab ? 'bg-muted-foreground' : 'bg-border'
+                            }
+                        >
+                            <p className="uppercase">{tab}</p>
+                        </Button>
+                    )
+                )}
             </div>
 
             {/* Content */}

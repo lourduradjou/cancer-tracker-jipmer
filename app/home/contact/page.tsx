@@ -1,9 +1,4 @@
-import {
-    TypographyH1,
-    TypographyH2,
-    TypographyMuted,
-    TypographyP,
-} from '@/components/ui/typography'
+import { TypographyH2, TypographyMuted, TypographyP } from '@/components/ui/typography'
 
 export default function ContactPage() {
     return (
@@ -14,7 +9,7 @@ export default function ContactPage() {
                 For any queries or technical issues related to the COMPASS Portal, please reach out
                 to us using the following contact information:
             </TypographyP>
-            <div className="space-y-4 bg-sidebar-accent rounded p-4 shadow">
+            <div className="bg-sidebar-accent space-y-4 rounded p-4 shadow">
                 <div>
                     <TypographyP className="font-semibold">Institution:</TypographyP>
                     <div>

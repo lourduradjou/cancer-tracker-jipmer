@@ -1,7 +1,7 @@
 import { db } from '@/firebase'
-import { Patient } from '@/types/patient'
-import { Hospital } from '@/types/schema/hospital'
-import { UserDoc } from '@/types/user'
+import { Patient } from '@/schema/patient'
+import { Hospital } from '@/schema/hospital'
+import { UserDoc } from '@/schema/user'
 import { useQuery } from '@tanstack/react-query'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 
@@ -11,10 +11,9 @@ import { collection, getDocs, query, where } from 'firebase/firestore'
  * @returns {string} The string with the last character removed.
  */
 function cutLastCharacter(str: string | undefined): string | undefined {
-  // Use the slice method to get a substring from the beginning up to the second-to-last character.
-  return str?.slice(0, -1);
+    // Use the slice method to get a substring from the beginning up to the second-to-last character.
+    return str?.slice(0, -1)
 }
-
 
 type UsePatientsProps = {
     orgId?: string | null
@@ -44,7 +43,10 @@ export const useTableData = ({
         queryFn: async () => {
             let patientsQuery
             if (orgId) {
-                patientsQuery = query(collection(db, 'patients'), where('assignedPhc', '==', orgId))
+                patientsQuery = query(
+                    collection(db, 'patients'),
+                    where('assignedHospitalId', '==', orgId)
+                )
             } else if (ashaEmail) {
                 patientsQuery = query(
                     collection(db, 'patients'),
