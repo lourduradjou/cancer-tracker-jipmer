@@ -74,9 +74,9 @@ const GenericRow = memo(function GenericRow<RowDataType extends RowDataBase>(
     return (
         <TableRow key={rowData.id} className="border-border border-b font-light">
             <TableCell className="border-border border-r text-center">{index + 1}</TableCell>
-            {headers.map((header) => (
+            {headers.map((header, index) => (
                 <TableCell
-                    key={String(header.key)}
+                    key={index}
                     className={`border-border border-r text-center ${header.key === 'name' ? 'font-semibold' : ''}`}
                 >
                     {renderCellContent(header.key)}
