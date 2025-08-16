@@ -92,6 +92,7 @@ export default function GenericTable({
 
     const [selectedRowData, setSelectedRowData] = useState<any | null>(null)
     const [showView, setShowView] = useState(false)
+    const [showDelete, setShowDelete] = useState(false)
 
     const searchFields = SEARCH_FIELDS[activeTab]
 
@@ -162,9 +163,9 @@ export default function GenericTable({
     }
 
     const handleDelete: HandleDeleteFn = useCallback((d) => {
-        setSelectedRowData(d) // or setPatientToDelete(d) if delete uses that
+        setSelectedRowData(d)
+        setShowDelete(true)
     }, [])
-
     return (
         <div className="flex min-h-screen flex-col">
             <GenericToolbar
@@ -251,12 +252,14 @@ export default function GenericTable({
                 </>
             )}
             <DeleteEntityDialog
+                open={showDelete} // <-- control it explicitly
                 entity={selectedRowData}
-                collectionName={activeTab} // "patients" | "hospitals" | "doctors" | ...
-                displayField="name" // or "hospitalName", "email", etc. if needed
-                onClose={() => setSelectedRowData(null)}
+                collectionName={activeTab}
+                displayField="name"
+                onClose={() => setShowDelete(false)}
                 onDeleted={(deletedId) => {
-                    // Optional: remove from local state if you keep data locally
+                    setShowDelete(false)
+                    setSelectedRowData(null)
                     console.log('Deleted:', deletedId)
                 }}
             />

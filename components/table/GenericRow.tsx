@@ -42,7 +42,9 @@ type GenericRowProps<RowDataType extends RowDataBase> = {
     headers: Header[]
 }
 
-const GenericRow = memo(function GenericRow<RowDataType extends RowDataBase>(props: GenericRowProps<RowDataType>) {
+const GenericRow = memo(function GenericRow<RowDataType extends RowDataBase>(
+    props: GenericRowProps<RowDataType>
+) {
     const { isPatientTab, rowData, index, onView, onUpdate, onDelete, headers } = props
     const pathname = usePathname()
     const isNurse = pathname.startsWith('/nurse')
@@ -70,7 +72,7 @@ const GenericRow = memo(function GenericRow<RowDataType extends RowDataBase>(pro
     const getAge = (dob: string | undefined): string => dobToAgeUtil(dob)
 
     return (
-        <TableRow className="border-border border-b font-light">
+        <TableRow key={rowData.id} className="border-border border-b font-light">
             <TableCell className="border-border border-r text-center">{index + 1}</TableCell>
             {headers.map((header) => (
                 <TableCell
