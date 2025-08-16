@@ -14,14 +14,16 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 type DeleteEntityDialogProps<T extends { id: string }> = {
+    open: boolean // <-- new prop
     entity: T | null
     collectionName: string
-    displayField: keyof T // e.g. "name", "email", "hospitalName"
+    displayField: keyof T
     onClose: () => void
     onDeleted?: (deletedId: string) => void
 }
 
 export default function DeleteEntityDialog<T extends { id: string }>({
+    open,
     entity,
     collectionName,
     displayField,
@@ -40,16 +42,10 @@ export default function DeleteEntityDialog<T extends { id: string }>({
             return entityId
         },
         onSuccess: (deletedId) => {
-            // ✅ Invalidate queries
-            if (collectionName === 'patients') {
-                queryClient.invalidateQueries({ queryKey: ['patients'] })
-            } else if (collectionName === 'hospitals') {
-                queryClient.invalidateQueries({ queryKey: ['hospitals'] })
-            } else {
-                queryClient.invalidateQueries({ queryKey: ['users'] })
-            }
+            if (collectionName === 'patients') queryClient.invalidateQueries({ queryKey: ['patients'] })
+            else if (collectionName === 'hospitals') queryClient.invalidateQueries({ queryKey: ['hospitals'] })
+            else queryClient.invalidateQueries({ queryKey: ['users'] })
 
-            // ✅ Fire toast
             toast.success(`${entity?.[displayField] as string} deleted successfully`)
 
             onDeleted?.(deletedId)
@@ -67,26 +63,25 @@ export default function DeleteEntityDialog<T extends { id: string }>({
     }
 
     return (
-        <Dialog open={!!entity} onOpenChange={onClose}>
+        <Dialog open={open} onOpenChange={onClose}> {/* use the explicit open prop */}
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Confirm Deletion</DialogTitle>
                 </DialogHeader>
                 <p>
                     Are you sure you want to delete{' '}
-                    <strong className="text-red-600">{entity?.[displayField] as string}</strong> ?
+                    <strong className="text-red-600">{entity?.[displayField] as string}</strong>?
                 </p>
                 <p className="text-orange-500">Note*: This action cannot be undone.</p>
 
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose} className="cursor-pointer">
+                    <Button variant="outline" onClick={onClose}>
                         Cancel
                     </Button>
                     <Button
                         variant="destructive"
                         onClick={handleConfirmDelete}
                         disabled={deleteMutation.isPending}
-                        className="cursor-pointer"
                     >
                         {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
                     </Button>
