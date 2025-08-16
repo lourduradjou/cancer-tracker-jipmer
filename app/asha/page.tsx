@@ -153,7 +153,7 @@ export default function AshaPage() {
                     {patients?.map((patient) => (
                         <PatientCard
                             key={patient.id}
-                            patient={patient}
+                            patient={patient as Patient}
                             onChange={handleInputChange}
                             onSave={handleSave}
                             isSaving={saving}

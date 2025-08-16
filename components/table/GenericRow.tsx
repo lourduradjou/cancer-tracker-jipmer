@@ -34,7 +34,7 @@ import type { Patient } from '@/schema/patient' // adjust the import path as nee
 
 type GenericRowProps<RowDataType extends RowDataBase> = {
     isPatientTab: boolean
-    rowData: RowDataType
+    rowData: any
     index: number
     onView: (data: RowDataType) => void
     onUpdate: (data: RowDataType) => void

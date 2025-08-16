@@ -1,4 +1,13 @@
-export const AVAILABLE_DISEASES_LIST = {
+interface Disease {
+    label: string
+    gender?: 'male' | 'female'
+}
+
+interface AVAILABLE_DISEASES_LIST {
+    [key: string]: Disease[]
+}
+
+export const AVAILABLE_DISEASES_LIST: AVAILABLE_DISEASES_LIST = {
     solid: [
         { label: 'Breast cancer', gender: 'female' }, // Added gender
         { label: 'Lung cancer', gender: undefined },
