@@ -1,5 +1,5 @@
 // hooks/useFilteredPatients.ts
-import { usePatientFilterStore } from '@/store/usePatientFilterStore'
+import { usePatientFilterStore } from '@/store/patient-filter-store'
 import { Patient } from '@/schema/patient'
 import { useMemo } from 'react'
 

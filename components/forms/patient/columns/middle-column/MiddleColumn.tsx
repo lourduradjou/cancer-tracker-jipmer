@@ -8,6 +8,7 @@ import StatusSelect from './fields/StatusSelect'
 type MiddleColumnProps = {
     form: UseFormReturn<any>
     clearGenderIncompatible: () => void
+    isEdit?: boolean
 }
 
 export default function MiddleColumn({ form, clearGenderIncompatible }: MiddleColumnProps) {

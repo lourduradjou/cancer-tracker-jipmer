@@ -1,6 +1,6 @@
+// components/GenericRow.tsx
 'use client'
 import { Eye, Pencil, Trash2 } from 'lucide-react'
-
 import { Button } from '@/components/ui/button'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { db } from '@/firebase'
@@ -13,104 +13,99 @@ import TransferDialog from '../dialogs/TransferDialog'
 import DiseasesCell from './DiseasesCell'
 import PhoneCell from './PhoneCell'
 import StatusCell from './StatusCell'
+import type { Patient } from '@/schema/patient'
+import GenericPatientDialog from '../forms/patient/GenericPatientDialog'
 
 type Header = {
     name: string
     key: string
 }
 
+// Make RowDataBase more flexible to accept any object with an id
 type RowDataBase = {
-    id: string
-    name?: string
-    phoneNumber?: string[]
-    contactNumber?: string[]
-    dob?: string
-    diseases?: string[]
-    status?: string
+    id: string | number
     [key: string]: unknown
 }
 
-import type { Patient } from '@/schema/patient' // adjust the import path as needed
-
-type GenericRowProps<RowDataType extends RowDataBase> = {
+type GenericRowProps = {
     isPatientTab: boolean
-    rowData: any
+    rowData: RowDataBase
     index: number
-    onView: (data: RowDataType) => void
-    onUpdate: (data: RowDataType) => void
-    onDelete: (data: RowDataType) => void
+    onView: (data: RowDataBase) => void
+    onUpdate: (data: RowDataBase) => void
+    onDelete: (data: RowDataBase) => void
     headers: Header[]
 }
 
-const GenericRow = memo(function GenericRow<RowDataType extends RowDataBase>(props: GenericRowProps<RowDataType>) {
+const GenericRow = memo(function GenericRow(props: GenericRowProps) {
     const { isPatientTab, rowData, index, onView, onUpdate, onDelete, headers } = props
     const pathname = usePathname()
     const isNurse = pathname.startsWith('/nurse')
 
     const renderCellContent = (key: string) => {
+        const value = rowData[key]
+
         switch (key) {
             case 'phoneNumber':
             case 'contactNumber':
-                return <PhoneCell phoneNumbers={(rowData[key] as string[]) ?? []} />
+                return <PhoneCell phoneNumbers={(value as string[]) ?? []} />
 
             case 'dob':
-                return <span className="">{getAge(rowData[key])}</span>
+                return <span className="">{dobToAgeUtil(value as string)}</span>
 
             case 'diseases':
-                return <DiseasesCell diseases={rowData[key] as string[]} />
+                return <DiseasesCell diseases={(value as string[]) ?? []} />
 
             case 'status':
-                return <StatusCell status={rowData[key] as string} />
+                return <StatusCell status={value as string} />
 
             default:
-                return <span className="">{String(rowData[key])}</span>
+                return <span className="">{String(value)}</span>
         }
     }
 
-    const getAge = (dob: string | undefined): string => dobToAgeUtil(dob)
-
     return (
-        <TableRow className="border-border border-b font-light">
+        <TableRow key={rowData.id} className="border-border border-b font-light">
             <TableCell className="border-border border-r text-center">{index + 1}</TableCell>
-            {headers.map((header) => (
+            {headers.map((header, index) => (
                 <TableCell
-                    key={String(header.key)}
+                    key={index}
                     className={`border-border border-r text-center ${header.key === 'name' ? 'font-semibold' : ''}`}
                 >
                     {renderCellContent(header.key)}
                 </TableCell>
             ))}
             <TableCell className="space-x-2 text-center">
-                {/* view button */}
-
                 <Button size="icon" variant="outline" onClick={() => onView(rowData)} title="View">
                     <Eye className="h-4 w-4" />
                 </Button>
 
-                {/* update button */}
+                {isPatientTab && (
+                    <GenericPatientDialog
+                        mode="edit"
+                        patientData={rowData as Patient}
+                        trigger={
+                            <Button size="icon" variant="outline" title="Update">
+                                <Pencil className="h-4 w-4" />
+                            </Button>
+                        }
+                        onSuccess={() => {
+                            console.log('Patient updated successfully')
+                        }}
+                    />
+                )}
 
-                <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => onUpdate(rowData)}
-                    title="Update"
-                >
-                    <Pencil className="h-4 w-4" />
-                </Button>
-
-                {/* transfer button */}
                 {isPatientTab && (
                     <TransferDialog
-                        patient={rowData as unknown as Patient}
+                        patient={rowData as Patient}
                         onTransfer={async (hospitalId) => {
                             try {
                                 if (!rowData.id) throw new Error('Missing patient document ID')
-                                const patientRef = doc(db, 'patients', rowData.id)
+                                const patientRef = doc(db, 'patients', rowData.id.toString())
                                 await updateDoc(patientRef, {
                                     assignedPhc: hospitalId,
                                     assignedAsha: '',
                                 })
-
                                 toast.success(`Transferred ${rowData.name} to new PHC.`)
                             } catch (err) {
                                 toast.error('Transfer failed. See console for details.' + err)
@@ -118,6 +113,7 @@ const GenericRow = memo(function GenericRow<RowDataType extends RowDataBase>(pro
                         }}
                     />
                 )}
+
                 <Button
                     size="icon"
                     variant="destructive"

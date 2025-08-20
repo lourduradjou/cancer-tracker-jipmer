@@ -15,15 +15,21 @@ import LeftColumn from './columns/left-column/LeftColumn'
 import MiddleColumn from './columns/middle-column/MiddleColumn'
 import RightColumn from './columns/right-column/RightColumn'
 
-
 interface PatientFormProps {
     form: UseFormReturn<PatientFormInputs>
     reset: UseFormReset<PatientFormInputs>
     handleSubmit: UseFormHandleSubmit<PatientFormInputs>
     onSubmit: (data: PatientFormInputs) => Promise<void>
+    isEdit?: boolean
 }
 
-export default function PatientForm({ form, reset, handleSubmit, onSubmit }: PatientFormProps) {
+export default function PatientForm({
+    form,
+    reset,
+    handleSubmit,
+    onSubmit,
+    isEdit = false,
+}: PatientFormProps) {
     const {
         control,
         watch,
@@ -63,7 +69,9 @@ export default function PatientForm({ form, reset, handleSubmit, onSubmit }: Pat
             if (!sex || sex === 'other') return true
             return item.gender === sex
         }
-        const validKnown = ([...AVAILABLE_DISEASES_LIST.solid, ...AVAILABLE_DISEASES_LIST.blood] as DiseaseItem[])
+        const validKnown = (
+            [...AVAILABLE_DISEASES_LIST.solid, ...AVAILABLE_DISEASES_LIST.blood] as DiseaseItem[]
+        )
             .filter(allowed)
             .map((d) => d.label)
         const next = (selectedDiseases || []).filter(
@@ -104,10 +112,10 @@ export default function PatientForm({ form, reset, handleSubmit, onSubmit }: Pat
             >
                 <div className="flex w-full flex-col gap-6 md:flex-row">
                     {/* LEFT COLUMN */}
-                    <LeftColumn form={form} />
+                    <LeftColumn form={form} isEdit={isEdit} />
 
                     {/* ======================= MIDDLE COLUMN ======================= */}
-                    <MiddleColumn form={form} clearGenderIncompatible={clearGenderIncompatible} />
+                    <MiddleColumn form={form} clearGenderIncompatible={clearGenderIncompatible} isEdit={isEdit} />
 
                     {/* ======================= RIGHT COLUMN ======================= */}
                     <RightColumn
@@ -119,6 +127,7 @@ export default function PatientForm({ form, reset, handleSubmit, onSubmit }: Pat
                         toggleCustomDisease={toggleCustomDisease}
                         customDisease={customDisease}
                         updateCustomDisease={updateCustomDisease}
+                        isEdit={isEdit}
                     />
                 </div>
                 <div className="mt-6 flex justify-between gap-2">
@@ -131,7 +140,7 @@ export default function PatientForm({ form, reset, handleSubmit, onSubmit }: Pat
                         <X className="h-4 w-4" /> Clear
                     </Button>
                     <Button type="submit" className="h-12 w-[80%]">
-                        Save
+                        {isEdit ? 'Update' : 'Save'}
                     </Button>
                 </div>
             </form>

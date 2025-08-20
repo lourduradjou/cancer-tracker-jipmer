@@ -13,6 +13,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { FirebaseError } from 'firebase/app'
+import { useAuth } from '@/contexts/AuthContext'
+import { useEffect } from 'react'
 
 const loginSchema = z.object({
     email: z
@@ -32,6 +34,22 @@ type LoginFormInputs = z.infer<typeof loginSchema>
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
+    const { user, role, isLoadingAuth } = useAuth()
+    const router = useRouter()
+
+    useEffect(() => {
+        if (!isLoadingAuth && user && role) {
+            const roleRoutes: Record<string, string> = {
+                admin: '/admin',
+                asha: '/asha',
+                nurse: '/nurse',
+                doctor: '/doctor',
+            }
+
+            const targetRoute = roleRoutes[role] || '/dashboard'
+            router.push(targetRoute)
+        }
+    }, [user, role, isLoadingAuth, router])
 
     const {
         register,
@@ -52,7 +70,7 @@ export default function LoginPage() {
 
             // Perform Firebase Authentication
             await signInWithEmailAndPassword(auth, data.email.toLowerCase(), data.password)
-            toast.success('Login successful! Redirecting...')
+
             reset()
         } catch (error) {
             console.error('Login error:', error)

@@ -13,6 +13,7 @@ type RightColumnProps = {
     toggleCustomDisease: (checked: boolean) => void
     customDisease: string
     updateCustomDisease: (value: string) => void
+    isEdit?: boolean
 }
 
 export default function RightColumn({
