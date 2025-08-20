@@ -7,14 +7,17 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { importData } from '@/lib/importUtils'
 import { exportToCSV, exportToExcel } from '@/lib/patient/export'
-import { usePathname } from 'next/navigation'
-import AddPatientDialog from '../forms/patient/AddPatientDialog'
-import PatientFilter from './PatientFilter'
 import { generateDiseasePDF } from '@/lib/patient/generateDiseaseReport'
+import { useQueryClient } from '@tanstack/react-query'
+import { usePathname } from 'next/navigation'
 import AddHospitalDialog from '../forms/hospital/AddHospitalDialog'
 import AddUserDialog from '../forms/user/AddUserDialog'
 import { SearchInput } from '../search/SearchInput'
+import PatientFilter from './PatientFilter'
+import GenericPatientDialog from '../forms/patient/GenericPatientDialog'
+
 
 export default function GenericToolbar({
     activeTab,
@@ -29,6 +32,8 @@ export default function GenericToolbar({
 }) {
     const pathname = usePathname()
     let dashboardTitleContent
+    const queryClient = useQueryClient()
+
     if (pathname.includes('/admin')) {
         dashboardTitleContent = 'Admin DashBoard'
     } else {
@@ -58,14 +63,30 @@ export default function GenericToolbar({
                     />
                 )}
                 {activeTab === 'patients' && <PatientFilter />}
-                {activeTab === 'patients' && <AddPatientDialog />}
+                {activeTab === 'patients' && <GenericPatientDialog mode="add" />}
                 {activeTab === 'hospitals' && <AddHospitalDialog />}
                 {['ashas', 'doctors', 'nurses'].includes(activeTab) && (
                     <AddUserDialog user={activeTab} />
                 )}
 
-                {/* //Todo: import button to handle multiple data to be inserted in the db */}
+                {/* Import Button */}
+                <div>
+                    <input
+                        id="file-upload"
+                        type="file"
+                        accept=".csv, .xlsx, .xls"
+                        className="hidden"
+                        onChange={(e) => importData(e, activeTab, queryClient)}
+                    />
+                    <Button
+                        variant="outline"
+                        onClick={() => document.getElementById('file-upload')?.click()}
+                    >
+                        Import
+                    </Button>
+                </div>
 
+                {/* Export Dropdown */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button className="cursor-pointer" variant="outline">

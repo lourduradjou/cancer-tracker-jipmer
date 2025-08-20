@@ -10,7 +10,7 @@ import {
     RATION_COLORS_OPTIONS,
     SEX_OPTIONS,
 } from '@/constants/form-fields'
-import { usePatientFilterStore } from '@/store/usePatientFilterStore'
+import { usePatientFilterStore } from '@/store/patient-filter-store'
 import { ListFilter } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 

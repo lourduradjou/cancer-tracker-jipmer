@@ -9,9 +9,10 @@ import PhoneNumbersField from './fields/PhoneNumbersField'
 
 interface LeftColumnProps {
     form: UseFormReturn<PatientFormInputs>
+    isEdit?: boolean
 }
 
-export default function LeftColumn({ form }: LeftColumnProps) {
+export default function LeftColumn({ form, isEdit = false }: LeftColumnProps) {
     return (
         <div className="flex flex-col gap-4 md:w-1/3">
             <NameField form={form} />

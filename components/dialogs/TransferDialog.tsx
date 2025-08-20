@@ -13,7 +13,8 @@ import {
     DialogContent,
     DialogFooter,
     DialogHeader,
-    DialogTitle
+    DialogTitle,
+    DialogTrigger,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { db } from '@/firebase'
@@ -68,14 +69,16 @@ export default function TransferDialog({
 
     return (
         <Dialog>
-            <Button
-                size="icon"
-                variant="outline"
-                className="cursor-pointer"
-                title="Transfer Patient"
-            >
-                <Repeat2 className="h-4 w-4" />
-            </Button>
+            <DialogTrigger asChild>
+                <Button
+                    size="icon"
+                    variant="outline"
+                    className="cursor-pointer"
+                    title="Transfer Patient"
+                >
+                    <Repeat2 className="h-4 w-4" />
+                </Button>
+            </DialogTrigger>
 
             <DialogContent>
                 <DialogHeader>

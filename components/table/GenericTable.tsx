@@ -13,23 +13,22 @@ import { useFilteredPatients } from '@/hooks/useFilteredPatients'
 import { usePagination } from '@/hooks/usePagination'
 
 import DeleteEntityDialog from '@/components/dialogs/DeleteEntityDialog'
-import { useTableData } from '@/hooks/useTableData'
-import { Hospital } from '@/schema/hospital'
-import { Patient } from '@/schema/patient'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import ViewDetailsDialog from '../dialogs/ViewDetailsDialog'
-import GenericRow from './GenericRow'
-import GenericToolbar from './GenericToolbar'
-
 import { hospitalFields } from '@/constants/hospital'
 import { patientFields } from '@/constants/patient'
 import { SEARCH_FIELDS } from '@/constants/search-bar'
 import { userFields } from '@/constants/user'
 import { useSearch } from '@/hooks/useSearch'
 import { useStats } from '@/hooks/useStats'
-import GenericPagination from './GenericPagination'
+import { useTableData } from '@/hooks/useTableData'
+import { Hospital } from '@/schema/hospital'
+import { Patient } from '@/schema/patient'
 import { UserDoc } from '@/schema/user'
-
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import ViewDetailsDialog from '../dialogs/ViewDetailsDialog'
+import GenericPagination from './GenericPagination'
+import GenericRow from './GenericRow'
+import GenericToolbar from './GenericToolbar'
+import { useTableStore, isPatient, isHospital, isUserDoc } from '@/store/table-store'
 export default function GenericTable({
     headers,
     activeTab,
@@ -41,9 +40,9 @@ export default function GenericTable({
     activeTab: 'ashas' | 'doctors' | 'nurses' | 'hospitals' | 'patients'
 }) {
     const stableHeaders = useMemo(() => headers, [headers])
-    console.log('Hi from tables')
     const [rowsPerPage, setRowsPerPage] = useState(8) // Initial default
     const { user, role, orgId, isLoadingAuth } = useAuth()
+    const { selectedRow, modal, setSelectedRow, openModal, closeModal } = useTableStore()
 
     const queryProps = {
         orgId,
@@ -62,7 +61,7 @@ export default function GenericTable({
 
     const fieldsToDisplay = fieldsMap[activeTab]
 
-    const { data } = useTableData(queryProps)
+    const { data = [] } = useTableData(queryProps) ?? {}
 
     useEffect(() => {
         let resizeTimeout: NodeJS.Timeout
@@ -89,10 +88,6 @@ export default function GenericTable({
             clearTimeout(resizeTimeout)
         }
     }, [])
-
-    const [selectedRowData, setSelectedRowData] = useState<any | null>(null)
-    const [showView, setShowView] = useState(false)
-    const [showDelete, setShowDelete] = useState(false)
 
     const searchFields = SEARCH_FIELDS[activeTab]
 
@@ -135,37 +130,44 @@ export default function GenericTable({
         setCurrentPage(1)
     }, [filteredPatients.length, setCurrentPage])
 
-    interface RowDataType {
+    // Replace RowDataType with the actual TabDataMap type
+    // In GenericTable component - REPLACE the callback section with this:
+
+    type RowDataBase = {
         id: string | number
-        [key: string]: any
+        [key: string]: unknown
     }
 
-    type HandleViewFn = (d: RowDataType) => void
+    type HandleViewFn = (d: RowDataBase) => void
 
-    const handleView: HandleViewFn = useCallback((d) => {
-        setSelectedRowData(d)
-        setShowView(true)
-    }, [])
+    const handleView: HandleViewFn = useCallback(
+        (row) => {
+            setSelectedRow(row as TabDataMap[typeof activeTab])
+            openModal('view')
+        },
+        [activeTab, setSelectedRow, openModal]
+    )
 
-    interface HandleUpdateFn {
-        (d: RowDataType): void
-    }
+    type HandleUpdateFn = (d: RowDataBase) => void
 
-    const [showUpdate, setShowUpdate] = useState<boolean>(false)
+    const handleUpdate: HandleUpdateFn = useCallback(
+        (row) => {
+            setSelectedRow(row as TabDataMap[typeof activeTab])
+            openModal('update')
+        },
+        [activeTab, setSelectedRow, openModal]
+    )
 
-    const handleUpdate: HandleUpdateFn = useCallback((d) => {
-        setSelectedRowData(d)
-        setShowUpdate(true)
-    }, [])
+    type HandleDeleteFn = (d: RowDataBase) => void
 
-    interface HandleDeleteFn {
-        (d: RowDataType): void
-    }
+    const handleDelete: HandleDeleteFn = useCallback(
+        (row) => {
+            setSelectedRow(row as TabDataMap[typeof activeTab])
+            openModal('delete')
+        },
+        [activeTab, setSelectedRow, openModal]
+    )
 
-    const handleDelete: HandleDeleteFn = useCallback((d) => {
-        setSelectedRowData(d)
-        setShowDelete(true)
-    }, [])
     return (
         <div className="flex min-h-screen flex-col">
             <GenericToolbar
@@ -201,7 +203,7 @@ export default function GenericTable({
                         paginatedData.map((data, index) => (
                             <GenericRow
                                 isPatientTab={isPatientTab}
-                                key={data.id}
+                                key={index}
                                 rowData={data}
                                 index={(currentPage - 1) * rowsPerPage + index}
                                 onView={handleView}
@@ -233,35 +235,31 @@ export default function GenericTable({
                 />
             </div>
 
-            {/* Modals and Dialogs */}
-            {selectedRowData && (
+            {selectedRow && modal === 'view' && (
                 <>
                     <ViewDetailsDialog
-                        open={showView}
-                        onOpenChange={setShowView}
-                        // Pass the selected data directly
-                        rowData={selectedRowData}
+                        open={modal === 'view'}
+                        onOpenChange={(open) => !open && closeModal()}
+                        rowData={selectedRow}
                         fieldsToDisplay={fieldsToDisplay}
                     />
-                    {/* <UpdateDetailsDialog
-                        open={showUpdate}
-                        onOpenChange={setShowUpdate}
-                        // rowData={selectedRowData}
-                        // fieldsToDisplay={fieldsToDisplay}
-                    /> */}
+                    {/* <GenericPatientDialog
+                            mode='edit'
+                        /> */}
                 </>
             )}
             <DeleteEntityDialog
-                open={showDelete} // <-- control it explicitly
-                entity={selectedRowData}
+                open={modal === 'delete'} // <-- control it explicitly
+                entity={selectedRow}
                 collectionName={activeTab}
                 displayField="name"
-                onClose={() => setShowDelete(false)}
-                onDeleted={(deletedId) => {
-                    setShowDelete(false)
-                    setSelectedRowData(null)
-                    console.log('Deleted:', deletedId)
-                }}
+                onClose={closeModal}
+                onDeleted={() => closeModal()}
+                // onDeleted={(deletedId) => {
+                //     setShowDelete(false)
+                //     setSelectedRowData(null)
+                //     console.log('Deleted:', deletedId)
+                // }}
             />
         </div>
     )

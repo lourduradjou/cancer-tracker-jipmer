@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input'
 
 interface NameFieldProps {
     form: UseFormReturn<PatientFormInputs>
+    isEdit?: boolean
 }
 
-export default function NameField({ form }: NameFieldProps) {
+export default function NameField({ form, isEdit = false }: NameFieldProps) {
     const { control } = form
     return (
         <FormField

@@ -15,6 +15,7 @@ const AuthContext = createContext<AuthState | undefined>(undefined)
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const router = useRouter()
     const queryClient = useQueryClient()
+    const currentPath = usePathname()
 
     const [firebaseUser, setFirebaseUser] = useState<FirebaseAuthUser | null>(null)
     const [initialAuthLoading, setInitialAuthLoading] = useState(true)
@@ -48,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             return userSnap.docs[0].data() as UserDoc
         },
         enabled: !!firebaseUser && !initialAuthLoading,
-        staleTime: 5 * 60 * 1000, //caching user role for 5 minutes
+        staleTime: 5 * 60 * 1000,
         retry: false,
     })
 
@@ -56,11 +57,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const role = userDoc?.role || null
     const orgId = userDoc?.orgId || null
     const error = isErrorUserRole ? userRoleError : null
-    const currentPath = usePathname()
 
+    // Redirect unauthenticated users from protected routes
     useEffect(() => {
-        const publicPaths = ['/login', '/', '/home'] // Add other public paths if any
-
+        const publicPaths = ['/login', '/', '/home']
         const isPublicPath = publicPaths.some(
             (path) => path === currentPath || (path.endsWith('/') && currentPath.startsWith(path))
         )
@@ -69,8 +69,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             toast.error('You must be logged in to view this page.')
             router.push('/login')
         }
-    }, [initialAuthLoading, firebaseUser, router, currentPath]) // currentPath must be in dependencies!
+    }, [initialAuthLoading, firebaseUser, router, currentPath])
 
+    // Redirect authenticated users from login to their role-specific pages
+    useEffect(() => {
+        if (!initialAuthLoading && firebaseUser && userDoc && currentPath === '/login') {
+            const roleRoutes: Record<string, string> = {
+                'admin': '/admin',
+                'asha': '/asha',
+                'nurse': '/nurse',
+                'doctor': '/doctor',
+                // Add other roles as needed
+            }
+
+            const targetRoute = roleRoutes[userDoc.role] || '/dashboard'
+            router.push(targetRoute)
+            toast.success(`Welcome back! Redirecting to your ${userDoc.role} dashboard.`)
+        }
+    }, [initialAuthLoading, firebaseUser, userDoc, currentPath, router])
+
+    // Handle user role errors
     useEffect(() => {
         if (isErrorUserRole && firebaseUser) {
             toast.error(error?.message || 'Failed to load user profile. Please log in again.')
@@ -103,6 +121,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
     const context = useContext(AuthContext)
     if (context === undefined) throw new Error('useAuth must be used within an AuthProvider')
-
     return context
 }
