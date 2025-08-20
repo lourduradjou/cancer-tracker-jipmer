@@ -1,167 +1,181 @@
-'use client'
+// 'use client'
 
-import PatientCard from '@/components/PatientCard'
-import Loading from '@/components/ui/loading'
-import { useAuth } from '@/contexts/AuthContext'
-import { db } from '@/firebase'
-import { useTableData } from '@/hooks/useTableData'
-import { Patient } from '@/schema/patient'
-import { useQueryClient } from '@tanstack/react-query'
-import { doc, Timestamp, updateDoc } from 'firebase/firestore'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+// import PatientCard from '@/components/PatientCard'
+// import Loading from '@/components/ui/loading'
+// import { useAuth } from '@/contexts/AuthContext'
+// import { db } from '@/firebase'
+// import { useTableData } from '@/hooks/useTableData'
+// import { Patient } from '@/schema/patient'
+// import { useQueryClient } from '@tanstack/react-query'
+// import { doc, Timestamp, updateDoc } from 'firebase/firestore'
+// import { useRouter } from 'next/navigation'
+// import { useEffect, useState } from 'react'
+// import { toast } from 'sonner'
 
-export default function AshaPage() {
-    const router = useRouter()
-    const queryClient = useQueryClient()
-    const { user, role, isLoadingAuth } = useAuth()
+// export default function AshaPage() {
+//     const router = useRouter()
+//     const queryClient = useQueryClient()
+//     const { user, role, isLoadingAuth } = useAuth()
 
-    const [saving, setSaving] = useState(false)
+//     const [saving, setSaving] = useState(false)
 
-    useEffect(() => {
-        if (!isLoadingAuth) {
-            if (!user) {
-                router.push('/login')
-                return
-            }
-            if (role !== 'asha') {
-                let redirectPath = '/login'
-                if (role === 'doctor') redirectPath = '/doctor'
-                else if (role === 'nurse') redirectPath = '/nurse'
-                toast.warning('You are not allowed to view this page')
-                router.push(redirectPath)
-            }
-        }
-    }, [isLoadingAuth, user, role, router])
+//     useEffect(() => {
+//         if (!isLoadingAuth) {
+//             if (!user) {
+//                 router.push('/login')
+//                 return
+//             }
+//             if (role !== 'asha') {
+//                 let redirectPath = '/login'
+//                 if (role === 'doctor') redirectPath = '/doctor'
+//                 else if (role === 'nurse') redirectPath = '/nurse'
+//                 toast.warning('You are not allowed to view this page')
+//                 router.push(redirectPath)
+//             }
+//         }
+//     }, [isLoadingAuth, user, role, router])
 
-    const {
-        data: patients,
-        isLoading: isLoadingPatients,
-        isError: isErrorPatients,
-        error: patientsError,
-    } = useTableData({ ashaEmail: user?.email || null, enabled: role === 'asha' })
 
-    // Handle input change in PatientCard
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, patientId: string) => {
-        const { name, value } = e.target
-        // When using React Query, you typically update the cached data directly
-        queryClient.setQueryData(
-            ['patients', { ashaEmail: user?.email }],
-            (oldPatients: Patient[] | undefined) =>
-                oldPatients?.map((p) => (p.id === patientId ? { ...p, [name]: value } : p)) || []
-        )
-    }
+//     // const {
+//     //     data: patients,
+//     //     isLoading: isLoadingPatients,
+//     //     isError: isErrorPatients,
+//     //     error: patientsError,
+//     // } = useTableData({ ashaEmail: user?.email || null, enabled: role === 'asha' })
 
-    const handleAddFollowUp = async (patientId: string, remark: string) => {
-        const now = Timestamp.now()
-        // const newFollowUp: FollowUp = {
-        //     date: now,
-        //     remarks: remark,
-        // }
+//     // Handle input change in PatientCard
+//     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, patientId: string) => {
+//         const { name, value } = e.target
+//         // When using React Query, you typically update the cached data directly
+//         queryClient.setQueryData(
+//             ['patients', { ashaEmail: user?.email }],
+//             (oldPatients: Patient[] | undefined) =>
+//                 oldPatients?.map((p) => (p.id === patientId ? { ...p, [name]: value } : p)) || []
+//         )
+//     }
 
-        try {
-            setSaving(true)
-            const patientDocRef = doc(db, 'patients', patientId)
+//     const handleAddFollowUp = async (patientId: string, remark: string) => {
+//         const now = Timestamp.now()
+//         // const newFollowUp: FollowUp = {
+//         //     date: now,
+//         //     remarks: remark,
+//         // }
 
-            const currentPatientsInCache = queryClient.getQueryData<Patient[]>([
-                'patients',
-                { ashaEmail: user?.email },
-            ])
+//         try {
+//             setSaving(true)
+//             const patientDocRef = doc(db, 'patients', patientId)
 
-            // Ensure currentPatientsInCache is an array before finding
-            const currentPatient = currentPatientsInCache?.find((p: Patient) => p.id === patientId)
+//             const currentPatientsInCache = queryClient.getQueryData<Patient[]>([
+//                 'patients',
+//                 { ashaEmail: user?.email },
+//             ])
 
-            if (!currentPatient) {
-                // Handle case where patient is not found in cache (e.g., fetch it explicitly if needed)
-                // For now, let's throw an error or handle gracefully
-                toast.error('Patient not found in local data. Please refresh.')
-                return
-            }
+//             // Ensure currentPatientsInCache is an array before finding
+//             const currentPatient = currentPatientsInCache?.find((p: Patient) => p.id === patientId)
 
-            // const updatedFollowUps = [...(currentPatient?.followUps || []), newFollowUp]
-            const updatedFollowUps = [...(currentPatient?.followUps || [])]
+//             if (!currentPatient) {
+//                 // Handle case where patient is not found in cache (e.g., fetch it explicitly if needed)
+//                 // For now, let's throw an error or handle gracefully
+//                 toast.error('Patient not found in local data. Please refresh.')
+//                 return
+//             }
 
-            await updateDoc(patientDocRef, {
-                followUps: updatedFollowUps,
-            })
+//             // const updatedFollowUps = [...(currentPatient?.followUps || []), newFollowUp]
+//             const updatedFollowUps = [...(currentPatient?.followUps || [])]
 
-            // Optimistic update + Invalidate to re-fetch fresh data
-            queryClient.setQueryData(
-                ['patients', { ashaEmail: user?.email }],
-                (oldPatients: Patient[] | undefined) =>
-                    oldPatients?.map((p) =>
-                        p.id === patientId ? { ...p, followUps: updatedFollowUps } : p
-                    ) || []
-            )
-            toast.success('Follow-up added successfully!')
-        } catch (error) {
-            console.error('Error adding follow-up:', error)
-            toast.error('Failed to add follow-up.')
-        } finally {
-            setSaving(false)
-        }
-    }
+//             await updateDoc(patientDocRef, {
+//                 followUps: updatedFollowUps,
+//             })
 
-    const handleSave = async (patientId: string) => {
-        setSaving(true)
-        try {
-            const patient = patients?.find((p) => p.id === patientId)
-            if (!patient) throw new Error('Patient not found in cache.')
+//             // Optimistic update + Invalidate to re-fetch fresh data
+//             queryClient.setQueryData(
+//                 ['patients', { ashaEmail: user?.email }],
+//                 (oldPatients: Patient[] | undefined) =>
+//                     oldPatients?.map((p) =>
+//                         p.id === patientId ? { ...p, followUps: updatedFollowUps } : p
+//                     ) || []
+//             )
+//             toast.success('Follow-up added successfully!')
+//         } catch (error) {
+//             console.error('Error adding follow-up:', error)
+//             toast.error('Failed to add follow-up.')
+//         } finally {
+//             setSaving(false)
+//         }
+//     }
 
-            const { id, ...patientData } = patient
-            const docRef = doc(db, 'patients', patientId)
+//     const handleSave = async (patientId: string) => {
+//         setSaving(true)
+//         try {
+//             const patient = patients?.find((p: any) => p.id === patientId)
+//             if (!patient) throw new Error('Patient not found in cache.')
 
-            await updateDoc(docRef, patientData)
-            toast.success('Patient updated successfully.')
-        } catch (error) {
-            console.error('Error updating patient:', error)
-            toast.error('Failed to update patient.')
-        } finally {
-            setSaving(false)
-        }
-    }
+//             const { id, ...patientData } = patient
+//             const docRef = doc(db, 'patients', patientId)
 
-    const showLoading = isLoadingAuth || isLoadingPatients
-    if (isErrorPatients) {
-        console.error('Failed to load patients for asha:', patientsError)
-        toast.error('Failed to load patient data.')
-        // Optionally, show a more specific error message or component
-    }
+//             await updateDoc(docRef, patientData)
+//             toast.success('Patient updated successfully.')
+//         } catch (error) {
+//             console.error('Error updating patient:', error)
+//             toast.error('Failed to update patient.')
+//         } finally {
+//             setSaving(false)
+//         }
+//     }
 
-    // If still loading auth or if not an ASHA (and redirection hasn't completed yet)
-    if (showLoading || role !== 'asha') {
-        return (
-            <main className="flex h-screen items-center justify-center">
-                <Loading />
-                <p className="text-gray-500">
-                    {isLoadingAuth ? 'Checking authentication...' : 'Loading your patients...'}
-                </p>
-            </main>
-        )
-    }
+//     const showLoading = isLoadingAuth || isLoadingPatients
+//     if (isErrorPatients) {
+//         console.error('Failed to load patients for asha:', patientsError)
+//         toast.error('Failed to load patient data.')
+//         // Optionally, show a more specific error message or component
+//     }
 
-    // Render UI
-    return (
-        <main className="mt-4 p-4">
-            <h1 className="mb-4 text-center text-xl font-bold">Your Assigned Patients</h1>
+//     // If still loading auth or if not an ASHA (and redirection hasn't completed yet)
+//     if (showLoading || role !== 'asha') {
+//         return (
+//             <main className="flex h-screen items-center justify-center">
+//                 <Loading />
+//                 <p className="text-gray-500">
+//                     {isLoadingAuth ? 'Checking authentication...' : 'Loading your patients...'}
+//                 </p>
+//             </main>
+//         )
+//     }
 
-            {patients?.length === 0 ? (
-                <p className="text-center text-sm">No patients assigned to you.</p>
-            ) : (
-                <div className="mx-auto flex max-w-[1400px] flex-col items-center gap-4 overflow-auto md:flex-row">
-                    {patients?.map((patient) => (
-                        <PatientCard
-                            key={patient.id}
-                            patient={patient as Patient}
-                            onChange={handleInputChange}
-                            onSave={handleSave}
-                            isSaving={saving}
-                            onAddFollowUp={handleAddFollowUp}
-                        />
-                    ))}
-                </div>
-            )}
-        </main>
-    )
+//     // Render UI
+//     return (
+//         <main className="mt-4 p-4">
+//             <h1 className="mb-4 text-center text-xl font-bold">Your Assigned Patients</h1>
+
+//             {patients?.length === 0 ? (
+//                 <p className="text-center text-sm">No patients assigned to you.</p>
+//             ) : (
+//                 <div className="mx-auto flex max-w-[1400px] flex-col items-center gap-4 overflow-auto md:flex-row">
+//                     {patients?.map((patient: any) => (
+//                         <PatientCard
+//                             key={patient.id}
+//                             patient={patient as Patient}
+//                             onChange={handleInputChange}
+//                             onSave={handleSave}
+//                             isSaving={saving}
+//                             onAddFollowUp={handleAddFollowUp}
+//                         />
+//                     ))}
+//                 </div>
+//             )}
+//         </main>
+//     )
+// }
+
+
+import React from 'react'
+
+const page = () => {
+  return (
+    <div>
+        Under construction
+    </div>
+  )
 }
+
+export default page
