@@ -1,4 +1,5 @@
 import { TypographyH2, TypographyMuted, TypographyP } from '@/components/ui/typography'
+import { Suspense } from 'react'
 
 export default function AboutPage() {
     return (

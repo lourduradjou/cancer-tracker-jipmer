@@ -10,6 +10,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+//creating an auth context to pass the auth state to all components in the website
 const AuthContext = createContext<AuthState | undefined>(undefined)
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -58,36 +59,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const orgId = userDoc?.orgId || null
     const error = isErrorUserRole ? userRoleError : null
 
-    // Redirect unauthenticated users from protected routes
-    useEffect(() => {
-        const publicPaths = ['/login', '/', '/home']
-        const isPublicPath = publicPaths.some(
-            (path) => path === currentPath || (path.endsWith('/') && currentPath.startsWith(path))
-        )
-
-        if (!initialAuthLoading && !firebaseUser && !isPublicPath) {
-            toast.error('You must be logged in to view this page.')
-            router.push('/login')
-        }
-    }, [initialAuthLoading, firebaseUser, router, currentPath])
-
-    // Redirect authenticated users from login to their role-specific pages
-    useEffect(() => {
-        if (!initialAuthLoading && firebaseUser && userDoc && currentPath === '/login') {
-            const roleRoutes: Record<string, string> = {
-                'admin': '/admin',
-                'asha': '/asha',
-                'nurse': '/nurse',
-                'doctor': '/doctor',
-                // Add other roles as needed
-            }
-
-            const targetRoute = roleRoutes[userDoc.role] || '/dashboard'
-            router.push(targetRoute)
-            toast.success(`Welcome back! Redirecting to your ${userDoc.role} dashboard.`)
-        }
-    }, [initialAuthLoading, firebaseUser, userDoc, currentPath, router])
-
     // Handle user role errors
     useEffect(() => {
         if (isErrorUserRole && firebaseUser) {
@@ -102,7 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return (
             <main className="flex h-screen flex-col items-center justify-center">
                 <Loading />
-                <p className="mt-4 text-gray-600">Checking authentication...</p>
+                <p className="mt-4 text-gray-600">Loading Please wait...</p>
             </main>
         )
     }

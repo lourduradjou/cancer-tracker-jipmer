@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuthStatus } from '@/hooks/useAuthStatus'
+import { useAuthStatus } from '@/hooks/auth/useAuthStatus'
 import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
 import Navbar from './Navbar'
