@@ -69,6 +69,7 @@ export const PatientSchema = z.object({
     stageOfTheCancer: z.string().optional(),
     reasonOfRemoval: z.string().optional(),
     treatmentDetails: z.string().optional(),
+    insurance: InsuranceSchema,
 })
 
 export type PatientFormInputs = z.infer<typeof PatientSchema>
