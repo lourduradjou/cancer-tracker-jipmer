@@ -19,7 +19,14 @@ type UsePatientsProps = {
     orgId?: string | null
     ashaEmail?: string | null | undefined
     enabled?: boolean
-    adminRequiredData?: 'ashas' | 'doctors' | 'nurses' | 'hospitals' | 'patients' | undefined
+    adminRequiredData?:
+        | 'ashas'
+        | 'doctors'
+        | 'nurses'
+        | 'hospitals'
+        | 'patients'
+        | 'removedPatients'
+        | undefined
 }
 
 export const useTableData = ({
@@ -78,14 +85,12 @@ export const useTableData = ({
     }
 
     if (adminRequiredData === 'patients') {
-        let queryKeyValue;
+        let queryKeyValue
         if (orgId) {
             queryKeyValue = ['patients', { orgId }]
-        }
-        else if (ashaEmail) {
+        } else if (ashaEmail) {
             queryKeyValue = ['patients', { ashaEmail }]
-        }
-        else {
+        } else {
             queryKeyValue = ['patients']
         }
 
@@ -116,6 +121,30 @@ export const useTableData = ({
                 })) as Patient[]
             },
             enabled: isPatientsEnabled,
+            staleTime: 60 * 1000,
+        })
+        return patientsQuery
+    }
+
+    if (adminRequiredData === 'removedPatients') {
+        let queryKeyValue
+
+        queryKeyValue = ['removedPatients']
+
+        const patientsQuery = useQuery<Patient[], Error>({
+            queryKey: queryKeyValue,
+
+            queryFn: async () => {
+                let removedPatientsQuery
+
+                removedPatientsQuery = query(collection(db, 'removedPatients'))
+
+                const removedPatientsSnap = await getDocs(removedPatientsQuery)
+                return removedPatientsSnap.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                })) as Patient[]
+            },
             staleTime: 60 * 1000,
         })
         return patientsQuery

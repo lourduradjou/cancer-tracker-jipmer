@@ -2,7 +2,7 @@ import * as XLSX from 'xlsx'
 import Papa from 'papaparse'
 import { collection, addDoc } from 'firebase/firestore'
 import { db } from '@/firebase' // adjust path to your firebase config
-import { getCollectionName } from '@/lib/getCollectionName'
+import { getCollectionName } from '@/lib/common/getCollectionName'
 import { PatientSchema } from '@/schema/patient'
 import { HospitalSchema } from '@/schema/hospital'
 import { UserSchema } from '@/schema/user'
@@ -85,7 +85,7 @@ const uploadToFirestore = async (rows: any[], activeTab: string, queryClient: an
       const errorSheet = XLSX.utils.json_to_sheet(
         errors?.map(err => ({
           Row: err.row,
-        //   Issues: err.issues.join("; "), 
+        //   Issues: err.issues.join("; "),
           ...err.rowData, // include original row fields
         }))
       )
