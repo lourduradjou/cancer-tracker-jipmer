@@ -25,7 +25,7 @@ export default function GenericToolbar({
     searchTerm,
     setSearchTerm,
 }: {
-    activeTab: 'ashas' | 'hospitals' | 'doctors' | 'nurses' | 'patients'
+    activeTab: 'ashas' | 'hospitals' | 'doctors' | 'nurses' | 'patients' | 'removedPatients'
     getExportData: () => any[]
     searchTerm: string
     setSearchTerm: (val: string) => void

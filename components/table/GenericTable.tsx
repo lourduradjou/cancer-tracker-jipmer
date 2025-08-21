@@ -9,17 +9,17 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { useAuth } from '@/contexts/AuthContext'
-import { useFilteredPatients } from '@/hooks/useFilteredPatients'
-import { usePagination } from '@/hooks/usePagination'
+import { useFilteredPatients } from '@/hooks/table/useFilteredPatients'
+import { usePagination } from '@/hooks/table/usePagination'
 
 import DeleteEntityDialog from '@/components/dialogs/DeleteEntityDialog'
 import { hospitalFields } from '@/constants/hospital'
 import { patientFields } from '@/constants/patient'
 import { SEARCH_FIELDS } from '@/constants/search-bar'
 import { userFields } from '@/constants/user'
-import { useSearch } from '@/hooks/useSearch'
-import { useStats } from '@/hooks/useStats'
-import { useTableData } from '@/hooks/useTableData'
+import { useSearch } from '@/hooks/table/useSearch'
+import { useStats } from '@/hooks/table/useStats'
+import { useTableData } from '@/hooks/table/useTableData'
 import { Hospital } from '@/schema/hospital'
 import { Patient } from '@/schema/patient'
 import { UserDoc } from '@/schema/user'
@@ -37,7 +37,7 @@ export default function GenericTable({
         name: string
         key: string
     }[]
-    activeTab: 'ashas' | 'doctors' | 'nurses' | 'hospitals' | 'patients'
+    activeTab: 'ashas' | 'doctors' | 'nurses' | 'hospitals' | 'patients' | 'removedPatients'
 }) {
     const stableHeaders = useMemo(() => headers, [headers])
     const [rowsPerPage, setRowsPerPage] = useState(8) // Initial default
@@ -57,6 +57,7 @@ export default function GenericTable({
         doctors: userFields,
         nurses: userFields,
         ashas: userFields,
+        removedPatients: patientFields,
     } as const
 
     const fieldsToDisplay = fieldsMap[activeTab]
@@ -104,6 +105,7 @@ export default function GenericTable({
         doctors: UserDoc
         nurses: UserDoc
         ashas: UserDoc
+        removedPatients: Patient
     }
 
     type ActiveDataType = TabDataMap[typeof activeTab] // infer based on activeTab

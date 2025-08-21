@@ -15,6 +15,7 @@ import { z } from 'zod'
 import { FirebaseError } from 'firebase/app'
 import { useAuth } from '@/contexts/AuthContext'
 import { useEffect } from 'react'
+import Link from 'next/link'
 
 const loginSchema = z.object({
     email: z
@@ -40,10 +41,10 @@ export default function LoginPage() {
     useEffect(() => {
         if (!isLoadingAuth && user && role) {
             const roleRoutes: Record<string, string> = {
-                admin: '/admin',
-                asha: '/asha',
-                nurse: '/nurse',
-                doctor: '/doctor',
+                admin: '/compass/admin',
+                asha: '/comapass/asha',
+                nurse: '/compass/nurse',
+                doctor: '/compass/doctor',
             }
 
             const targetRoute = roleRoutes[role] || '/dashboard'
@@ -125,7 +126,9 @@ export default function LoginPage() {
                     className="bg-background w-full max-w-md space-y-6 rounded-lg p-6 opacity-90 shadow-md backdrop-blur-sm"
                 >
                     <h1 className="text-center text-2xl font-bold">
-                        <span className="text-green-600">JIPMER</span> LOGIN
+                        <div>
+                            <span className="text-green-600">JIPMER</span> LOGIN
+                        </div>
                     </h1>
 
                     {/* Email Input */}
@@ -175,6 +178,12 @@ export default function LoginPage() {
                     >
                         {loading ? 'Signing In...' : 'Sign In'}
                     </Button>
+
+                    <Link href="/home" >
+                        <p className="text-center cursor-pointer text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                            Click to go home
+                        </p>
+                    </Link>
                 </form>
             </div>
         </section>

@@ -1,7 +1,5 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-// Assuming Patient type is used elsewhere, if not, it can be removed
-// import { Patient } from '@/types/patient'
 
 type DiseaseStats = {
     [disease: string]: {
@@ -14,15 +12,12 @@ type DiseaseStats = {
 const getAgeGroupIndex = (age: number) => {
     if (age < 5) return 0
     if (age < 10) return 1
-    if (age < 15) return 2
-    if (age < 20) return 3
-    if (age < 25) return 4
-    if (age < 30) return 5
-    if (age < 35) return 6
-    if (age < 40) return 7
-    if (age < 45) return 8
-    if (age < 50) return 9
-    return 10
+    if (age < 20) return 2
+    if (age < 30) return 3
+    if (age < 40) return 4
+    if (age < 50) return 5
+    if (age < 60) return 6
+    return 7
 }
 
 export type PatientData = {
@@ -45,7 +40,7 @@ export type PatientData = {
 
 export function generateDiseasePDF(patients: PatientData[]) {
     const doc = new jsPDF()
-    const ageGroups = ['0-4', '5-9', '10-19', '20-29', '30-39', '40-49', '50+']
+    const ageGroups = ['<5', '<10', '<20', '<30', '<40', '<50', '<60', '60+']
     const diseaseStats: DiseaseStats = {}
 
     patients.forEach((p) => {
@@ -60,6 +55,7 @@ export function generateDiseasePDF(patients: PatientData[]) {
         const birthYear = new Date(p.dob).getFullYear()
         // Use the current year at the time of execution
         const currentYear = new Date().getFullYear()
+
         const age = currentYear - birthYear
         const ageIndex = getAgeGroupIndex(age)
 
@@ -79,9 +75,9 @@ export function generateDiseasePDF(patients: PatientData[]) {
 
             if (!diseaseStats[disease]) {
                 diseaseStats[disease] = {
-                    male: Array(11).fill(0),
-                    female: Array(11).fill(0),
-                    total: Array(11).fill(0),
+                    male: Array(8).fill(0),
+                    female: Array(8).fill(0),
+                    total: Array(8).fill(0),
                 }
             }
 
@@ -114,6 +110,6 @@ export function generateDiseasePDF(patients: PatientData[]) {
         headStyles: { fillColor: [0, 122, 255] },
         margin: { horizontal: 10 },
     })
-
-    doc.save('Disease_Report.pdf')
+    const currentDate = new Date().getDate()
+    doc.save(`Disease_Report_${currentDate}.pdf`)
 }

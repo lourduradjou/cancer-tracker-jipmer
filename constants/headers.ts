@@ -104,3 +104,22 @@ export const HOSPITAL_TABLE_HEADERS = [
         key: 'address',
     },
 ]
+
+export const REMOVED_PATIENT_TABLE_HEADERS = [
+    {
+        name: 'Patient Name',
+        key: 'name',
+    },
+    {
+        name: 'Contact Number',
+        key: 'contactNumber',
+    },
+    {
+        name: 'Address',
+        key: 'address',
+    },
+    {
+        name: 'Reason of Removal',
+        key: 'reasonOfRemoval',
+    }
+]

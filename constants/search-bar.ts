@@ -4,6 +4,7 @@ export const SEARCH_FIELDS = {
     doctors: ['name', 'email', 'phoneNumber'] as const,
     nurses: ['name', 'email', 'phoneNumber'] as const,
     ashas: ['name', 'email', 'phoneNumber'] as const,
+    removedPatients: ['name', 'aadhaarId', 'phoneNumber'] as const,
 } as const;
 
 // This type represents all entity names

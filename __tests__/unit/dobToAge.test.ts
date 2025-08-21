@@ -1,4 +1,4 @@
-import { dobToAgeUtil } from './dobToAge'
+import { dobToAgeUtil } from '../../lib/patient/dobToAge'
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest'
 
 describe('dobToAgeUtil', () => {

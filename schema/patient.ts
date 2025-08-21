@@ -19,6 +19,11 @@ export const PatientSchema = z.object({
         .string()
         .min(1, 'Name is required.')
         .max(100, "Name length can't exceed 100 characters"),
+    caregiverName: z
+        .string()
+        .min(1, 'Name is required.')
+        .max(100, "Name length can't exceed 100 characters")
+        .optional(),
     phoneNumber: z.array(z.string().optional()).optional(),
     sex: z.enum(['male', 'female', 'other'], {
         message: 'Please select a sex.',
@@ -30,6 +35,7 @@ export const PatientSchema = z.object({
         .max(120, 'Age cannot exceed 120.')
         .optional(),
     address: z.string().min(1, 'Address is required.'),
+    religion: z.string().optional(),
     aadhaarId: z.string().optional(),
     rationCardColor: z.enum(['red', 'yellow', 'none']).optional(),
     diseases: z.array(z.string()).min(1, 'At least one disease is required.'),
@@ -47,12 +53,23 @@ export const PatientSchema = z.object({
     aabhaId: z.string().optional(),
     diagnosedDate: z.string().optional(),
     diagnosedYearsAgo: z.number().optional(),
-    insurance: InsuranceSchema.optional(),
+    // new fields after second meet
+    hospitalRegistrationDate: z.string().optional(),
+    treatmentStartDate: z.string().optional(),
+    treatmentEndDate: z.string().optional(),
+    biopsyNumber: z.string().optional(),
     transferred: z.boolean().optional(),
     transferredFrom: z.string().optional(),
     // Fields for internal use
     hasAadhaar: z.boolean(),
     useAgeInstead: z.boolean(),
+    // additional fields after second meet
+    hbcrID: z.string(),
+    hospitalRegistrationId: z.string().optional(),
+    stageOfTheCancer: z.string().optional(),
+    reasonOfRemoval: z.string().optional(),
+    treatmentDetails: z.string().optional(),
+    insurance: InsuranceSchema,
 })
 
 export type PatientFormInputs = z.infer<typeof PatientSchema>
