@@ -1,6 +1,6 @@
 // exportUtils.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { exportToCSV, exportToExcel } from './export'
+import { exportToCSV, exportToExcel } from '../../lib/patient/export'
 import { saveAs } from 'file-saver'
 
 vi.mock('file-saver', () => ({
