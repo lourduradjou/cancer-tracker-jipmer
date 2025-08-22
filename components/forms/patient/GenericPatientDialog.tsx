@@ -54,6 +54,7 @@ export default function GenericPatientDialog({
             status: 'Alive',
             hasAadhaar: true,
             useAgeInstead: false,
+            suspectedCase: false,
         },
     })
 
@@ -138,7 +139,7 @@ export default function GenericPatientDialog({
                 {trigger || defaultTrigger}
             </DialogTrigger>
 
-            <DialogContent onInteractOutside={(e) => e.preventDefault()} className="min-w-[1000px]">
+            <DialogContent onInteractOutside={(e) => e.preventDefault()} className="min-w-[1200px]">
                 <DialogHeader>
                     <DialogTitle>
                         {isEdit ? 'Update Patient Details' : 'Add New Patient Details'}

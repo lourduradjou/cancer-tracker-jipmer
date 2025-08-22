@@ -29,6 +29,7 @@ import GenericPagination from './GenericPagination'
 import GenericRow from './GenericRow'
 import GenericToolbar from './GenericToolbar'
 import { useTableStore, isPatient, isHospital, isUserDoc } from '@/store/table-store'
+import { getCollectionName } from '@/lib/common/getCollectionName'
 export default function GenericTable({
     headers,
     activeTab,
@@ -205,6 +206,7 @@ export default function GenericTable({
                         paginatedData.map((data, index) => (
                             <GenericRow
                                 isPatientTab={isPatientTab}
+                                isRemovedPatientsTab={activeTab === 'removedPatients'}
                                 key={index}
                                 rowData={data}
                                 index={(currentPage - 1) * rowsPerPage + index}
@@ -251,17 +253,10 @@ export default function GenericTable({
                 </>
             )}
             <DeleteEntityDialog
-                open={modal === 'delete'} // <-- control it explicitly
-                entity={selectedRow}
-                collectionName={activeTab}
-                displayField="name"
+                open={modal === 'delete'}
+                entityData={selectedRow}
+                collectionName={activeTab} // 'patients' | 'hospitals' | 'doctors' | 'nurses' | 'ashas' | 'removedPatients'
                 onClose={closeModal}
-                onDeleted={() => closeModal()}
-                // onDeleted={(deletedId) => {
-                //     setShowDelete(false)
-                //     setSelectedRowData(null)
-                //     console.log('Deleted:', deletedId)
-                // }}
             />
         </div>
     )

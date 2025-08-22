@@ -10,7 +10,7 @@ type RightColumnProps = {
     isEdit?: boolean
 }
 
-export default function RightColumn({ form, isEdit = false }: RightColumnProps) {
+export default function ColumnThree({ form, isEdit = false }: RightColumnProps) {
     const { watch, setValue, control } = form
     const selectedDiseases: string[] = watch('diseases') || []
 
