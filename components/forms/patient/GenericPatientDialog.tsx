@@ -39,6 +39,8 @@ export default function GenericPatientDialog({
         resolver: zodResolver(PatientSchema),
         defaultValues: {
             name: '',
+            caregiverName: '',
+            hbcrID: '',
             phoneNumber: [''],
             sex: undefined,
             dob: '',

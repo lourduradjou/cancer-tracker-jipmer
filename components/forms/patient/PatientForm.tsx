@@ -2,7 +2,7 @@
 
 import { X } from 'lucide-react'
 import { useRef } from 'react'
-import { useFieldArray, UseFormHandleSubmit, UseFormReset, UseFormReturn } from 'react-hook-form'
+import { UseFormHandleSubmit, UseFormReset, UseFormReturn } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 
@@ -31,75 +31,8 @@ export default function PatientForm({
     isEdit = false,
 }: PatientFormProps) {
     const {
-        control,
-        watch,
-        setValue,
         formState: { errors },
     } = form
-
-    // ------------------- Aadhaar (3-part UI, single field in form: aadhaarId) -------------------
-    const aadhaarId = watch('aadhaarId') || ''
-
-    console.log('see my')
-
-    const clamp12 = (s: string) => (s || '').replace(/\D/g, '').slice(0, 12)
-    const getPart = (idx: 0 | 1 | 2) => clamp12(aadhaarId).slice(idx * 4, idx * 4 + 4)
-
-    const aadhaarRefs = useRef<Array<HTMLInputElement | null>>([])
-    // ------------------- Sex + diseases logic -------------------
-    const sex = watch('sex') as 'male' | 'female' | 'other' | undefined
-    const selectedDiseases: string[] = watch('diseases') || []
-
-    const allKnownLabels = new Set(
-        [...AVAILABLE_DISEASES_LIST.solid, ...AVAILABLE_DISEASES_LIST.blood].map((d) => d.label)
-    )
-
-    const toggleDisease = (label: string, checked: boolean) => {
-        const next = checked
-            ? Array.from(new Set([...(selectedDiseases || []), label]))
-            : (selectedDiseases || []).filter((d) => d !== label)
-        setValue('diseases', next, { shouldDirty: true, shouldValidate: true })
-    }
-
-    const clearGenderIncompatible = () => {
-        // if sex changes, drop diseases that are gender-specific to the other sex
-        type DiseaseItem = { label: string; gender?: 'male' | 'female' }
-        const allowed = (item: DiseaseItem) => {
-            if (!item.gender) return true
-            if (!sex || sex === 'other') return true
-            return item.gender === sex
-        }
-        const validKnown = (
-            [...AVAILABLE_DISEASES_LIST.solid, ...AVAILABLE_DISEASES_LIST.blood] as DiseaseItem[]
-        )
-            .filter(allowed)
-            .map((d) => d.label)
-        const next = (selectedDiseases || []).filter(
-            (d) => !allKnownLabels.has(d) || validKnown.includes(d)
-        )
-        setValue('diseases', next, { shouldDirty: true })
-    }
-
-    // ------------------- Custom disease entry (optional) -------------------
-    const customDisease = (selectedDiseases || []).find((d) => !allKnownLabels.has(d)) || ''
-    const isCustomDiseaseSelected = Boolean(customDisease)
-
-    const toggleCustomDisease = (checked: boolean) => {
-        if (!checked) {
-            const next = (selectedDiseases || []).filter((d) => allKnownLabels.has(d))
-            setValue('diseases', next, { shouldDirty: true })
-        } else {
-            // add empty placeholder to let the input control the value
-            setValue('diseases', [...(selectedDiseases || []), ''], { shouldDirty: true })
-        }
-    }
-
-    const updateCustomDisease = (value: string) => {
-        const keepKnown = (selectedDiseases || []).filter((d) => allKnownLabels.has(d))
-        const next = value ? [...keepKnown, value] : keepKnown
-        setValue('diseases', next, { shouldDirty: true })
-    }
-
     console.log('Form errors:', errors)
 
     // ---------- UI ----------
@@ -114,21 +47,11 @@ export default function PatientForm({
                     {/* LEFT COLUMN */}
                     <LeftColumn form={form} isEdit={isEdit} />
 
-                    {/* ======================= MIDDLE COLUMN ======================= */}
-                    <MiddleColumn form={form} clearGenderIncompatible={clearGenderIncompatible} isEdit={isEdit} />
+                    {/* MIDDLE COLUMN */}
+                    <MiddleColumn form={form} isEdit={isEdit} />
 
-                    {/* ======================= RIGHT COLUMN ======================= */}
-                    <RightColumn
-                        form={form}
-                        sex={sex}
-                        selectedDiseases={selectedDiseases}
-                        toggleDisease={toggleDisease}
-                        isCustomDiseaseSelected={isCustomDiseaseSelected}
-                        toggleCustomDisease={toggleCustomDisease}
-                        customDisease={customDisease}
-                        updateCustomDisease={updateCustomDisease}
-                        isEdit={isEdit}
-                    />
+                    {/* RIGHT COLUMN */}
+                    <RightColumn form={form} isEdit={isEdit} />
                 </div>
                 <div className="mt-6 flex justify-between gap-2">
                     <Button

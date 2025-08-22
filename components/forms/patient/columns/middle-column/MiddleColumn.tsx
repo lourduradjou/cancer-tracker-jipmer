@@ -7,12 +7,11 @@ import StatusSelect from './fields/StatusSelect'
 
 type MiddleColumnProps = {
     form: UseFormReturn<any>
-    clearGenderIncompatible: () => void
     isEdit?: boolean
 }
 
-export default function MiddleColumn({ form, clearGenderIncompatible }: MiddleColumnProps) {
-    const { register, control, watch } = form
+export default function MiddleColumn({ form}: MiddleColumnProps) {
+    const { register, control } = form
 
     return (
         <div className="mx-1 flex flex-col gap-4 border-x-2 px-4 md:w-1/3">
@@ -26,7 +25,7 @@ export default function MiddleColumn({ form, clearGenderIncompatible }: MiddleCo
             <DobOrAgeField form={form} />
 
             {/* Sex */}
-            <SexSelect control={control} clearGenderIncompatible={clearGenderIncompatible} />
+            <SexSelect control={control} />
 
             {/* Status */}
             <StatusSelect control={control} />
