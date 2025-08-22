@@ -44,6 +44,8 @@ export default function PatientForm({
 
                     {/* MIDDLE COLUMN */}
                     <MiddleColumn form={form} isEdit={isEdit} />
+                    {/* MIDDLE COLUMN */}
+                    <MiddleColumn form={form} isEdit={isEdit} />
 
                     {/* RIGHT COLUMN */}
                     <RightColumn form={form} isEdit={isEdit} />

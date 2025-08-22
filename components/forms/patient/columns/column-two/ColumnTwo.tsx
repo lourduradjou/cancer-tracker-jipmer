@@ -26,6 +26,7 @@ export default function ColumnTwo({ form}: MiddleColumnProps) {
 
             {/* Sex */}
             <SexSelect control={control} />
+            <SexSelect control={control} />
 
             {/* Status */}
             <StatusSelect control={control} />
