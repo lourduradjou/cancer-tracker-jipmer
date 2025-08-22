@@ -5,11 +5,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Checkbox } from '@/components/ui/checkbox'
 import { cn } from '@/lib/utils'
 import { AVAILABLE_DISEASES_LIST } from '@/constants/diseases'
+import { useFormContext } from 'react-hook-form'
 
 type DiseaseMultiSelectProps = {
     sex: 'male' | 'female' | 'other' | undefined
     selectedDiseases: string[]
-    toggleDisease: (label: string, checked: boolean) => void
     isCustomDiseaseSelected: boolean
     toggleCustomDisease: (checked: boolean) => void
     customDisease: string
@@ -19,12 +19,18 @@ type DiseaseMultiSelectProps = {
 export default function DiseaseMultiSelect({
     sex,
     selectedDiseases,
-    toggleDisease,
     isCustomDiseaseSelected,
     toggleCustomDisease,
     customDisease,
     updateCustomDisease,
 }: DiseaseMultiSelectProps) {
+    const { setValue } = useFormContext()
+    const toggleDisease = (label: string, checked: boolean) => {
+        const next = checked
+            ? Array.from(new Set([...(selectedDiseases || []), label]))
+            : (selectedDiseases || []).filter((d) => d !== label)
+        setValue('diseases', next, { shouldDirty: true, shouldValidate: true })
+    }
     return (
         <Popover>
             <PopoverTrigger asChild>
