@@ -1,11 +1,11 @@
 // components/GenericRow.tsx
 'use client'
-import { Eye, Pencil, Trash2 } from 'lucide-react'
+import { Eye, Pencil, Trash2, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { db } from '@/firebase'
 import { dobToAgeUtil } from '@/lib/patient/dobToAge'
-import { doc, updateDoc } from 'firebase/firestore'
+import { deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
 import { usePathname } from 'next/navigation'
 import { memo } from 'react'
 import { toast } from 'sonner'
@@ -15,6 +15,7 @@ import PhoneCell from './PhoneCell'
 import StatusCell from './StatusCell'
 import type { Patient } from '@/schema/patient'
 import GenericPatientDialog from '../forms/patient/GenericPatientDialog'
+import { useQueryClient } from '@tanstack/react-query'
 
 type Header = {
     name: string
@@ -29,6 +30,7 @@ type RowDataBase = {
 
 type GenericRowProps = {
     isPatientTab: boolean
+    isRemovedPatientsTab?: boolean
     rowData: RowDataBase
     index: number
     onView: (data: RowDataBase) => void
@@ -38,9 +40,19 @@ type GenericRowProps = {
 }
 
 const GenericRow = memo(function GenericRow(props: GenericRowProps) {
-    const { isPatientTab, rowData, index, onView, onUpdate, onDelete, headers } = props
+    const {
+        isPatientTab,
+        rowData,
+        isRemovedPatientsTab,
+        index,
+        onView,
+        onUpdate,
+        onDelete,
+        headers,
+    } = props
     const pathname = usePathname()
     const isNurse = pathname.startsWith('/nurse')
+    const queryClient = useQueryClient()
 
     const renderCellContent = (key: string) => {
         const value = rowData[key]
@@ -61,6 +73,31 @@ const GenericRow = memo(function GenericRow(props: GenericRowProps) {
 
             default:
                 return <span className="">{String(value)}</span>
+        }
+    }
+
+    const handleRetrieve = async () => {
+        try {
+            if (!rowData.id) throw new Error('Missing patient ID')
+
+            const patientId = rowData.id.toString()
+
+            // move patient back to "patients"
+            await setDoc(doc(db, 'patients', patientId), {
+                ...rowData,
+                restoredAt: new Date().toISOString(),
+            })
+
+            // delete from "removedPatients"
+            await deleteDoc(doc(db, 'removedPatients', patientId))
+
+            queryClient.invalidateQueries({ queryKey: ['patients'] })
+            queryClient.invalidateQueries({ queryKey: ['removedPatients'] })
+
+            toast.success(`Patient ${rowData.name} retrieved successfully!`)
+        } catch (err) {
+            toast.error('Failed to retrieve patient. Check console.')
+            console.error(err)
         }
     }
 
@@ -114,15 +151,27 @@ const GenericRow = memo(function GenericRow(props: GenericRowProps) {
                     />
                 )}
 
-                <Button
-                    size="icon"
-                    variant="destructive"
-                    className="text-white"
-                    onClick={() => onDelete(rowData)}
-                    title="Delete Record"
-                >
-                    <Trash2 className="h-4 w-4" />
-                </Button>
+                {isRemovedPatientsTab ? (
+                    <Button
+                        size="icon"
+                        variant="outline"
+                        className="text-green-600"
+                        onClick={handleRetrieve}
+                        title="Retrieve Patient"
+                    >
+                        <RotateCcw className="h-4 w-4" />
+                    </Button>
+                ) : (
+                    <Button
+                        size="icon"
+                        variant="destructive"
+                        className="text-white"
+                        onClick={() => onDelete(rowData)}
+                        title="Delete Record"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                )}
             </TableCell>
         </TableRow>
     )

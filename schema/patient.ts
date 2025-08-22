@@ -63,8 +63,9 @@ export const PatientSchema = z.object({
     // Fields for internal use
     hasAadhaar: z.boolean(),
     useAgeInstead: z.boolean(),
+    suspectedCase: z.boolean().optional(),
     // additional fields after second meet
-    hbcrID: z.string(),
+    hbcrID: z.string().optional(),
     hospitalRegistrationId: z.string().optional(),
     stageOfTheCancer: z.string().optional(),
     reasonOfRemoval: z.string().optional(),
