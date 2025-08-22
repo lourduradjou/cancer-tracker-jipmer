@@ -5,9 +5,9 @@ import { UseFormHandleSubmit, UseFormReset, UseFormReturn } from 'react-hook-for
 import { Button } from '@/components/ui/button'
 import { PatientFormInputs } from '@/schema/patient'
 import { Form } from '@/components/ui/form'
-import LeftColumn from './columns/column-one/ColumnOne'
-import MiddleColumn from './columns/column-two/ColumnTwo'
-import RightColumn from './columns/column-three/ColumnThree'
+import ColumnOne from './columns/column-one/ColumnOne'
+import ColumnTwo from './columns/column-two/ColumnTwo'
+import ColumnThree from './columns/column-three/ColumnThree'
 import ColumnFour from './columns/column-four/fields/ColumnFour'
 
 interface PatientFormProps {
@@ -39,17 +39,16 @@ export default function PatientForm({
                 className="grid min-w-full gap-6 py-4 select-none"
             >
                 <div className="flex w-full flex-col gap-6 md:flex-row">
-                    {/* LEFT COLUMN */}
-                    <LeftColumn form={form} isEdit={isEdit} />
+                    {/* COLUMN ONE*/}
+                    <ColumnOne form={form} isEdit={isEdit} />
 
-                    {/* MIDDLE COLUMN */}
-                    <MiddleColumn form={form} isEdit={isEdit} />
-                    {/* MIDDLE COLUMN */}
-                    <MiddleColumn form={form} isEdit={isEdit} />
+                    {/* COLUMN TWO */}
+                    <ColumnTwo form={form} isEdit={isEdit} />
 
-                    {/* RIGHT COLUMN */}
-                    <RightColumn form={form} isEdit={isEdit} />
+                    {/*COLUMN THREE */}
+                    <ColumnThree form={form} isEdit={isEdit} />
 
+                    {/*COLUMN FOUR */}
                     <ColumnFour form={form} isEdit={isEdit} />
                 </div>
                 <div className="mt-6 flex justify-between gap-2">
