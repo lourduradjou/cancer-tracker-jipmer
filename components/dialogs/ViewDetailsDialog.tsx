@@ -10,7 +10,7 @@ import { Hospital } from '@/schema/hospital'
 type RowDataType = Patient | UserDoc | Hospital
 
 // Define a type for the fields to display
-type FieldToDisplay = { label: string; key: string };
+type FieldToDisplay = { label: string; key: string }
 
 // Update the props to be generic and include fieldsToDisplay
 export default function ViewDetailsDialog({
@@ -26,16 +26,30 @@ export default function ViewDetailsDialog({
     fieldsToDisplay: FieldToDisplay[]
 }) {
     // Helper function to render specific data types
-    const renderValue = (key: string, value: any) => {
-        if (key === 'phoneNumber' && Array.isArray(value)) {
-            return value.join(', ')
+    function renderValue(key: string, value: any): string {
+        if (value == null) return 'N/A'
+
+        if (Array.isArray(value)) {
+            // diseases: ["cancer", "diabetes"]
+            if (typeof value[0] === 'string') return value.join(', ')
+            // followUps: [{ date, remarks }]
+            if (typeof value[0] === 'object') {
+                return value.map((v) => `${v.date || ''} - ${v.remarks || ''}`).join('; ')
+            }
         }
-        if (key === 'gpsLocation' && value) {
-            return `Lat: ${value.lat}, Lng: ${value.lng}`
+
+        if (typeof value === 'object') {
+            if (key === 'gpsLocation') return `Lat: ${value.lat}, Lng: ${value.lng}`
+            if (key === 'assignedHospital') return `${value.name} (ID: ${value.id})`
+            if (key === 'insurance') return `${value.type}${value.id ? ` (${value.id})` : ''}`
+            return JSON.stringify(value) // fallback
         }
-        // Add more special cases here if needed (e.g., date formatting, nested objects)
-        return value || 'N/A'
+
+        if (typeof value === 'boolean') return value ? 'Yes' : 'No'
+
+        return String(value)
     }
+
     // function displayDetail(rowData) {
     //     console.log('inside display fucntion')
     //     for(let key of fieldsToDisplay) {
@@ -96,11 +110,12 @@ export default function ViewDetailsDialog({
     )
 }
 
-function Info({ label, value }: { label: string; value?: string | number }) {
-    return (
-        <p>
-            <span className="text-muted-foreground font-medium">{label}:</span>{' '}
-            <span>{value || 'N/A'}</span>
-        </p>
-    )
+function Info({ label, value }: { label: string; value: string }) {
+  return (
+    <p>
+      <span className="text-muted-foreground font-medium">{label}:</span>{" "}
+      <span>{value}</span>
+    </p>
+  )
 }
+

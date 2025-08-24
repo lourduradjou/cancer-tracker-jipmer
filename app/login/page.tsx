@@ -136,11 +136,9 @@ export default function LoginPage() {
                         <Input
                             placeholder="Email"
                             type="email"
-                            // Register the input with react-hook-form
-                            // { ...register('email') } binds the input to the 'email' field in your schema
                             {...register('email')}
                             className="border border-gray-300 bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
-                            disabled={loading}
+                            // disabled={loading}
                         />
                         {/* Display validation error if any */}
                         {errors.email && (
@@ -155,7 +153,7 @@ export default function LoginPage() {
                             type={showPassword ? 'text' : 'password'}
                             {...register('password')} // Register the password input
                             className="border border-gray-300 bg-gray-100 pr-10 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
-                            disabled={loading}
+                            // disabled={loading}
                         />
                         <button
                             type="button"
@@ -174,7 +172,7 @@ export default function LoginPage() {
                     <Button
                         type="submit" // Important: Set type to submit for form submission
                         className="w-full cursor-pointer rounded-md bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
-                        disabled={loading}
+                        // disabled={loading}
                     >
                         {loading ? 'Signing In...' : 'Sign In'}
                     </Button>
