@@ -166,12 +166,13 @@ export default function AddUserForm({ user, onSuccess, onSubmit }: AddUserFormPr
                         render={() => (
                             <FormItem>
                                 <FormLabel>Organization</FormLabel>
+
                                 <HospitalSearch
                                     value={{
                                         id: form.watch('orgId'),
                                         name: form.watch('orgName'),
                                     }}
-                                    onValueChange={(hospital) => {
+                                    onChange={(hospital) => {
                                         form.setValue('orgId', hospital.id)
                                         form.setValue('orgName', hospital.name)
                                     }}

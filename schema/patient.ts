@@ -24,7 +24,7 @@ export const PatientSchema = z
             .string()
             .max(100, "Name length can't exceed 100 characters")
             .optional(),
-        phoneNumber: z.array(z.string().optional()).optional(),
+        phoneNumber: z.array(z.string()).optional(),
         sex: z.enum(['male', 'female', 'other'], {
             message: 'Please select a sex.',
         }),

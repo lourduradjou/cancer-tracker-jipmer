@@ -34,8 +34,8 @@ export default function UpdateDetailsDialog({
                 aadhaarId: patient.aadhaarId,
                 rationCardColor: patient.rationCardColor,
                 assignedAsha: patient.assignedAsha || '',
-                assignedHospitalId: patient.assignedHospitalId || '',
-                assignedHospitalName: patient.assignedHospitalName || '',
+                // assignedHospitalId: patient.assignedHospitalId || '',
+                // assignedHospitalName: patient.assignedHospitalName || '',
                 diseases: patient.diseases || [],
                 gpsLocation: patient.gpsLocation || { lat: 0, lng: 0 },
             })

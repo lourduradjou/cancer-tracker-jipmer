@@ -25,7 +25,8 @@ export function useFilteredPatients(patients: Patient[] = []): Patient[] {
                     p.diseases?.some((d) => diseases.includes(d.toLowerCase()))
 
                 const matchStatus =
-                    statuses.length === 0 || statuses.includes((p.status || '').toLowerCase())
+                    statuses.length === 0 ||
+                    statuses.includes((p.patientStatus || '').toLowerCase())
 
                 const matchRationCard =
                     rationColors.length === 0 ||
@@ -68,9 +69,9 @@ export function useFilteredPatients(patients: Patient[] = []): Patient[] {
                 )
             })
             .sort((a, b) => {
-                if (a.status?.toLowerCase() === 'alive' && b.status?.toLowerCase() !== 'alive')
+                if (a.patientStatus?.toLowerCase() === 'alive' && b.patientStatus?.toLowerCase() !== 'alive')
                     return -1
-                if (a.status?.toLowerCase() !== 'alive' && b.status?.toLowerCase() === 'alive')
+                if (a.patientStatus?.toLowerCase() !== 'alive' && b.patientStatus?.toLowerCase() === 'alive')
                     return 1
                 return 0
             })
