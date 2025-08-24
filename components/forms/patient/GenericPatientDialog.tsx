@@ -30,7 +30,7 @@ export default function GenericPatientDialog({
     mode,
     trigger,
     patientData,
-    onSuccess
+    onSuccess,
 }: GenericPatientDialogProps) {
     const [open, setOpen] = useState(false)
     const isEdit = mode === 'edit'
@@ -42,19 +42,26 @@ export default function GenericPatientDialog({
             caregiverName: '',
             hbcrID: '',
             phoneNumber: [''],
+            hospitalRegistrationDate: '',
             sex: undefined,
             dob: '',
-            age: undefined,
             address: '',
             aadhaarId: '',
-            rationCardColor: undefined,
+            rationCardColor: 'none',
+            religion:  'none',
             diseases: [],
-            assignedHospitalId: '',
-            assignedHospitalName: '',
-            status: 'Alive',
+            assignedHospital: { id: '', name: '' },
+            diagnosedYearsAgo: '',
+            diagnosedDate: '',
+            treatmentStartDate: null,
+            treatmentEndDate: null,
+            patientStatus: 'Alive',
             hasAadhaar: true,
-            useAgeInstead: false,
             suspectedCase: false,
+            biopsyNumber: '',
+            stageOfTheCancer: '',
+            treatmentDetails: '',
+            otherTreatmentDetails: '',
         },
     })
 
@@ -71,8 +78,11 @@ export default function GenericPatientDialog({
 
     // Aadhaar duplicate check (skip for edit mode if Aadhaar hasn't changed)
     useEffect(() => {
-        if (hasAadhaar && aadhaarId?.length === 12 &&
-            (!isEdit || aadhaarId !== patientData?.aadhaarId)) {
+        if (
+            hasAadhaar &&
+            aadhaarId?.length === 12 &&
+            (!isEdit || aadhaarId !== patientData?.aadhaarId)
+        ) {
             const timer = setTimeout(async () => {
                 await checkAadhaarDuplicateUtil(aadhaarId)
             }, 500)
@@ -135,11 +145,12 @@ export default function GenericPatientDialog({
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                {trigger || defaultTrigger}
-            </DialogTrigger>
+            <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
 
-            <DialogContent onInteractOutside={(e) => e.preventDefault()} className="min-w-[1200px]">
+            <DialogContent
+                onInteractOutside={(e) => e.preventDefault()}
+                className="max-h-[90vh] min-w-[1200px] overflow-y-auto"
+            >
                 <DialogHeader>
                     <DialogTitle>
                         {isEdit ? 'Update Patient Details' : 'Add New Patient Details'}

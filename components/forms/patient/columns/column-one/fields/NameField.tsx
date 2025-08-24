@@ -5,6 +5,7 @@ import { UseFormReturn } from 'react-hook-form'
 import { PatientFormInputs } from '@/schema/patient'
 import { FormField, FormItem, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { FloatingLabelInput } from '@/components/ui/floating-label-input'
 
 interface NameFieldProps {
     form: UseFormReturn<PatientFormInputs>
@@ -21,9 +22,16 @@ export default function NameField({ form, isEdit = false }: NameFieldProps) {
                 render={({ field }) => (
                     <FormItem>
                         <FormControl>
-                            <Input placeholder="Patient Name" autoComplete="off" {...field} />
+                            <FloatingLabelInput
+                                id="patient-name"
+                                data-testid="patient-name-input"
+                                label="Patient Name"
+                                autoComplete="off"
+                                {...field}
+                                className="!border-yellow-400"
+                            />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage data-testid="name-error"/>
                     </FormItem>
                 )}
             />
@@ -33,7 +41,12 @@ export default function NameField({ form, isEdit = false }: NameFieldProps) {
                 render={({ field }) => (
                     <FormItem>
                         <FormControl>
-                            <Input placeholder="Caregiver Name" autoComplete="off" {...field} />
+                            <FloatingLabelInput
+                                id="caregiver-name"
+                                label="Caregiver Name"
+                                autoComplete="off"
+                                {...field}
+                            />
                         </FormControl>
                         <FormMessage />
                     </FormItem>

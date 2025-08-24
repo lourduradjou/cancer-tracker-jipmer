@@ -20,7 +20,7 @@ export default function PhoneNumbersField({ form }: PhoneNumbersFieldProps) {
 
     return (
         <FormItem>
-            <FormLabel>Phone Numbers (Max {MAX_PHONE_NUMBERS})</FormLabel>
+            <FormLabel className='text-sm text-muted-foreground'>Phone Numbers (Max {MAX_PHONE_NUMBERS})</FormLabel>
             <div className="flex flex-col gap-2">
                 {fields.map((field, index) => (
                     <div key={field.id} className="flex items-center gap-2">
@@ -58,7 +58,7 @@ export default function PhoneNumbersField({ form }: PhoneNumbersFieldProps) {
                     <Button
                         type="button"
                         variant="ghost"
-                        className="w-fit px-2"
+                        className="w-fit px-2 text-sm text-muted-foreground"
                         onClick={() => append({ date: new Date(), remarks: '' })}
                     >
                         <PlusCircle className="mr-1 h-4 w-4" />

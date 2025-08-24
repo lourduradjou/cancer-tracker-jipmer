@@ -54,8 +54,9 @@ export default function SexSelect({ control }: Props) {
             field.onChange(val)
             clearGenderIncompatible() // ✅ works now
           }}
+
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full" required={true}>
             <SelectValue placeholder="Select Sex" />
           </SelectTrigger>
           <SelectContent>

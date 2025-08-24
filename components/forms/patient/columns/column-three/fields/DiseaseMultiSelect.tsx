@@ -40,11 +40,11 @@ export default function DiseaseMultiSelect({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className={cn('min-h-[100px] w-full p-2 text-left', {
+          className={cn('min-h-[100px] w-full p-2 text-left !bg-background !border-yellow-400', {
             'text-muted-foreground': selectedDiseases.length === 0,
           })}
         >
-          <div className="flex max-h-24 flex-wrap items-start gap-1 overflow-y-auto">
+          <div className="flex max-h-24 flex-wrap items-start gap-1 overflow-y-auto ">
             {selectedDiseases.length > 0 ? (
               selectedDiseases.map((disease, i) => (
                 <span

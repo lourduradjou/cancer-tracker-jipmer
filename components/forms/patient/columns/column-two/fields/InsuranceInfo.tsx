@@ -30,7 +30,7 @@ export default function InsuranceInfo({ form }: InsuranceInfoProps) {
                     <SelectTrigger className="text-muted-foreground w-full text-sm font-medium">
                         <SelectValue className="text-sm capitalize">
                             {insuranceType === 'none'
-                                ? 'Insurance Type (default: none)'
+                                ? 'Insurance Type (Default: None)'
                                 : insuranceType}
                         </SelectValue>
                     </SelectTrigger>
