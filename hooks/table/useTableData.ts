@@ -75,7 +75,8 @@ export const useTableData = ({
                 )
                 const usersSnap = await getDocs(usersQuery)
                 return usersSnap.docs.map((user) => ({
-                    ...(user.data() as UserDoc),
+                    id: user.id, // Firestore document ID
+                    ...(user.data() as Omit<UserDoc, 'id'>), // spread the rest of the user fields
                 })) as UserDoc[]
             },
             enabled: isUsersEnabled,
@@ -102,7 +103,7 @@ export const useTableData = ({
                 if (orgId) {
                     patientsQuery = query(
                         collection(db, 'patients'),
-                        where('assignedHospitalId', '==', orgId)
+                        where('assignedHospital.id', '==', orgId)
                     )
                 } else if (ashaEmail) {
                     patientsQuery = query(

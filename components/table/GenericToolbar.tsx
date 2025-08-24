@@ -2,10 +2,10 @@
 
 import { Button } from '@/components/ui/button'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { importData } from '@/lib/importUtils'
 import { exportToCSV, exportToExcel } from '@/lib/patient/export'
@@ -17,95 +17,95 @@ import AddUserDialog from '../forms/user/AddUserDialog'
 import { SearchInput } from '../search/SearchInput'
 import PatientFilter from './PatientFilter'
 import GenericPatientDialog from '../forms/patient/GenericPatientDialog'
+import { MoreVertical } from 'lucide-react'
 
 export default function GenericToolbar({
-    activeTab,
-    getExportData,
-    searchTerm,
-    setSearchTerm,
+  activeTab,
+  getExportData,
+  searchTerm,
+  setSearchTerm,
 }: {
-    activeTab: 'ashas' | 'hospitals' | 'doctors' | 'nurses' | 'patients' | 'removedPatients'
-    getExportData: () => any[]
-    searchTerm: string
-    setSearchTerm: (val: string) => void
+  activeTab: 'ashas' | 'hospitals' | 'doctors' | 'nurses' | 'patients' | 'removedPatients'
+  getExportData: () => any[]
+  searchTerm: string
+  setSearchTerm: (val: string) => void
 }) {
-    const pathname = usePathname()
-    let dashboardTitleContent
-    const queryClient = useQueryClient()
+  const pathname = usePathname()
+  const queryClient = useQueryClient()
 
-    if (pathname.includes('/admin')) {
-        dashboardTitleContent = 'Admin DashBoard'
-    } else {
-        const userRole = pathname.includes('/nurse') ? 'Nurse Dashboard' : 'Doctor Dashboard'
-        dashboardTitleContent = <h1 className="text-2xl font-bold">{userRole}</h1>
-    }
+  const dashboardTitleContent = pathname.includes('/admin')
+    ? 'Admin Dashboard'
+    : pathname.includes('/nurse')
+    ? <h1 className="text-2xl font-bold">Nurse Dashboard</h1>
+    : <h1 className="text-2xl font-bold">Doctor Dashboard</h1>
 
-    const handleExportCSV = () => {
-        const data = getExportData()
-        exportToCSV(data, activeTab)
-    }
+  const handleExportCSV = () => {
+    const data = getExportData()
+    exportToCSV(data, activeTab)
+  }
 
-    const handleExportExcel = () => {
-        const data = getExportData()
-        exportToExcel(data, activeTab)
-    }
+  const handleExportExcel = () => {
+    const data = getExportData()
+    exportToExcel(data, activeTab)
+  }
 
-    return (
-        <div className="mb-4 flex items-center justify-between">
-            {dashboardTitleContent}
-            <div className="flex items-center gap-2">
-                {activeTab && (
-                    <SearchInput
-                        value={searchTerm}
-                        onChange={setSearchTerm}
-                        placeholder={`Search ${activeTab}...`}
-                    />
-                )}
-                {activeTab === 'patients' && <PatientFilter />}
-                {activeTab === 'patients' && <GenericPatientDialog mode="add" />}
-                {activeTab === 'hospitals' && <AddHospitalDialog />}
-                {['ashas', 'doctors', 'nurses'].includes(activeTab) && (
-                    <AddUserDialog user={activeTab} />
-                )}
+  return (
+    <div className="mb-4 flex items-center justify-between">
+      {dashboardTitleContent}
+      <div className="flex items-center gap-2">
+        {activeTab && (
+          <SearchInput
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder={`Search ${activeTab}...`}
+          />
+        )}
+        {activeTab === 'patients' && <PatientFilter />}
+        {activeTab === 'patients' && <GenericPatientDialog mode="add" />}
+        {activeTab === 'hospitals' && <AddHospitalDialog />}
+        {['ashas', 'doctors', 'nurses'].includes(activeTab) && (
+          <AddUserDialog user={activeTab} />
+        )}
 
-                {/* Import Button */}
-                <div>
-                    <input
-                        id="file-upload"
-                        type="file"
-                        accept=".csv, .xlsx, .xls"
-                        className="hidden"
-                        onChange={(e) => importData(e, activeTab, queryClient)}
-                    />
-                    <Button
-                        variant="outline"
-                        onClick={() => document.getElementById('file-upload')?.click()}
-                    >
-                        Import
-                    </Button>
-                </div>
+        {/* Three-dot Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {/* Import */}
+            <DropdownMenuItem
+              onClick={() => document.getElementById('file-upload')?.click()}
+            >
+              Import
+            </DropdownMenuItem>
+            <input
+              id="file-upload"
+              type="file"
+              accept=".csv, .xlsx, .xls"
+              className="hidden"
+              onChange={(e) => importData(e, activeTab, queryClient)}
+            />
 
-                {/* Export Dropdown */}
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button className="cursor-pointer" variant="outline">
-                            Export
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuItem onClick={handleExportCSV}>Export as CSV</DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleExportExcel}>
-                            Export as Excel
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+            {/* Export */}
+            <DropdownMenuItem onClick={handleExportCSV}>
+              Export as CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportExcel}>
+              Export as Excel
+            </DropdownMenuItem>
 
-                {activeTab === 'patients' && (
-                    <Button variant="outline" onClick={() => generateDiseasePDF(getExportData())}>
-                        Report
-                    </Button>
-                )}
-            </div>
-        </div>
-    )
+            {/* Report (only for patients) */}
+            {activeTab === 'patients' && (
+              <DropdownMenuItem onClick={() => generateDiseasePDF(getExportData())}>
+                Generate Report
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  )
 }

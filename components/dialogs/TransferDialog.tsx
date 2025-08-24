@@ -34,7 +34,7 @@ export default function TransferDialog({
     onTransfer,
 }: {
     patient: Patient
-    onTransfer: (hospitalId: string) => void
+    onTransfer: (hospitalId: string, hospitalName: string) => void
 }) {
     const [hospitals, setHospitals] = useState<Hospital[]>([])
     const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null)
@@ -61,7 +61,7 @@ export default function TransferDialog({
 
     const handleTransfer = () => {
         if (selectedHospital) {
-            onTransfer(selectedHospital.id)
+            onTransfer(selectedHospital.id, selectedHospital.name)
         }
     }
 
