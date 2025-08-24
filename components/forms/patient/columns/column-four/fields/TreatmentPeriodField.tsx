@@ -32,7 +32,7 @@ export function TreatmentPeriodField({ form }: Props) {
                                 <FormControl className="text-muted-foreground text-sm">
                                     <Button
                                         variant="outline"
-                                        className="w-full pl-3 text-left font-normal !bg-background"
+                                        className="!bg-background w-full pl-3 text-left font-normal"
                                     >
                                         {field.value ? (
                                             format(new Date(field.value), 'PPP')
@@ -49,7 +49,9 @@ export function TreatmentPeriodField({ form }: Props) {
                                     captionLayout="dropdown"
                                     selected={field.value ? new Date(field.value) : undefined}
                                     onSelect={(date) =>
-                                        field.onChange(date ? date.toISOString().split('T')[0] : null)
+                                        field.onChange(
+                                            date ? date.toISOString().split('T')[0] : null
+                                        )
                                     }
                                 />
                             </PopoverContent>
@@ -73,7 +75,7 @@ export function TreatmentPeriodField({ form }: Props) {
                                 <FormControl className="text-muted-foreground text-sm">
                                     <Button
                                         variant="outline"
-                                        className="w-full pl-3 text-left font-normal !bg-background"
+                                        className="!bg-background w-full pl-3 text-left font-normal"
                                     >
                                         {field.value ? (
                                             format(new Date(field.value), 'PPP')
@@ -90,7 +92,9 @@ export function TreatmentPeriodField({ form }: Props) {
                                     captionLayout="dropdown"
                                     selected={field.value ? new Date(field.value) : undefined}
                                     onSelect={(date) =>
-                                        field.onChange(date ? date.toISOString().split('T')[0] : null)
+                                        field.onChange(
+                                            date ? date.toISOString().split('T')[0] : null
+                                        )
                                     }
                                 />
                             </PopoverContent>

@@ -22,7 +22,7 @@ const ReligionDropdown: React.FC<ReligionDropdownProps> = ({ form: { control } }
             name="religion"
             render={({ field }) => (
                 <>
-                    <Label className='text-muted-foreground text-sm'>Regilion</Label>
+                    <Label className="text-muted-foreground text-sm">Regilion</Label>
                     <Select value={field.value} onValueChange={(val) => field.onChange(val)}>
                         <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select Religion" />

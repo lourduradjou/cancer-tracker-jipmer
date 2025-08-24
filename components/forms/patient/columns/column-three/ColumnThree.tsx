@@ -4,7 +4,7 @@ import DiseaseMultiSelect from './fields/DiseaseMultiSelect'
 import RationCardSelect from './fields/RationCardSelect'
 import DiagnosisTimingField from './fields/DiagnosisTimingField'
 import { AVAILABLE_DISEASES_LIST } from '@/constants/diseases'
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 
 type RightColumnProps = {
     form: UseFormReturn<any>
@@ -58,7 +58,9 @@ export default function ColumnThree({ form }: RightColumnProps) {
                 name="assignedHospital"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel className='text-sm text-muted-foreground'>Assigned Hospital</FormLabel>
+                        <FormLabel className="text-muted-foreground text-sm">
+                            Assigned Hospital
+                        </FormLabel>
                         <FormControl>
                             <HospitalSearch value={field.value} onChange={field.onChange} />
                         </FormControl>

@@ -1,4 +1,4 @@
-import { vi } from "vitest"
+import { vi } from 'vitest'
 
 // __mocks__/@/firebase.ts
 export const db = {}

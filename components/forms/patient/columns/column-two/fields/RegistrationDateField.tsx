@@ -35,10 +35,10 @@ export function RegistrationDateField({ form }: Props) {
                     </FormLabel>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <FormControl className="text-muted-foreground text-sm !border-yellow-400">
+                            <FormControl className="text-muted-foreground !border-yellow-400 text-sm">
                                 <Button
                                     variant="outline"
-                                    className="w-full pl-3 text-left font-normal !bg-background"
+                                    className="!bg-background w-full pl-3 text-left font-normal"
                                 >
                                     {field.value ? (
                                         format(new Date(field.value), 'PPP')

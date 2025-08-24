@@ -7,8 +7,8 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface SelectProps extends React.ComponentProps<typeof SelectPrimitive.Root> {
-  required?: boolean
-  value?: string
+    required?: boolean
+    value?: string
 }
 
 function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
@@ -24,39 +24,38 @@ function SelectValue({ ...props }: React.ComponentProps<typeof SelectPrimitive.V
 }
 
 function SelectTrigger({
-  className,
-  size = 'default',
-  children,
-  value,
-  required,
-  ...props
+    className,
+    size = 'default',
+    children,
+    value,
+    required,
+    ...props
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
-  size?: 'sm' | 'default'
-  value?: string
-  required?: boolean
+    size?: 'sm' | 'default'
+    value?: string
+    required?: boolean
 }) {
-  // show warning if required and no value
-  const showWarning = required && (!value || value === '')
+    // show warning if required and no value
+    const showWarning = required && (!value || value === '')
 
-  return (
-    <SelectPrimitive.Trigger
-      data-slot="select-trigger"
-      data-size={size}
-      className={cn(
-        "border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-background flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8",
-        showWarning ? 'border-yellow-500 ring-yellow-200' : '',
-        className
-      )}
-      {...props}
-    >
-      {children}
-      <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon className="size-4 opacity-50" />
-      </SelectPrimitive.Icon>
-    </SelectPrimitive.Trigger>
-  )
+    return (
+        <SelectPrimitive.Trigger
+            data-slot="select-trigger"
+            data-size={size}
+            className={cn(
+                "border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-background flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8",
+                showWarning ? 'border-yellow-500 ring-yellow-200' : '',
+                className
+            )}
+            {...props}
+        >
+            {children}
+            <SelectPrimitive.Icon asChild>
+                <ChevronDownIcon className="size-4 opacity-50" />
+            </SelectPrimitive.Icon>
+        </SelectPrimitive.Trigger>
+    )
 }
-
 
 function SelectContent({
     className,

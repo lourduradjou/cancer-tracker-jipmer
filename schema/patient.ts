@@ -20,11 +20,8 @@ export const PatientSchema = z
             .string()
             .min(1, 'Name is required.')
             .max(100, "Name length can't exceed 100 characters"),
-        caregiverName: z
-            .string()
-            .max(100, "Name length can't exceed 100 characters")
-            .optional(),
-        phoneNumber: z.array(z.string()).optional(),
+        caregiverName: z.string().max(100, "Name length can't exceed 100 characters").optional(),
+        phoneNumber: z.array(z.string().optional()).optional(),
         sex: z.enum(['male', 'female', 'other'], {
             message: 'Please select a sex.',
         }),

@@ -20,7 +20,7 @@ export default function RationCardSelect({ control }: RationCardSelectProps) {
             name="rationCardColor"
             render={({ field }) => (
                 <SelectGroup>
-                    <SelectLabel className="text-muted-foreground text-sm mb-1">
+                    <SelectLabel className="text-muted-foreground mb-1 text-sm">
                         Ration Card Color
                     </SelectLabel>
                     <Select value={field.value} onValueChange={field.onChange}>

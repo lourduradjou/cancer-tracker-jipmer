@@ -48,7 +48,7 @@ export default function GenericPatientDialog({
             address: '',
             aadhaarId: '',
             rationCardColor: 'none',
-            religion:  'none',
+            religion: 'none',
             diseases: [],
             assignedHospital: { id: '', name: '' },
             diagnosedYearsAgo: '',

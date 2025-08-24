@@ -61,7 +61,7 @@ export default function PatientForm({
                     >
                         <X className="h-4 w-4" /> Clear
                     </Button>
-                    <Button type="submit" className="h-12 w-[80%]" name='Save'>
+                    <Button type="submit" className="h-12 w-[80%]" name="Save">
                         {isEdit ? 'Update' : 'Save'}
                     </Button>
                 </div>

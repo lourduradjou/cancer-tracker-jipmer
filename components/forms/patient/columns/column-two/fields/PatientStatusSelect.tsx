@@ -20,7 +20,7 @@ export default function PatientStatusSelect({ control }: Props) {
             render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="w-full" required={true}>
-                        <SelectValue className='tracking-wider'>
+                        <SelectValue className="tracking-wider">
                             {field.value ? (
                                 <span
                                     className={cn('font-medium', {
@@ -37,7 +37,7 @@ export default function PatientStatusSelect({ control }: Props) {
                             )}
                         </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className='tracking-wider'>
+                    <SelectContent className="tracking-wider">
                         <SelectItem value="Alive">
                             <span className="text-green-400">Alive</span>
                         </SelectItem>

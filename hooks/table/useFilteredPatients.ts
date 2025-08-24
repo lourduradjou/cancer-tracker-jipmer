@@ -69,9 +69,15 @@ export function useFilteredPatients(patients: Patient[] = []): Patient[] {
                 )
             })
             .sort((a, b) => {
-                if (a.patientStatus?.toLowerCase() === 'alive' && b.patientStatus?.toLowerCase() !== 'alive')
+                if (
+                    a.patientStatus?.toLowerCase() === 'alive' &&
+                    b.patientStatus?.toLowerCase() !== 'alive'
+                )
                     return -1
-                if (a.patientStatus?.toLowerCase() !== 'alive' && b.patientStatus?.toLowerCase() === 'alive')
+                if (
+                    a.patientStatus?.toLowerCase() !== 'alive' &&
+                    b.patientStatus?.toLowerCase() === 'alive'
+                )
                     return 1
                 return 0
             })

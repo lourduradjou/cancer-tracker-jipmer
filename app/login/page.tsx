@@ -177,8 +177,8 @@ export default function LoginPage() {
                         {loading ? 'Signing In...' : 'Sign In'}
                     </Button>
 
-                    <Link href="/home" >
-                        <p className="text-center cursor-pointer text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <Link href="/home">
+                        <p className="cursor-pointer text-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                             Click to go home
                         </p>
                     </Link>

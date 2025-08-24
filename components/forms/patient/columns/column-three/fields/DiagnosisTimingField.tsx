@@ -8,13 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar'
 import { CalendarIcon } from 'lucide-react'
 import { format } from 'date-fns'
-import {
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-    FormControl,
-} from '@/components/ui/form'
+import { FormField, FormItem, FormLabel, FormMessage, FormControl } from '@/components/ui/form'
 
 type DiagnosisTimingFieldProps = {
     form: UseFormReturn<any>
@@ -41,7 +35,9 @@ export default function DiagnosisTimingField({ form }: DiagnosisTimingFieldProps
                                 onCheckedChange={(checked) => field.onChange(Boolean(checked))}
                             />
                         </FormControl>
-                        <FormLabel className="text-muted-foreground text-sm">Enter Years Ago</FormLabel>
+                        <FormLabel className="text-muted-foreground text-sm">
+                            Enter Years Ago
+                        </FormLabel>
                     </FormItem>
                 )}
             />
@@ -53,7 +49,7 @@ export default function DiagnosisTimingField({ form }: DiagnosisTimingFieldProps
                     name="diagnosedDate" // store computed date directly
                     render={({ field }) => (
                         <FormItem>
-                        <FormControl className='!border-yellow-400'>
+                            <FormControl className="!border-yellow-400">
                                 <Input
                                     type="number"
                                     min={0}
@@ -69,8 +65,12 @@ export default function DiagnosisTimingField({ form }: DiagnosisTimingFieldProps
                                         const years = Number(e.target.value)
                                         if (!isNaN(years)) {
                                             const diagnosedDate = new Date()
-                                            diagnosedDate.setFullYear(diagnosedDate.getFullYear() - years)
-                                            field.onChange(diagnosedDate.toISOString().split('T')[0])
+                                            diagnosedDate.setFullYear(
+                                                diagnosedDate.getFullYear() - years
+                                            )
+                                            field.onChange(
+                                                diagnosedDate.toISOString().split('T')[0]
+                                            )
                                         } else {
                                             field.onChange('')
                                         }
@@ -93,7 +93,7 @@ export default function DiagnosisTimingField({ form }: DiagnosisTimingFieldProps
                                     <PopoverTrigger asChild>
                                         <Button
                                             variant="outline"
-                                            className="!border-yellow-400 !bg-background w-full pl-3 text-left font-normal text-muted-foreground"
+                                            className="!bg-background text-muted-foreground w-full !border-yellow-400 pl-3 text-left font-normal"
                                         >
                                             {field.value ? (
                                                 format(new Date(field.value), 'PPP')
@@ -109,9 +109,13 @@ export default function DiagnosisTimingField({ form }: DiagnosisTimingFieldProps
                                             captionLayout="dropdown"
                                             fromYear={1900}
                                             toYear={new Date().getFullYear()}
-                                            selected={field.value ? new Date(field.value) : undefined}
+                                            selected={
+                                                field.value ? new Date(field.value) : undefined
+                                            }
                                             onSelect={(date) =>
-                                                field.onChange(date ? date.toISOString().split('T')[0] : '')
+                                                field.onChange(
+                                                    date ? date.toISOString().split('T')[0] : ''
+                                                )
                                             }
                                         />
                                     </PopoverContent>

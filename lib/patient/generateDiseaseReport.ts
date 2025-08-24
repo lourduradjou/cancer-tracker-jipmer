@@ -66,14 +66,7 @@ export function generateDiseasePDF(patients: Patient[]) {
         const totalFemale = counts.female.reduce((a, b) => a + b, 0)
         const grandTotal = totalMale + totalFemale
 
-        return [
-            disease,
-            ...counts.male,
-            ...counts.female,
-            totalMale,
-            totalFemale,
-            grandTotal,
-        ]
+        return [disease, ...counts.male, ...counts.female, totalMale, totalFemale, grandTotal]
     })
 
     doc.text('Disease Distribution Report', 14, 16)

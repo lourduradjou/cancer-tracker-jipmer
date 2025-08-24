@@ -31,7 +31,7 @@ export default function NameField({ form, isEdit = false }: NameFieldProps) {
                                 className="!border-yellow-400"
                             />
                         </FormControl>
-                        <FormMessage data-testid="name-error"/>
+                        <FormMessage data-testid="name-error" />
                     </FormItem>
                 )}
             />

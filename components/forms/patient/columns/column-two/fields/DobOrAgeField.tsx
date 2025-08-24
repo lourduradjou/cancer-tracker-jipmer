@@ -47,7 +47,7 @@ export default function DobOrAgeField({ form }: Props) {
                     name="dob" // store the computed dob directly
                     render={({ field }) => (
                         <FormItem>
-                            <FormControl className='!border-yellow-400'>
+                            <FormControl className="!border-yellow-400">
                                 <Input
                                     type="number"
                                     min={0}
@@ -89,7 +89,7 @@ export default function DobOrAgeField({ form }: Props) {
                                     <PopoverTrigger asChild>
                                         <Button
                                             variant="outline"
-                                            className="!border-yellow-400 !bg-background w-full pl-3 text-left font-normal text-muted-foreground"
+                                            className="!bg-background text-muted-foreground w-full !border-yellow-400 pl-3 text-left font-normal"
                                         >
                                             {field.value ? (
                                                 format(new Date(field.value), 'PPP')

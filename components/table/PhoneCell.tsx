@@ -26,7 +26,7 @@ export default function PhoneCell({
                 <div key={i}>{num}</div>
             ))}
 
-           {numbers.filter((n) => n?.trim()).length === 0 && <p>N/A</p>}
+            {numbers.filter((n) => n?.trim()).length === 0 && <p>N/A</p>}
             {!showAll && remaining > 0 && (
                 <div
                     className="cursor-pointer text-blue-500 underline"

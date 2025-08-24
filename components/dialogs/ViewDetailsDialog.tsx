@@ -111,11 +111,9 @@ export default function ViewDetailsDialog({
 }
 
 function Info({ label, value }: { label: string; value: string }) {
-  return (
-    <p>
-      <span className="text-muted-foreground font-medium">{label}:</span>{" "}
-      <span>{value}</span>
-    </p>
-  )
+    return (
+        <p>
+            <span className="text-muted-foreground font-medium">{label}:</span> <span>{value}</span>
+        </p>
+    )
 }
-

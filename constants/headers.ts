@@ -121,5 +121,5 @@ export const REMOVED_PATIENT_TABLE_HEADERS = [
     {
         name: 'Reason of Removal',
         key: 'deletionReason',
-    }
+    },
 ]

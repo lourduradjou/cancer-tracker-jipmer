@@ -65,9 +65,9 @@ export default function TransferDialog({
         }
     }
 
-    const filteredHospitals = hospitals
-        .filter((h) => (h.name ?? '').toLowerCase().includes(searchTerm.toLowerCase()))
-
+    const filteredHospitals = hospitals.filter((h) =>
+        (h.name ?? '').toLowerCase().includes(searchTerm.toLowerCase())
+    )
 
     return (
         <Dialog>

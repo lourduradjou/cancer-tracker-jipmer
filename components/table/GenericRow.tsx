@@ -64,7 +64,9 @@ const GenericRow = memo(function GenericRow(props: GenericRowProps) {
                 return <PhoneCell phoneNumbers={value as string[]} />
 
             case 'dob':
-                return <span className="">{dobToAgeUtil(formatDobToDDMMYYYY(value as string))}</span>
+                return (
+                    <span className="">{dobToAgeUtil(formatDobToDDMMYYYY(value as string))}</span>
+                )
 
             case 'diseases':
                 return <DiseasesCell diseases={(value as string[]) ?? []} />

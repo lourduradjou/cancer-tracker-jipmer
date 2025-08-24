@@ -81,9 +81,11 @@ export default function HospitalSearch({ value, onChange }: HospitalSearchProps)
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-full justify-between !bg-background !border-yellow-400"
+                    className="!bg-background w-full justify-between !border-yellow-400"
                 >
-                    <span className="truncate text-sm text-muted-foreground">{selectedHospitalName}</span>
+                    <span className="text-muted-foreground truncate text-sm">
+                        {selectedHospitalName}
+                    </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>

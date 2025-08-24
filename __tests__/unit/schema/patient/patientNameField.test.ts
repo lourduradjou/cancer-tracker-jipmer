@@ -49,4 +49,3 @@ describe('PatientSchema - name field validation', () => {
         expect(result.success).toBe(true)
     })
 })
-

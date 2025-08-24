@@ -44,63 +44,66 @@ export const importData = async (
 }
 
 const uploadToFirestore = async (rows: any[], activeTab: string, queryClient: any) => {
-  try {
-    const collectionName = getCollectionName(activeTab)
-    const colRef = collection(db, collectionName)
-    const schema = schemaMap[activeTab]
+    try {
+        const collectionName = getCollectionName(activeTab)
+        const colRef = collection(db, collectionName)
+        const schema = schemaMap[activeTab]
 
-    if (!schema) {
-      throw new Error(`No schema defined for activeTab: ${activeTab}`)
-    }
+        if (!schema) {
+            throw new Error(`No schema defined for activeTab: ${activeTab}`)
+        }
 
-    let successCount = 0
-    const errors: { row: number; issues: string[]; rowData: any }[] = []
+        let successCount = 0
+        const errors: { row: number; issues: string[]; rowData: any }[] = []
 
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i]
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i]
 
-      const parsed = schema.safeParse(row)
-      if (!parsed.success) {
-        errors.push({
-          row: i + 1, // row number (1-based)
-          issues: parsed?.error?.errors?.map((e: any) => `${e.path.join(".")}: ${e.message}`),
-          rowData: row, // include original data for fixing
+            const parsed = schema.safeParse(row)
+            if (!parsed.success) {
+                errors.push({
+                    row: i + 1, // row number (1-based)
+                    issues: parsed?.error?.errors?.map(
+                        (e: any) => `${e.path.join('.')}: ${e.message}`
+                    ),
+                    rowData: row, // include original data for fixing
+                })
+                continue
+            }
+
+            await addDoc(colRef, parsed.data) // only save if valid
+            successCount++
+        }
+
+        if (successCount > 0) {
+            alert(`✅ Imported ${successCount} records successfully`)
+        }
+
+        if (errors.length > 0) {
+            console.error('❌ Validation errors:', errors)
+            alert(
+                `⚠️ ${errors.length} rows failed validation. An error report has been downloaded.`
+            )
+
+            // Generate Excel error report
+            const errorSheet = XLSX.utils.json_to_sheet(
+                errors?.map((err) => ({
+                    Row: err.row,
+                    //   Issues: err.issues.join("; "),
+                    ...err.rowData, // include original row fields
+                }))
+            )
+            const wb = XLSX.utils.book_new()
+            XLSX.utils.book_append_sheet(wb, errorSheet, 'Errors')
+            XLSX.writeFile(wb, `import-errors-${activeTab}.xlsx`)
+        }
+
+        // Invalidate cache after imports
+        queryClient.invalidateQueries({
+            queryKey: [collectionName === 'users' ? 'users' : collectionName],
         })
-        continue
-      }
-
-      await addDoc(colRef, parsed.data) // only save if valid
-      successCount++
+    } catch (err) {
+        console.error('Error uploading data:', err)
+        alert(err instanceof Error ? err.message : 'Failed to import data.')
     }
-
-    if (successCount > 0) {
-      alert(`✅ Imported ${successCount} records successfully`)
-    }
-
-    if (errors.length > 0) {
-      console.error("❌ Validation errors:", errors)
-      alert(`⚠️ ${errors.length} rows failed validation. An error report has been downloaded.`)
-
-      // Generate Excel error report
-      const errorSheet = XLSX.utils.json_to_sheet(
-        errors?.map(err => ({
-          Row: err.row,
-        //   Issues: err.issues.join("; "),
-          ...err.rowData, // include original row fields
-        }))
-      )
-      const wb = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(wb, errorSheet, "Errors")
-      XLSX.writeFile(wb, `import-errors-${activeTab}.xlsx`)
-    }
-
-    // Invalidate cache after imports
-    queryClient.invalidateQueries({
-      queryKey: [collectionName === "users" ? "users" : collectionName],
-    })
-  } catch (err) {
-    console.error("Error uploading data:", err)
-    alert(err instanceof Error ? err.message : "Failed to import data.")
-  }
 }
-

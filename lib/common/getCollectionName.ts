@@ -15,12 +15,12 @@ export const getCollectionName = (activeTab: string): string => {
         case 'ashas':
         case 'doctors':
         case 'nurses':
-            return 'users';
+            return 'users'
         case 'hospitals':
-            return 'hospitals';
+            return 'hospitals'
         case 'patients':
-            return 'patients';
+            return 'patients'
         default:
-            throw new Error(`Unsupported activeTab value: ${activeTab}`);
+            throw new Error(`Unsupported activeTab value: ${activeTab}`)
     }
-};
+}
