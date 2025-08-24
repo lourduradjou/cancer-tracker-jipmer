@@ -18,7 +18,6 @@ import { SearchInput } from '../search/SearchInput'
 import PatientFilter from './PatientFilter'
 import GenericPatientDialog from '../forms/patient/GenericPatientDialog'
 
-
 export default function GenericToolbar({
     activeTab,
     getExportData,

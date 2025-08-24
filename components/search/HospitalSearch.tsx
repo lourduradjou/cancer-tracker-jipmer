@@ -36,11 +36,10 @@ interface HospitalOption {
 
 // Define the props for our new component
 interface HospitalSearchProps {
-    value: HospitalOption // The currently selected hospital ID
-    onValueChange: (value: HospitalOption) => void // Function to call when a hospital is selected
+    value?: { id: string; name: string }
+    onChange?: (value: { id: string; name: string }) => void
 }
-
-export default function HospitalSearch({ value, onValueChange }: HospitalSearchProps) {
+export default function HospitalSearch({ value, onChange }: HospitalSearchProps) {
     const [hospitals, setHospitals] = useState<Hospital[]>([])
     const [open, setOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
@@ -73,7 +72,7 @@ export default function HospitalSearch({ value, onValueChange }: HospitalSearchP
         .slice(0, 5)
 
     const selectedHospitalName =
-        hospitals.find((hospital) => hospital.id === value.id)?.name || 'Select Hospital...'
+        hospitals.find((hospital) => hospital.id === value?.id)?.name || 'Select Hospital...'
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -82,9 +81,11 @@ export default function HospitalSearch({ value, onValueChange }: HospitalSearchP
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-full justify-between"
+                    className="!bg-background w-full justify-between !border-yellow-400"
                 >
-                    <span className="truncate">{selectedHospitalName}</span>
+                    <span className="text-muted-foreground truncate text-sm">
+                        {selectedHospitalName}
+                    </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
@@ -101,7 +102,7 @@ export default function HospitalSearch({ value, onValueChange }: HospitalSearchP
                                 key={hospital.id}
                                 value={hospital.name} // Command uses this for internal filtering/search
                                 onSelect={() => {
-                                    onValueChange({
+                                    onChange?.({
                                         id: hospital.id,
                                         name: hospital.name,
                                     })

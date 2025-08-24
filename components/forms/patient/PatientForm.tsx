@@ -8,7 +8,7 @@ import { Form } from '@/components/ui/form'
 import ColumnOne from './columns/column-one/ColumnOne'
 import ColumnTwo from './columns/column-two/ColumnTwo'
 import ColumnThree from './columns/column-three/ColumnThree'
-import ColumnFour from './columns/column-four/fields/ColumnFour'
+import ColumnFour from './columns/column-four/ColumnFour'
 
 interface PatientFormProps {
     form: UseFormReturn<PatientFormInputs>
@@ -28,14 +28,15 @@ export default function PatientForm({
     const {
         formState: { errors },
     } = form
-    console.log('Form errors:', errors)
 
     // ---------- UI ----------
     return (
         // keep this a form to preserve semantics, but don't submit here
         <Form {...form}>
             <form
-                onSubmit={handleSubmit(onSubmit)}
+                onSubmit={handleSubmit(onSubmit, (errors) => {
+                    console.log('Validation failed:', errors)
+                })}
                 className="grid min-w-full gap-6 py-4 select-none"
             >
                 <div className="flex w-full flex-col gap-6 md:flex-row">
@@ -60,7 +61,7 @@ export default function PatientForm({
                     >
                         <X className="h-4 w-4" /> Clear
                     </Button>
-                    <Button type="submit" className="h-12 w-[80%]">
+                    <Button type="submit" className="h-12 w-[80%]" name="Save">
                         {isEdit ? 'Update' : 'Save'}
                     </Button>
                 </div>

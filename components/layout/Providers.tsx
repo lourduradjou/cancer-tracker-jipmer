@@ -11,20 +11,20 @@ import ClientLayout from '@/components/layout/ClientLayout'
 const queryClient = new QueryClient()
 
 export default function Providers({ children }: { children: ReactNode }) {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Toaster richColors />
-          {children}
-        </ThemeProvider>
-      </AuthProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
-  )
+    return (
+        <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
+                >
+                    <Toaster richColors />
+                    {children}
+                </ThemeProvider>
+            </AuthProvider>
+            <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+    )
 }

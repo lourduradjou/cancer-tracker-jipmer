@@ -16,6 +16,7 @@ import StatusCell from './StatusCell'
 import type { Patient } from '@/schema/patient'
 import GenericPatientDialog from '../forms/patient/GenericPatientDialog'
 import { useQueryClient } from '@tanstack/react-query'
+import { formatDobToDDMMYYYY } from '@/lib/patient/dateFormatter'
 
 type Header = {
     name: string
@@ -60,19 +61,21 @@ const GenericRow = memo(function GenericRow(props: GenericRowProps) {
         switch (key) {
             case 'phoneNumber':
             case 'contactNumber':
-                return <PhoneCell phoneNumbers={(value as string[]) ?? []} />
+                return <PhoneCell phoneNumbers={value as string[]} />
 
             case 'dob':
-                return <span className="">{dobToAgeUtil(value as string)}</span>
+                return (
+                    <span className="">{dobToAgeUtil(formatDobToDDMMYYYY(value as string))}</span>
+                )
 
             case 'diseases':
                 return <DiseasesCell diseases={(value as string[]) ?? []} />
 
-            case 'status':
+            case 'patientStatus':
                 return <StatusCell status={value as string} />
 
             default:
-                return <span className="">{String(value)}</span>
+                return <span className="capitalize">{String(value)}</span>
         }
     }
 

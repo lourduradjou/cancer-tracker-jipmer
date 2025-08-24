@@ -1,4 +1,3 @@
-
 'use client'
 
 import { withAuth } from '@/components/hoc/withAuth'
@@ -15,5 +14,3 @@ function NursePage() {
 }
 
 export default withAuth(NursePage, ROLE_CONFIG.nurse)
-
-

@@ -57,15 +57,17 @@ export default function TransferDialog({
         fetchHospitals()
     }, [])
 
+    console.log('hospitals', hospitals)
+
     const handleTransfer = () => {
         if (selectedHospital) {
             onTransfer(selectedHospital.id)
         }
     }
 
-    const filteredHospitals = hospitals
-        .filter((h) => h.name.toLowerCase().includes(searchTerm.toLowerCase()))
-        .slice(0, 3) // limit to top 3 matches
+    const filteredHospitals = hospitals.filter((h) =>
+        (h.name ?? '').toLowerCase().includes(searchTerm.toLowerCase())
+    )
 
     return (
         <Dialog>
@@ -86,7 +88,7 @@ export default function TransferDialog({
                 </DialogHeader>
 
                 <div className="space-y-2">
-                    <Label>Select Hospital</Label>
+                    <Label className="text-muted-foreground text-sm">Select Hospital</Label>
                     <Command className="rounded-md border shadow-md">
                         <CommandInput
                             placeholder="Search hospital name..."

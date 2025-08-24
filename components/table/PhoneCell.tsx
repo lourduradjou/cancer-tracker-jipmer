@@ -1,6 +1,10 @@
 import { useState } from 'react'
 
-export default function PhoneCell({ phoneNumbers }: { phoneNumbers: string[] | string }) {
+export default function PhoneCell({
+    phoneNumbers,
+}: {
+    phoneNumbers: (string | undefined)[] | undefined
+}) {
     const [showAll, setShowAll] = useState(false)
 
     const MAX_DISPLAY = 2
@@ -22,8 +26,7 @@ export default function PhoneCell({ phoneNumbers }: { phoneNumbers: string[] | s
                 <div key={i}>{num}</div>
             ))}
 
-            {phoneNumbers.length === 0 && <p>N/A</p>}
-
+            {numbers.filter((n) => n?.trim()).length === 0 && <p>N/A</p>}
             {!showAll && remaining > 0 && (
                 <div
                     className="cursor-pointer text-blue-500 underline"

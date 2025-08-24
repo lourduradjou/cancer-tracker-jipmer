@@ -9,69 +9,68 @@ export const InsuranceSchema = z
 
 export const FollowUpSchema = z
     .object({
-        date: z.union([z.date()]),
+        date: z.string(),
         remarks: z.string(),
     })
     .optional()
 
-export const PatientSchema = z.object({
-    name: z
-        .string()
-        .min(1, 'Name is required.')
-        .max(100, "Name length can't exceed 100 characters"),
-    caregiverName: z
-        .string()
-        .min(1, 'Name is required.')
-        .max(100, "Name length can't exceed 100 characters")
-        .optional(),
-    phoneNumber: z.array(z.string().optional()).optional(),
-    sex: z.enum(['male', 'female', 'other'], {
-        message: 'Please select a sex.',
-    }),
-    dob: z.string().optional(),
-    age: z
-        .number()
-        .min(0, 'Age must be 0 or greater.')
-        .max(120, 'Age cannot exceed 120.')
-        .optional(),
-    address: z.string().min(1, 'Address is required.'),
-    religion: z.string().optional(),
-    aadhaarId: z.string().optional(),
-    rationCardColor: z.enum(['red', 'yellow', 'none']).optional(),
-    diseases: z.array(z.string()).min(1, 'At least one disease is required.'),
-    assignedHospitalId: z.string().min(1, 'Assigned PHC is required.'),
-    assignedHospitalName: z.string().min(1, 'Assigned Hospital Name is empty'),
-    assignedAsha: z.string().optional(),
-    gpsLocation: z
-        .object({
-            lat: z.number(),
-            lng: z.number(),
-        })
-        .optional(),
-    followUps: z.array(FollowUpSchema).optional(),
-    status: z.enum(['Alive', 'Death', 'Ongoing', 'Followup']).optional(),
-    aabhaId: z.string().optional(),
-    diagnosedDate: z.string().optional(),
-    diagnosedYearsAgo: z.number().optional(),
-    // new fields after second meet
-    hospitalRegistrationDate: z.string().optional(),
-    treatmentStartDate: z.string().optional(),
-    treatmentEndDate: z.string().optional(),
-    biopsyNumber: z.string().optional(),
-    transferred: z.boolean().optional(),
-    transferredFrom: z.string().optional(),
-    // Fields for internal use
-    hasAadhaar: z.boolean(),
-    useAgeInstead: z.boolean(),
-    suspectedCase: z.boolean().optional(),
-    // additional fields after second meet
-    hbcrID: z.string().optional(),
-    hospitalRegistrationId: z.string().optional(),
-    stageOfTheCancer: z.string().optional(),
-    reasonOfRemoval: z.string().optional(),
-    treatmentDetails: z.string().optional(),
-    insurance: InsuranceSchema,
-})
+export const PatientSchema = z
+    .object({
+        name: z
+            .string()
+            .min(1, 'Name is required.')
+            .max(100, "Name length can't exceed 100 characters"),
+        caregiverName: z.string().max(100, "Name length can't exceed 100 characters").optional(),
+        phoneNumber: z.array(z.string().optional()).optional(),
+        sex: z.enum(['male', 'female', 'other'], {
+            message: 'Please select a sex.',
+        }),
+        dob: z.string().optional(),
+        address: z.string().min(1, 'Address is required.'),
+        religion: z.string().optional(),
+        aadhaarId: z.string().optional(),
+        rationCardColor: z.enum(['red', 'yellow', 'none']).optional(),
+        diseases: z.array(z.string()).optional(),
+        assignedHospital: z.object({
+            id: z.string().min(1, 'Hospital is required'),
+            name: z.string().min(1, 'Hospital name is required'),
+        }),
+        assignedAsha: z.string().optional(),
+        gpsLocation: z
+            .object({
+                lat: z.number(),
+                lng: z.number(),
+            })
+            .optional(),
+        followUps: z.array(FollowUpSchema).optional(),
+        patientStatus: z.enum(['Alive', 'Death', 'Not Available']).optional(),
+        treatmentStatus: z.enum(['Ongoing', 'FollowUp', 'Stopped', 'Not Available']).optional(),
+        aabhaId: z.string().optional(),
+        diagnosedDate: z.string().optional(),
+        diagnosedYearsAgo: z.string().optional(),
+        // new fields after second meet
+        hospitalRegistrationDate: z.string().optional(),
+        treatmentStartDate: z.string().nullable().optional(),
+        treatmentEndDate: z.string().nullable().optional(),
+        biopsyNumber: z.string().nullable().optional(),
+        transferred: z.boolean().optional(),
+        transferredFrom: z.string().optional(),
+        // Fields for internal use
+        hasAadhaar: z.boolean(),
+        suspectedCase: z.boolean().optional(),
+        // additional fields after second meet
+        hbcrID: z.string().optional(),
+        hospitalRegistrationId: z.string().optional(),
+        stageOfTheCancer: z.string().optional(),
+        reasonOfRemoval: z.string().optional(),
+        treatmentDetails: z.string().optional(),
+        otherTreatmentDetails: z.string().optional(),
+        insurance: InsuranceSchema,
+    })
+    .refine((data) => data.dob, {
+        message: 'Please enter either age or date of birth.',
+        path: ['age', 'dob'],
+    })
 
 export type PatientFormInputs = z.infer<typeof PatientSchema>
 

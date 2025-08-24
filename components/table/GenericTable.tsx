@@ -28,8 +28,8 @@ import ViewDetailsDialog from '../dialogs/ViewDetailsDialog'
 import GenericPagination from './GenericPagination'
 import GenericRow from './GenericRow'
 import GenericToolbar from './GenericToolbar'
-import { useTableStore, isPatient, isHospital, isUserDoc } from '@/store/table-store'
-import { getCollectionName } from '@/lib/common/getCollectionName'
+import { useTableStore } from '@/store/table-store'
+
 export default function GenericTable({
     headers,
     activeTab,

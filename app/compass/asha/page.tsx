@@ -35,7 +35,6 @@
 //         }
 //     }, [isLoadingAuth, user, role, router])
 
-
 //     // const {
 //     //     data: patients,
 //     //     isLoading: isLoadingPatients,
@@ -167,15 +166,10 @@
 //     )
 // }
 
-
 import React from 'react'
 
 const page = () => {
-  return (
-    <div>
-        Under construction
-    </div>
-  )
+    return <div>Under construction</div>
 }
 
 export default page
