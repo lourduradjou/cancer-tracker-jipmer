@@ -71,6 +71,39 @@ export const PatientSchema = z
         message: 'Please enter either age or date of birth.',
         path: ['age', 'dob'],
     })
+    // ✅ treatmentStartDate >= hospitalRegistrationDate
+    .refine(
+        (data) => {
+            if (!data.treatmentStartDate || !data.hospitalRegistrationDate) return true
+            return new Date(data.treatmentStartDate) >= new Date(data.hospitalRegistrationDate)
+        },
+        {
+            message: 'Treatment start date must be on or after registration date.',
+            path: ['treatmentStartDate'],
+        }
+    )
+    // ✅ treatmentEndDate >= treatmentStartDate
+    .refine(
+        (data) => {
+            if (!data.treatmentEndDate || !data.treatmentStartDate) return true
+            return new Date(data.treatmentEndDate) >= new Date(data.treatmentStartDate)
+        },
+        {
+            message: 'Treatment end date must be on or after treatment start date.',
+            path: ['treatmentEndDate'],
+        }
+    )
+    // ✅ treatmentEndDate cannot exist if treatmentStartDate is missing
+    .refine(
+        (data) => {
+            if (data.treatmentEndDate && !data.treatmentStartDate) return false
+            return true
+        },
+        {
+            message: 'Cannot have treatment end date without start date.',
+            path: ['treatmentEndDate'],
+        }
+    )
 
 export type PatientFormInputs = z.infer<typeof PatientSchema>
 
