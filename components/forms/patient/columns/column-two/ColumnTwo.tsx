@@ -29,7 +29,7 @@ export default function ColumnTwo({ form }: MiddleColumnProps) {
                                 {...field}
                                 label="Address"
                                 autoComplete="off"
-                                className="!border-yellow-400"
+                                className="!border-red-400"
                             />
                         </FormControl>
                         <FormMessage />

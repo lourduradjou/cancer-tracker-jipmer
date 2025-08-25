@@ -28,7 +28,7 @@ export default function NameField({ form, isEdit = false }: NameFieldProps) {
                                 label="Patient Name"
                                 autoComplete="off"
                                 {...field}
-                                className="!border-yellow-400"
+                                className="!border-red-400"
                             />
                         </FormControl>
                         <FormMessage data-testid="name-error" />

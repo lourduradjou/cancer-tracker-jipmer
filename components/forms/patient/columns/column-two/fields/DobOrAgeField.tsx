@@ -1,6 +1,6 @@
 'use client'
 
-import { UseFormReturn, Controller } from 'react-hook-form'
+import { UseFormReturn } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
@@ -8,14 +8,41 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar'
 import { CalendarIcon } from 'lucide-react'
 import { format } from 'date-fns'
-import { FormField, FormItem, FormLabel, FormMessage, FormControl } from '@/components/ui/form'
+import {
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+    FormControl,
+} from '@/components/ui/form'
+import {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+} from '@/components/ui/select'
 
 type Props = {
     form: UseFormReturn<any>
 }
 
+const BLOOD_GROUPS = [
+    'A+',
+    'A-',
+    'B+',
+    'B-',
+    'AB+',
+    'AB-',
+    'O+',
+    'O-',
+    'Bombay (hh)',
+    'Rh-null',
+]
+
 export default function DobOrAgeField({ form }: Props) {
     const { control, watch } = form
+    const useAgeInstead = watch('useAgeInstead')
 
     return (
         <div className="flex flex-col gap-3">
@@ -23,36 +50,71 @@ export default function DobOrAgeField({ form }: Props) {
                 Date of Birth or Age
             </FormLabel>
 
-            {/* Toggle */}
-            <FormField
-                control={control}
-                name="useAgeInstead"
-                render={({ field }) => (
-                    <FormItem className="flex flex-row items-center gap-2 space-y-0">
-                        <FormControl>
-                            <Checkbox
-                                checked={Boolean(field.value)}
-                                onCheckedChange={(checked) => field.onChange(Boolean(checked))}
-                            />
-                        </FormControl>
-                        <FormLabel className="text-muted-foreground text-sm">Enter Age</FormLabel>
-                    </FormItem>
-                )}
-            />
-
-            {/* If age */}
-            {watch('useAgeInstead') ? (
+            {/* Checkbox + Blood group always */}
+            <div className="flex flex-row items-center gap-3">
                 <FormField
                     control={control}
-                    name="dob" // store the computed dob directly
+                    name="useAgeInstead"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-row items-center gap-2 space-y-0">
+                            <FormControl>
+                                <Checkbox
+                                    checked={Boolean(field.value)}
+                                    onCheckedChange={(checked) =>
+                                        field.onChange(Boolean(checked))
+                                    }
+                                />
+                            </FormControl>
+                            <FormLabel className="text-muted-foreground text-sm">
+                                Enter Age
+                            </FormLabel>
+                        </FormItem>
+                    )}
+                />
+
+                {/* Blood group dropdown */}
+                <FormField
+                    control={control}
+                    name="bloodGroup"
+                    render={({ field }) => (
+                        <FormItem className="w-32">
+                            <FormControl>
+                                <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value || ''}
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Blood Group" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {BLOOD_GROUPS.map((group) => (
+                                            <SelectItem key={group} value={group}>
+                                                {group}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
+
+            {/* Conditional render: either DOB or Age box */}
+            {useAgeInstead ? (
+                // Age input
+                <FormField
+                    control={control}
+                    name="dob"
                     render={({ field }) => (
                         <FormItem>
-                            <FormControl className="!border-yellow-400">
+                            <FormControl>
                                 <Input
                                     type="number"
                                     min={0}
                                     max={120}
-                                    placeholder="Enter years ago (e.g. 5)"
+                                    placeholder="Enter years (e.g. 25)"
                                     value={
                                         field.value
                                             ? Math.floor(
@@ -66,7 +128,9 @@ export default function DobOrAgeField({ form }: Props) {
                                         if (!isNaN(years)) {
                                             const dob = new Date()
                                             dob.setFullYear(dob.getFullYear() - years)
-                                            field.onChange(dob.toISOString().split('T')[0]) // store as ISO string
+                                            field.onChange(
+                                                dob.toISOString().split('T')[0]
+                                            )
                                         } else {
                                             field.onChange('')
                                         }
@@ -78,7 +142,7 @@ export default function DobOrAgeField({ form }: Props) {
                     )}
                 />
             ) : (
-                // If dob
+                // DOB picker
                 <FormField
                     control={control}
                     name="dob"
@@ -89,7 +153,7 @@ export default function DobOrAgeField({ form }: Props) {
                                     <PopoverTrigger asChild>
                                         <Button
                                             variant="outline"
-                                            className="!bg-background text-muted-foreground w-full !border-yellow-400 pl-3 text-left font-normal"
+                                            className="!bg-background text-muted-foreground w-full !border-red-400 pl-3 text-left font-normal"
                                         >
                                             {field.value ? (
                                                 format(new Date(field.value), 'PPP')
@@ -106,11 +170,17 @@ export default function DobOrAgeField({ form }: Props) {
                                             fromYear={1900}
                                             toYear={new Date().getFullYear()}
                                             selected={
-                                                field.value ? new Date(field.value) : undefined
+                                                field.value
+                                                    ? new Date(field.value)
+                                                    : undefined
                                             }
                                             onSelect={(date) =>
                                                 field.onChange(
-                                                    date ? date.toISOString().split('T')[0] : ''
+                                                    date
+                                                        ? date
+                                                              .toISOString()
+                                                              .split('T')[0]
+                                                        : ''
                                                 )
                                             }
                                         />

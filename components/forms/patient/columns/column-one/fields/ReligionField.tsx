@@ -6,9 +6,11 @@ import {
     SelectValue,
     SelectContent,
     SelectItem,
+    SelectLabel,
 } from '@/components/ui/select'
 import { PatientFormInputs } from '@/schema/patient'
 import { Label } from '@/components/ui/label'
+import { SelectGroup } from '@radix-ui/react-select'
 
 interface ReligionDropdownProps {
     form: UseFormReturn<PatientFormInputs>
@@ -21,8 +23,10 @@ const ReligionDropdown: React.FC<ReligionDropdownProps> = ({ form: { control } }
             control={control}
             name="religion"
             render={({ field }) => (
-                <>
-                    <Label className="text-muted-foreground text-sm">Regilion</Label>
+                <SelectGroup>
+                    <SelectLabel className="text-muted-foreground mb-1 text-sm">
+                        Religion
+                    </SelectLabel>
                     <Select value={field.value} onValueChange={(val) => field.onChange(val)}>
                         <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select Religion" />
@@ -37,7 +41,7 @@ const ReligionDropdown: React.FC<ReligionDropdownProps> = ({ form: { control } }
                             <SelectItem value="none">None / Prefer not to say</SelectItem>
                         </SelectContent>
                     </Select>
-                </>
+                </SelectGroup>
             )}
         />
     )

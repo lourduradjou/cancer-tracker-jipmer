@@ -35,7 +35,7 @@ export function RegistrationDateField({ form }: Props) {
                     </FormLabel>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <FormControl className="text-muted-foreground !border-yellow-400 text-sm">
+                            <FormControl className="text-muted-foreground !border-red-400 text-sm">
                                 <Button
                                     variant="outline"
                                     className="!bg-background w-full pl-3 text-left font-normal"

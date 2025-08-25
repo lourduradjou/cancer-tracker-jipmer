@@ -49,7 +49,7 @@ export default function DiagnosisTimingField({ form }: DiagnosisTimingFieldProps
                     name="diagnosedDate" // store computed date directly
                     render={({ field }) => (
                         <FormItem>
-                            <FormControl className="!border-yellow-400">
+                            <FormControl className="">
                                 <Input
                                     type="number"
                                     min={0}
@@ -93,7 +93,7 @@ export default function DiagnosisTimingField({ form }: DiagnosisTimingFieldProps
                                     <PopoverTrigger asChild>
                                         <Button
                                             variant="outline"
-                                            className="!bg-background text-muted-foreground w-full !border-yellow-400 pl-3 text-left font-normal"
+                                            className="!bg-background text-muted-foreground w-full  pl-3 text-left font-normal"
                                         >
                                             {field.value ? (
                                                 format(new Date(field.value), 'PPP')

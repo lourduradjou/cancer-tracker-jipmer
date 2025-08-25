@@ -74,6 +74,22 @@ export default function AadhaarField({ form }: AadhaarFieldProps) {
                     </FormItem>
                 )}
             />
+            <FormField
+                control={control}
+                name="aabhaId"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormControl>
+                            <FloatingLabelInput
+                                {...field}
+                                label="Aabha Number"
+                                autoComplete="off"
+                            />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
         </>
     )
 }

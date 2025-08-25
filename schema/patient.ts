@@ -19,13 +19,19 @@ export const PatientSchema = z
         name: z
             .string()
             .min(1, 'Name is required.')
-            .max(100, "Name length can't exceed 100 characters"),
-        caregiverName: z.string().max(100, "Name length can't exceed 100 characters").optional(),
+            .max(100, "Name length can't exceed 100 characters")
+            .regex(/^[A-Za-z\s]+$/, 'Name must only contain letters and spaces'),
+        caregiverName: z
+            .string()
+            .max(100, "Name length can't exceed 100 characters")
+            .regex(/^[A-Za-z\s]*$/, 'Name must only contain letters and spaces')
+            .optional(),
         phoneNumber: z.array(z.string().optional()).optional(),
         sex: z.enum(['male', 'female', 'other'], {
             message: 'Please select a sex.',
         }),
         dob: z.string().optional(),
+        bloodGroup: z.string().optional(),
         address: z.string().min(1, 'Address is required.'),
         religion: z.string().optional(),
         aadhaarId: z.string().optional(),
