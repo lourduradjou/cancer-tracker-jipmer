@@ -44,7 +44,7 @@ function SelectTrigger({
             data-size={size}
             className={cn(
                 "border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-background flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8",
-                showWarning ? 'border-yellow-500 ring-yellow-200' : '',
+                showWarning ? 'border-red-400 ring-red-400' : '',
                 className
             )}
             {...props}

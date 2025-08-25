@@ -81,7 +81,7 @@ export default function HospitalSearch({ value, onChange }: HospitalSearchProps)
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="!bg-background w-full justify-between !border-yellow-400"
+                    className="!bg-background w-full justify-between !border-red-400"
                 >
                     <span className="text-muted-foreground truncate text-sm">
                         {selectedHospitalName}

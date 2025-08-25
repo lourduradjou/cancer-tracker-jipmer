@@ -47,6 +47,7 @@ export default function GenericPatientDialog({
             dob: '',
             address: '',
             aadhaarId: '',
+            aabhaId: '',
             rationCardColor: 'none',
             religion: 'none',
             diseases: [],
@@ -68,6 +69,7 @@ export default function GenericPatientDialog({
     const { handleSubmit, reset, watch, setValue } = form
     const aadhaarId = watch('aadhaarId')
     const hasAadhaar = watch('hasAadhaar')
+    const suspectedCase = watch('suspectedCase')
 
     // Initialize form with patient data for edit mode
     useEffect(() => {
@@ -149,7 +151,7 @@ export default function GenericPatientDialog({
 
             <DialogContent
                 onInteractOutside={(e) => e.preventDefault()}
-                className="max-h-[90vh] min-w-[1200px] overflow-y-auto"
+                className={`max-h-[90vh] ${suspectedCase ? 'min-w-[1020px]' : 'min-w-[1280px]'} overflow-y-auto`}
             >
                 <DialogHeader>
                     <DialogTitle>
