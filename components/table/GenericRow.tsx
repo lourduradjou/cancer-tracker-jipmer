@@ -61,7 +61,7 @@ const GenericRow = memo(function GenericRow(props: GenericRowProps) {
         switch (key) {
             case 'phoneNumber':
             case 'contactNumber':
-                return <PhoneCell phoneNumbers={value as string[]} />
+                return <PhoneCell phoneNumbers={value as string[]} isPatientTab={isPatientTab} />
 
             case 'dob':
                 return (
@@ -75,7 +75,7 @@ const GenericRow = memo(function GenericRow(props: GenericRowProps) {
                 return <StatusCell status={value as string} />
 
             default:
-                return <span className="capitalize">{String(value)}</span>
+                return <span className="">{String(value)}</span>
         }
     }
 
@@ -138,12 +138,12 @@ const GenericRow = memo(function GenericRow(props: GenericRowProps) {
                 {isPatientTab && (
                     <TransferDialog
                         patient={rowData as Patient}
-                        onTransfer={async (hospitalId) => {
+                        onTransfer={async (hospitalId, hospitalName) => {
                             try {
                                 if (!rowData.id) throw new Error('Missing patient document ID')
                                 const patientRef = doc(db, 'patients', rowData.id.toString())
                                 await updateDoc(patientRef, {
-                                    assignedPhc: hospitalId,
+                                    assignedHospital: { id: hospitalId, name: hospitalName },
                                     assignedAsha: '',
                                 })
                                 toast.success(`Transferred ${rowData.name} to new PHC.`)
@@ -154,7 +154,7 @@ const GenericRow = memo(function GenericRow(props: GenericRowProps) {
                     />
                 )}
 
-                {isRemovedPatientsTab ? (
+                {isRemovedPatientsTab && (
                     <Button
                         size="icon"
                         variant="outline"
@@ -164,17 +164,16 @@ const GenericRow = memo(function GenericRow(props: GenericRowProps) {
                     >
                         <RotateCcw className="h-4 w-4" />
                     </Button>
-                ) : (
-                    <Button
-                        size="icon"
-                        variant="destructive"
-                        className="text-white"
-                        onClick={() => onDelete(rowData)}
-                        title="Delete Record"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
                 )}
+                <Button
+                    size="icon"
+                    variant="destructive"
+                    className="text-white"
+                    onClick={() => onDelete(rowData)}
+                    title="Delete Record"
+                >
+                    <Trash2 className="h-4 w-4" />
+                </Button>
             </TableCell>
         </TableRow>
     )
