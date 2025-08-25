@@ -25,14 +25,44 @@ export default function DiseaseMultiSelect({
     updateCustomDisease,
 }: DiseaseMultiSelectProps) {
     const { setValue, watch } = useFormContext()
-
     const suspectedCase = watch('suspectedCase') || false
+
+    // Display diseases includes custom disease if selected
+    const displayedDiseases = isCustomDiseaseSelected && customDisease.trim()
+        ? [...selectedDiseases.filter(d => d !== customDisease), customDisease]
+        : selectedDiseases
 
     const toggleDisease = (label: string, checked: boolean) => {
         const next = checked
-            ? Array.from(new Set([...(selectedDiseases || []), label]))
-            : (selectedDiseases || []).filter((d) => d !== label)
+            ? Array.from(new Set([...selectedDiseases, label]))
+            : selectedDiseases.filter((d) => d !== label)
         setValue('diseases', next, { shouldDirty: true, shouldValidate: true })
+    }
+
+    const handleCustomDiseaseToggle = (checked: boolean) => {
+        toggleCustomDisease(checked)
+        if (!checked) {
+            // remove custom disease from selectedDiseases
+            setValue(
+                'diseases',
+                selectedDiseases.filter((d) => d !== customDisease),
+                { shouldDirty: true, shouldValidate: true }
+            )
+        } else if (customDisease.trim()) {
+            // add custom disease
+            setValue('diseases', [...selectedDiseases, customDisease], {
+                shouldDirty: true,
+                shouldValidate: true,
+            })
+        }
+    }
+
+    const handleCustomDiseaseChange = (value: string) => {
+        if (isCustomDiseaseSelected) {
+            const otherDiseases = selectedDiseases.filter((d) => d !== customDisease)
+            setValue('diseases', [...otherDiseases, value], { shouldDirty: true, shouldValidate: true })
+        }
+        updateCustomDisease(value)
     }
 
     return (
@@ -43,13 +73,13 @@ export default function DiseaseMultiSelect({
                     className={cn(
                         '!bg-background min-h-[100px] w-full !border-yellow-400 p-2 text-left',
                         {
-                            'text-muted-foreground': selectedDiseases.length === 0,
+                            'text-muted-foreground': displayedDiseases.length === 0,
                         }
                     )}
                 >
                     <div className="flex max-h-24 flex-wrap items-start gap-1 overflow-y-auto">
-                        {selectedDiseases.length > 0 ? (
-                            selectedDiseases.map((disease, i) => (
+                        {displayedDiseases.length > 0 ? (
+                            displayedDiseases.map((disease, i) => (
                                 <span
                                     key={`${disease}-${i}`}
                                     className="bg-muted text-muted-foreground rounded px-2 py-0.5 text-xs"
@@ -92,9 +122,7 @@ export default function DiseaseMultiSelect({
                                             if (sex === 'male')
                                                 return d.gender === undefined || d.gender === 'male'
                                             if (sex === 'female')
-                                                return (
-                                                    d.gender === undefined || d.gender === 'female'
-                                                )
+                                                return d.gender === undefined || d.gender === 'female'
                                             return true
                                         })
                                         .map(({ label }) => (
@@ -119,7 +147,7 @@ export default function DiseaseMultiSelect({
                                                 <Checkbox
                                                     checked={isCustomDiseaseSelected}
                                                     onCheckedChange={(c) =>
-                                                        toggleCustomDisease(Boolean(c))
+                                                        handleCustomDiseaseToggle(Boolean(c))
                                                     }
                                                 />
                                                 <span>Enter disease</span>
@@ -131,7 +159,7 @@ export default function DiseaseMultiSelect({
                                                     placeholder="Type disease name"
                                                     value={customDisease}
                                                     onChange={(e) =>
-                                                        updateCustomDisease(e.target.value)
+                                                        handleCustomDiseaseChange(e.target.value)
                                                     }
                                                 />
                                             )}
