@@ -2,16 +2,18 @@ import { describe, it, expect } from 'vitest'
 import { PatientSchema } from '@/schema/patient'
 
 describe('PatientSchema - caregiverName field validation', () => {
-    it('should fail when caregiverName is empty string', () => {
+    it('should pass when caregiverName is empty string', () => {
         const result = PatientSchema.safeParse({
             name: 'John Doe',
             caregiverName: '',
             sex: 'male',
             dob: '1990-01-01',
             address: 'Some address',
-            assignedHospital: { id: 'h1', name: 'Test Hospital' },
             hasAadhaar: true,
+            assignedHospital: { id: 'h1', name: 'Test Hospital' },
         })
+
+        console.log(result)
 
         expect(result.success).toBe(true)
     })

@@ -24,7 +24,7 @@ export const PatientSchema = z
         caregiverName: z
             .string()
             .max(100, "Name length can't exceed 100 characters")
-            .regex(/^[A-Za-z\s]+$/, 'Name must only contain letters and spaces')
+            .regex(/^[A-Za-z\s]*$/, 'Name must only contain letters and spaces')
             .optional(),
         phoneNumber: z.array(z.string().optional()).optional(),
         sex: z.enum(['male', 'female', 'other'], {
