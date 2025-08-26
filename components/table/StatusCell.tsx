@@ -4,7 +4,7 @@ interface StatusCellProps {
     status?: string
 }
 
-export default function StatusCell({ status }: StatusCellProps) {
+export function StatusCell({ status }: StatusCellProps) {
     const statusLower = status?.toLowerCase()
 
     const colorClass =

@@ -28,7 +28,7 @@ interface GenericPaginationProps {
     isPatientTab: boolean
 }
 
-export default function GenericPagination({
+export function GenericPagination({
     currentPage,
     totalPages,
     onPageChange,

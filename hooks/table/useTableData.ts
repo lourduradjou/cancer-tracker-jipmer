@@ -19,7 +19,7 @@ type UsePatientsProps = {
     orgId?: string | null
     ashaEmail?: string | null | undefined
     enabled?: boolean
-    adminRequiredData?:
+    requiredData?:
         | 'ashas'
         | 'doctors'
         | 'nurses'
@@ -33,19 +33,19 @@ export const useTableData = ({
     orgId,
     ashaEmail,
     enabled = true,
-    adminRequiredData,
+    requiredData,
 }: UsePatientsProps) => {
     console.log('inside custom user hook')
-    const isPatientsEnabled = adminRequiredData ? true : enabled && (!!orgId || !!ashaEmail)
-    const isHospitalsEnabled = enabled && adminRequiredData === 'hospitals'
+    const isPatientsEnabled = requiredData ? true : enabled && (!!orgId || !!ashaEmail)
+    const isHospitalsEnabled = enabled && requiredData === 'hospitals'
     const isUsersEnabled =
         enabled &&
-        (adminRequiredData === 'ashas' ||
-            adminRequiredData === 'doctors' ||
-            adminRequiredData === 'nurses')
+        (requiredData === 'ashas' ||
+            requiredData === 'doctors' ||
+            requiredData === 'nurses')
 
     // Now you return the appropriate query result based on the props.
-    if (adminRequiredData === 'hospitals') {
+    if (requiredData === 'hospitals') {
         const hospitalsQuery = useQuery<Hospital[], Error>({
             queryKey: ['hospitals'],
             queryFn: async () => {
@@ -62,16 +62,16 @@ export const useTableData = ({
         return hospitalsQuery
     }
     if (
-        adminRequiredData === 'ashas' ||
-        adminRequiredData === 'doctors' ||
-        adminRequiredData === 'nurses'
+        requiredData === 'ashas' ||
+        requiredData === 'doctors' ||
+        requiredData === 'nurses'
     ) {
         const usersQuery = useQuery<UserDoc[], Error>({
-            queryKey: ['users', adminRequiredData],
+            queryKey: ['users', requiredData],
             queryFn: async () => {
                 const usersQuery = query(
                     collection(db, 'users'),
-                    where('role', '==', cutLastCharacter(adminRequiredData))
+                    where('role', '==', cutLastCharacter(requiredData))
                 )
                 const usersSnap = await getDocs(usersQuery)
                 return usersSnap.docs.map((user) => ({
@@ -85,7 +85,7 @@ export const useTableData = ({
         return usersQuery
     }
 
-    if (adminRequiredData === 'patients') {
+    if (requiredData === 'patients') {
         let queryKeyValue
         if (orgId) {
             queryKeyValue = ['patients', { orgId }]
@@ -110,7 +110,7 @@ export const useTableData = ({
                         collection(db, 'patients'),
                         where('assignedAsha', '==', ashaEmail)
                     )
-                } else if (adminRequiredData === 'patients') {
+                } else if (requiredData === 'patients') {
                     patientsQuery = query(collection(db, 'patients'))
                 } else {
                     throw new Error('No organization Id or Asha email provided to fetch patients')
@@ -127,7 +127,7 @@ export const useTableData = ({
         return patientsQuery
     }
 
-    if (adminRequiredData === 'removedPatients') {
+    if (requiredData === 'removedPatients') {
         let queryKeyValue
 
         queryKeyValue = ['removedPatients']

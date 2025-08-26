@@ -42,7 +42,7 @@ export default function LoginPage() {
         if (!isLoadingAuth && user && role) {
             const roleRoutes: Record<string, string> = {
                 admin: '/compass/admin',
-                asha: '/comapass/asha',
+                asha: '/compass/asha',
                 nurse: '/compass/nurse',
                 doctor: '/compass/doctor',
             }

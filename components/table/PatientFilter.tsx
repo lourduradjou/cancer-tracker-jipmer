@@ -14,7 +14,7 @@ import { usePatientFilterStore } from '@/store/patient-filter-store'
 import { ListFilter } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 
-export default function PatientFilter() {
+export function PatientFilter() {
     const searchRef = useRef<HTMLInputElement>(null)
     const { filters, setFilter, toggleFilterItem, reset } = usePatientFilterStore()
 

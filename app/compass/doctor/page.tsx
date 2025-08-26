@@ -1,6 +1,6 @@
 'use client'
 
-import PatientTable from '@/components/table/GenericTable'
+import { GenericTable } from '@/components/table'
 import { PATIENT_TABLE_HEADERS } from '@/constants/headers'
 import { withAuth } from '@/components/hoc/withAuth'
 import { ROLE_CONFIG } from '@/constants/auth'
@@ -8,7 +8,7 @@ import { ROLE_CONFIG } from '@/constants/auth'
 function DoctorPageContent() {
     return (
         <main className="mx-auto px-8 py-4 lg:max-w-[1240px] xl:max-w-[1400px]">
-            <PatientTable headers={PATIENT_TABLE_HEADERS} activeTab="patients" />
+            <GenericTable headers={PATIENT_TABLE_HEADERS} activeTab="patients" />
         </main>
     )
 }

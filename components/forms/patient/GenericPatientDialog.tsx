@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { FormProvider, useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import {
     Dialog,
@@ -146,27 +146,29 @@ export default function GenericPatientDialog({
     )
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
+        <FormProvider {...form}>
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
 
-            <DialogContent
-                onInteractOutside={(e) => e.preventDefault()}
-                className={`max-h-[90vh] ${suspectedCase ? 'min-w-[1020px]' : 'min-w-[1280px]'} overflow-y-auto`}
-            >
-                <DialogHeader>
-                    <DialogTitle>
-                        {isEdit ? 'Update Patient Details' : 'Add New Patient Details'}
-                    </DialogTitle>
-                </DialogHeader>
+                <DialogContent
+                    onInteractOutside={(e) => e.preventDefault()}
+                    className={`max-h-[90vh] ${suspectedCase ? 'min-w-[1020px]' : 'min-w-[1280px]'} overflow-y-auto`}
+                >
+                    <DialogHeader>
+                        <DialogTitle>
+                            {isEdit ? 'Update Patient Details' : 'Add New Patient Details'}
+                        </DialogTitle>
+                    </DialogHeader>
 
-                <PatientForm
-                    form={form}
-                    reset={reset}
-                    handleSubmit={handleSubmit}
-                    onSubmit={onSubmit}
-                    isEdit={isEdit}
-                />
-            </DialogContent>
-        </Dialog>
+                    <PatientForm
+                        form={form}
+                        reset={reset}
+                        handleSubmit={handleSubmit}
+                        onSubmit={onSubmit}
+                        isEdit={isEdit}
+                    />
+                </DialogContent>
+            </Dialog>
+        </FormProvider>
     )
 }

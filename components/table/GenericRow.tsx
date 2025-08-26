@@ -10,9 +10,7 @@ import { usePathname } from 'next/navigation'
 import { memo } from 'react'
 import { toast } from 'sonner'
 import TransferDialog from '../dialogs/TransferDialog'
-import DiseasesCell from './DiseasesCell'
-import PhoneCell from './PhoneCell'
-import StatusCell from './StatusCell'
+import {DiseasesCell, PhoneCell, StatusCell} from '.'
 import type { Patient } from '@/schema/patient'
 import GenericPatientDialog from '../forms/patient/GenericPatientDialog'
 import { useQueryClient } from '@tanstack/react-query'
@@ -40,7 +38,7 @@ type GenericRowProps = {
     headers: Header[]
 }
 
-const GenericRow = memo(function GenericRow(props: GenericRowProps) {
+export const GenericRow = memo(function GenericRow(props: GenericRowProps) {
     const {
         isPatientTab,
         rowData,
@@ -179,4 +177,3 @@ const GenericRow = memo(function GenericRow(props: GenericRowProps) {
     )
 })
 
-export default GenericRow

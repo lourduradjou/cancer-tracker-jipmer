@@ -10,7 +10,8 @@ import {
     ASHA_TABLE_HEADERS,
     REMOVED_PATIENT_TABLE_HEADERS,
 } from '@/constants/headers'
-import PatientTable from '@/components/table/GenericTable'
+// import { PatientTable } from '@/components/table'
+import { GenericTable } from '@/components/table'
 import { withAuth } from '@/components/hoc/withAuth'
 import { ROLE_CONFIG } from '@/constants/auth'
 
@@ -69,7 +70,7 @@ function AdminPageContent() {
             </div>
 
             <div className="p-4">
-                <PatientTable headers={selectedHeaders} activeTab={activeTab} />
+                <GenericTable headers={selectedHeaders} activeTab={activeTab} />
             </div>
         </div>
     )
