@@ -20,7 +20,8 @@
         ],
         "paths": {
             "@/*": ["./*"]
-        }
+        },
+        "types": ["vitest/globals", "node"]
     },
     "include": [
         "next-env.d.ts",
@@ -28,7 +29,8 @@
         "**/*.tsx",
         ".next/types/**/*.ts",
         "scripts/seedPatients.js",
-        "app/__tests__/RootPage.test.tsx"
+        "app/__tests__/RootPage.test.tsx",
+        "**/*.ts", "**/*.tsx", "vitest.setup.ts"
     ],
     "exclude": ["node_modules"]
 }

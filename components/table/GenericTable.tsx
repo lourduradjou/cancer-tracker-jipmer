@@ -25,12 +25,10 @@ import { Patient } from '@/schema/patient'
 import { UserDoc } from '@/schema/user'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import ViewDetailsDialog from '../dialogs/ViewDetailsDialog'
-import GenericPagination from './GenericPagination'
-import GenericRow from './GenericRow'
-import GenericToolbar from './GenericToolbar'
+import {GenericPagination, GenericRow, GenericToolbar} from './'
 import { useTableStore } from '@/store/table-store'
 
-export default function GenericTable({
+export function GenericTable({
     headers,
     activeTab,
 }: {

@@ -12,7 +12,6 @@ export const FollowUpSchema = z
         date: z.string(),
         remarks: z.string(),
     })
-    .optional()
 
 export const PatientSchema = z
     .object({
@@ -44,10 +43,10 @@ export const PatientSchema = z
         assignedAsha: z.string().optional(),
         gpsLocation: z
             .object({
-                lat: z.number(),
-                lng: z.number(),
+                lat: z.number().optional(),
+                lng: z.number().optional(),
             })
-            .optional(),
+            .optional().nullable(),
         followUps: z.array(FollowUpSchema).optional(),
         patientStatus: z.enum(['Alive', 'Death', 'Not Available']).optional(),
         treatmentStatus: z.enum(['Ongoing', 'FollowUp', 'Stopped', 'Not Available']).optional(),

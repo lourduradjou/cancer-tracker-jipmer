@@ -4,7 +4,7 @@ interface DiseasesCellProps {
     diseases?: string[]
 }
 
-export default function DiseasesCell({ diseases }: DiseasesCellProps) {
+export function DiseasesCell({ diseases }: DiseasesCellProps) {
     if (!diseases?.length) {
         return <span className="text-muted-foreground italic">No diseases listed</span>
     }

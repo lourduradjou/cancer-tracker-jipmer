@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function PhoneCell({
+export function PhoneCell({
     phoneNumbers,
     isPatientTab,
 }: {

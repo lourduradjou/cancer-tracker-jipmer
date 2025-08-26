@@ -1,109 +1,115 @@
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Checkbox } from '@/components/ui/checkbox'
-import { cn } from '@/lib/utils'
 import { AVAILABLE_DISEASES_LIST } from '@/constants/diseases'
-import { useFormContext } from 'react-hook-form'
+import { cn } from '@/lib/utils'
+import { X } from 'lucide-react'
 import { useState } from 'react'
+import { useFormContext } from 'react-hook-form'
 
 type DiseaseMultiSelectProps = {
     sex: 'male' | 'female' | 'other' | undefined
-    selectedDiseases: string[]
-    isCustomDiseaseSelected?: boolean
-    toggleCustomDisease: (checked: boolean) => void
-    customDisease: string
-    updateCustomDisease: (value: string) => void
 }
 
-export default function DiseaseMultiSelect({
-    sex,
-    selectedDiseases,
-    toggleCustomDisease,
-    customDisease,
-    updateCustomDisease,
-}: DiseaseMultiSelectProps) {
-    const { setValue, watch } = useFormContext()
+export default function DiseaseMultiSelect({ sex }: DiseaseMultiSelectProps) {
     const [isCustomDiseaseSelected, setIsCustomDiseaseSelected] = useState(false)
+    const { watch, setValue, control } = useFormContext()
 
+    // ------------------- Diseases logic -------------------
+    const selectedDiseases: string[] = watch('diseases') || []
+    const [customDisease, setCustomDisease] = useState('')
     const suspectedCase = watch('suspectedCase') || false
-
-    // Display diseases includes custom disease if selected
-    const displayedDiseases =
-        isCustomDiseaseSelected && customDisease.trim()
-            ? [...selectedDiseases.filter((d) => d !== customDisease), customDisease]
-            : selectedDiseases.filter((d) => d.trim() !== '')
-
-    const toggleDisease = (label: string, checked: boolean) => {
-        setIsCustomDiseaseSelected(checked)
-        const next = checked
-            ? Array.from(new Set([...selectedDiseases, label]))
-            : selectedDiseases.filter((d) => d !== label)
-        setValue('diseases', next, { shouldDirty: true, shouldValidate: true })
-    }
-
-    const handleCustomDiseaseToggle = (checked: boolean) => {
-        toggleCustomDisease(checked)
-        if (!checked) {
-            setValue(
-                'diseases',
-                selectedDiseases.filter((d) => d !== customDisease),
-                { shouldDirty: true, shouldValidate: true }
-            )
-        } else if (customDisease.trim()) {
-            setValue('diseases', [...selectedDiseases, customDisease], {
-                shouldDirty: true,
-                shouldValidate: true,
-            })
-        }
-    }
-
-    const handleCustomDiseaseChange = (value: string) => {
-        if (isCustomDiseaseSelected) {
-            const otherDiseases = selectedDiseases.filter((d) => d !== customDisease)
-            setValue('diseases', [...otherDiseases, value], {
-                shouldDirty: true,
-                shouldValidate: true,
-            })
-        }
-        updateCustomDisease(value)
-    }
+    const displayedDiseases = selectedDiseases.filter((d) => d.trim() !== '')
 
     return (
         <div className="flex flex-col gap-3">
             {/* ---- Enter disease checkbox + input ---- */}
-            <div className='flex gap-2'>
+            <div className="flex gap-2">
                 <label className="flex items-center gap-2 text-sm">
                     <Checkbox
                         checked={isCustomDiseaseSelected}
-                        onCheckedChange={(c) => handleCustomDiseaseToggle(Boolean(c))}
+                        onCheckedChange={(c) => setIsCustomDiseaseSelected(Boolean(c))}
                     />
-                    <span className='text-sm text-muted-foreground'>Enter disease</span>
+                    <span className="text-muted-foreground text-sm">Enter disease</span>
                 </label>
 
                 {/* ---- Suspected Case checkbox ---- */}
-                <label className="flex items-center gap-2 text-sm pl-2 border-l-2">
+                <label className="flex items-center gap-2 border-l-2 pl-2 text-sm">
                     <Checkbox
                         checked={suspectedCase}
-                        onCheckedChange={(c) =>
-                            setValue('suspectedCase', Boolean(c), {
+                        onCheckedChange={(c) => {
+                            const checked = Boolean(c)
+
+                            setValue('suspectedCase', checked, {
                                 shouldDirty: true,
                                 shouldValidate: true,
                             })
-                        }
+
+                            if (checked) {
+                                // 🔴 clear diseases when suspected case is selected
+                                setValue('diseases', [], {
+                                    shouldDirty: true,
+                                    shouldValidate: true,
+                                })
+                                setIsCustomDiseaseSelected(false) // disable custom input
+                            }
+                        }}
                     />
-                    <span className='text-sm text-muted-foreground'>Suspected Case</span>
+
+                    <span className="text-muted-foreground text-sm">Suspected Case</span>
                 </label>
             </div>
 
             {isCustomDiseaseSelected && (
-                <Input
-                    className="ml-6"
-                    placeholder="Type disease name"
-                    value={customDisease}
-                    onChange={(e) => handleCustomDiseaseChange(e.target.value)}
-                />
+                <div className="ml-6 flex gap-2">
+                    <Input
+                        className="flex-1"
+                        placeholder="Type disease name"
+                        value={customDisease}
+                        onChange={(e) => setCustomDisease(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (suspectedCase) return // 🔴 block typing if suspected case is active
+                            if (e.key === 'Enter' && customDisease.trim()) {
+                                e.preventDefault()
+                                if (!selectedDiseases.includes(customDisease.trim())) {
+                                    setValue(
+                                        'diseases',
+                                        [...selectedDiseases, customDisease.trim()],
+                                        {
+                                            shouldDirty: true,
+                                            shouldValidate: true,
+                                        }
+                                    )
+                                }
+                                setCustomDisease('')
+                            }
+                        }}
+                        disabled={suspectedCase} // 🔴 disable field
+                    />
+                    <Button
+                        type="button"
+                        disabled={suspectedCase} // 🔴 disable add button
+                        onClick={() => {
+                            if (customDisease.trim()) {
+                                if (!selectedDiseases.includes(customDisease.trim())) {
+                                    setValue(
+                                        'diseases',
+                                        [...selectedDiseases, customDisease.trim()],
+                                        {
+                                            shouldDirty: true,
+                                            shouldValidate: true,
+                                        }
+                                    )
+                                }
+                                setCustomDisease('')
+                            }
+                        }}
+                    >
+                        Add
+                    </Button>
+                </div>
             )}
 
             {/* ---- Diseases multi-select box ---- */}
@@ -123,9 +129,24 @@ export default function DiseaseMultiSelect({
                                 displayedDiseases.map((disease, i) => (
                                     <span
                                         key={`${disease}-${i}`}
-                                        className="bg-muted text-muted-foreground rounded px-2 py-0.5 text-xs"
+                                        className="bg-muted text-muted-foreground flex items-center gap-1 rounded px-2 py-0.5 text-xs"
                                     >
                                         {disease || '—'}
+                                        <span
+                                            role="button"
+                                            tabIndex={0}
+                                            className="cursor-pointer hover:text-red-500"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setValue(
+                                                    'diseases',
+                                                    selectedDiseases.filter((d) => d !== disease),
+                                                    { shouldDirty: true, shouldValidate: true }
+                                                )
+                                            }}
+                                        >
+                                            <X size={12} />
+                                        </span>
                                     </span>
                                 ))
                             ) : (
@@ -160,6 +181,7 @@ export default function DiseaseMultiSelect({
                                     >
                                         {AVAILABLE_DISEASES_LIST[type]
                                             .filter((d) => {
+                                                //getting values based on the selected sex
                                                 if (sex === 'male')
                                                     return (
                                                         d.gender === undefined ||
@@ -179,9 +201,35 @@ export default function DiseaseMultiSelect({
                                                 >
                                                     <Checkbox
                                                         checked={selectedDiseases.includes(label)}
-                                                        onCheckedChange={(checked) =>
-                                                            toggleDisease(label, Boolean(checked))
-                                                        }
+                                                        onCheckedChange={(checked) => {
+                                                            if (checked) {
+                                                                // 🔴 turn off suspected case if selecting other diseases
+                                                                setValue('suspectedCase', false, {
+                                                                    shouldDirty: true,
+                                                                    shouldValidate: true,
+                                                                })
+
+                                                                setValue(
+                                                                    'diseases',
+                                                                    [...selectedDiseases, label],
+                                                                    {
+                                                                        shouldDirty: true,
+                                                                        shouldValidate: true,
+                                                                    }
+                                                                )
+                                                            } else {
+                                                                setValue(
+                                                                    'diseases',
+                                                                    selectedDiseases.filter(
+                                                                        (d) => d !== label
+                                                                    ),
+                                                                    {
+                                                                        shouldDirty: true,
+                                                                        shouldValidate: true,
+                                                                    }
+                                                                )
+                                                            }
+                                                        }}
                                                     />
                                                     <span className="ml-1 text-sm">{label}</span>
                                                 </label>

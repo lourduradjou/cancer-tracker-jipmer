@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { importData } from '@/lib/importUtils'
+import { importData } from '@/lib/import/importUtils'
 import { exportToCSV, exportToExcel } from '@/lib/patient/export'
 import { generateDiseasePDF } from '@/lib/patient/generateDiseaseReport'
 import { useQueryClient } from '@tanstack/react-query'
@@ -15,11 +15,11 @@ import { usePathname } from 'next/navigation'
 import AddHospitalDialog from '../forms/hospital/AddHospitalDialog'
 import AddUserDialog from '../forms/user/AddUserDialog'
 import { SearchInput } from '../search/SearchInput'
-import PatientFilter from './PatientFilter'
+import {PatientFilter} from '.'
 import GenericPatientDialog from '../forms/patient/GenericPatientDialog'
 import { MoreVertical } from 'lucide-react'
 
-export default function GenericToolbar({
+export function GenericToolbar({
   activeTab,
   getExportData,
   searchTerm,
