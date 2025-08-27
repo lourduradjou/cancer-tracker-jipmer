@@ -80,22 +80,24 @@ export function GenericToolbar({
                         {/* Import */}
                         {activeTab === 'patients' && (
                             <DropdownMenuItem
-                                onClick={() => document.getElementById('file-upload')?.click()}
+                                onSelect={(e) => {
+                                    e.preventDefault() // ✅ stop default closing behavior if needed
+                                    console.log('inside import button')
+                                    document.getElementById('file-upload')?.click()
+                                }}
                             >
                                 Import
                             </DropdownMenuItem>
                         )}
-                        {/* <DropdownMenuItem
-              onClick={() => document.getElementById('file-upload')?.click()}
-            >
-              Import
-            </DropdownMenuItem> */}
                         <input
                             id="file-upload"
                             type="file"
                             accept=".csv, .xlsx, .xls"
                             className="hidden"
-                            onChange={(e) => importData(e, activeTab, queryClient)}
+                            onChange={(e) => {
+                                console.log('inside file upload')
+                                importData(e, queryClient)
+                            }}
                         />
 
                         {/* Export */}
