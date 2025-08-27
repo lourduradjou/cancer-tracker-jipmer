@@ -63,11 +63,11 @@ export default function Navbar() {
                 <ModeToggle />
 
                 <div className="flex flex-col md:flex-row md:items-center md:space-x-4">
-                    {username && (
+                    {/* {username && (
                         <span className="text-foreground mb-2 font-medium capitalize select-none md:mb-0">
                             Hello, {username}
                         </span>
-                    )}
+                    )} */}
 
                     <Button
                         variant="destructive"

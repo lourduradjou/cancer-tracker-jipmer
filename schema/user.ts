@@ -19,6 +19,7 @@ export type UserDoc = z.infer<typeof UserSchema> & { id: string }
 
 export interface AuthState {
     user: FirebaseAuthUser | null
+    userId: string | null
     role: string | null
     orgId: string | null
     isLoadingAuth: boolean

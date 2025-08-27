@@ -7,14 +7,15 @@ import { db } from '@/firebase'
 import { dobToAgeUtil } from '@/lib/patient/dobToAge'
 import { deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
 import { usePathname } from 'next/navigation'
-import { memo } from 'react'
+import { memo, use, useState } from 'react'
 import { toast } from 'sonner'
 import TransferDialog from '../dialogs/TransferDialog'
-import {DiseasesCell, PhoneCell, StatusCell} from '.'
+import { DiseasesCell, PhoneCell, StatusCell } from '.'
 import type { Patient } from '@/schema/patient'
 import GenericPatientDialog from '../forms/patient/GenericPatientDialog'
 import { useQueryClient } from '@tanstack/react-query'
 import { formatDobToDDMMYYYY } from '@/lib/patient/dateFormatter'
+import AshaSearchDialog from '../dialogs/AshaSearchDialog'
 
 type Header = {
     name: string
@@ -51,6 +52,7 @@ export const GenericRow = memo(function GenericRow(props: GenericRowProps) {
     } = props
     const pathname = usePathname()
     const isNurse = pathname.startsWith('/nurse')
+    const [assignedAshaId, setAssignedAshaId] = useState((rowData as Patient).assignedAsha || '')
     const queryClient = useQueryClient()
 
     const renderCellContent = (key: string) => {
@@ -151,6 +153,16 @@ export const GenericRow = memo(function GenericRow(props: GenericRowProps) {
                         }}
                     />
                 )}
+                {/* ✅ ASHA assign button */}
+                {isPatientTab && (
+                    <AshaSearchDialog
+                        patientId={rowData.id.toString()}
+                        assignedAshaId={assignedAshaId}
+                        onAssigned={(ashaId: string | null) =>
+                            setAssignedAshaId(ashaId ? ashaId : '')
+                        }
+                    />
+                )}
 
                 {isRemovedPatientsTab && (
                     <Button
@@ -176,4 +188,3 @@ export const GenericRow = memo(function GenericRow(props: GenericRowProps) {
         </TableRow>
     )
 })
-

@@ -5,10 +5,7 @@ import { UseFormHandleSubmit, UseFormReset, UseFormReturn } from 'react-hook-for
 import { Button } from '@/components/ui/button'
 import { PatientFormInputs } from '@/schema/patient'
 import { Form } from '@/components/ui/form'
-import ColumnOne from './columns/column-one/ColumnOne'
-import ColumnTwo from './columns/column-two/ColumnTwo'
-import ColumnThree from './columns/column-three/ColumnThree'
-import ColumnFour from './columns/column-four/ColumnFour'
+import { ColumnOne, ColumnTwo, ColumnThree, ColumnFour, ColumnFive } from './'
 
 interface PatientFormProps {
     form: UseFormReturn<PatientFormInputs>
@@ -51,6 +48,10 @@ export default function PatientForm({
 
                     {/*COLUMN FOUR */}
                     <ColumnFour form={form} isEdit={isEdit} />
+
+                    {
+                        isEdit && <ColumnFive form={form}/>
+                    }
                 </div>
                 <div className="mt-6 flex justify-between gap-2">
                     <Button

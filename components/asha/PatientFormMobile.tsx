@@ -6,16 +6,30 @@ import { useState } from 'react'
 import { useSwipeable } from 'react-swipeable'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { PatientFormInputs, PatientSchema } from '@/schema/patient'
-import ColumnOne from '../forms/patient/columns/column-one/ColumnOne'
-import ColumnTwo from '../forms/patient/columns/column-two/ColumnTwo'
-import ColumnThree from '../forms/patient/columns/column-three/ColumnThree'
-import ColumnFour from '../forms/patient/columns/column-four/ColumnFour'
-import ColumnFive from '../forms/patient/columns/column-five/ColumnFive'
+import { ColumnOne, ColumnTwo, ColumnThree, ColumnFour, ColumnFive } from '../forms/patient'
+import { updatePatient } from '@/lib/api/patient.api'
+import { toast } from 'sonner'
+import { Patient } from '@/schema'
+import {
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogCancel,
+    AlertDialogAction,
+} from '@/components/ui/alert-dialog'
+import { useQueryClient } from '@tanstack/react-query'
+import { useAuth } from '@/contexts/AuthContext'
 
-export default function PatientFormMobile({ patient }: { patient: PatientFormInputs }) {
+export default function PatientFormMobile({ patient }: { patient: Patient }) {
+    const { userId } = useAuth()
     const [isSaving, setIsSaving] = useState(false)
     const [activeIndex, setActiveIndex] = useState(0)
     const [isOpen, setIsOpen] = useState(false)
+    const queryClient = useQueryClient()
 
     const form = useForm<PatientFormInputs>({
         resolver: zodResolver(PatientSchema),
@@ -26,10 +40,35 @@ export default function PatientFormMobile({ patient }: { patient: PatientFormInp
         },
     })
 
-    const handleSubmit = form.handleSubmit((values) => {
-        // setIsSaving(true)
-        // onSave?.(values)
-    })
+    const handleSubmit = form.handleSubmit(
+        async (values) => {
+            try {
+                console.log('✅ Form submitted with values:', values)
+                setIsSaving(true)
+                if (!patient.id) throw new Error('Patient ID missing')
+
+                const cleanValues: PatientFormInputs = Object.fromEntries(
+                    Object.entries(values).filter(([_, v]) => v !== undefined)
+                ) as PatientFormInputs
+
+                await updatePatient(patient.id, cleanValues)
+                toast.success('Patient updated successfully!')
+
+                queryClient.invalidateQueries({
+                    queryKey: ['patients', { ashaId: userId }],
+                })
+            } catch (err) {
+                console.error(err)
+                toast.error('Failed to save changes. Try again.')
+            } finally {
+                setIsSaving(false)
+            }
+        },
+        (errors) => {
+            console.error('❌ Validation errors:', errors)
+            toast.error('Please fix validation errors before saving.')
+        }
+    )
 
     const columns = [
         <ColumnOne key="col1" form={form} isEdit />,
@@ -106,14 +145,62 @@ export default function PatientFormMobile({ patient }: { patient: PatientFormInp
                             </div>
 
                             {/* Submit button */}
-                            <div className="mt-4 flex w-full justify-center px-4">
+                            <div className="mt-4 flex w-full justify-center space-x-6 px-4">
                                 <button
                                     type="submit"
-                                    className="w-full max-w-[520px] rounded bg-blue-600 p-2 text-white"
+                                    className="w-full max-w-[520px] cursor-pointer rounded bg-blue-600 p-2 text-white"
                                     disabled={isSaving}
                                 >
                                     {isSaving ? 'Saving...' : 'Save Changes'}
                                 </button>
+                                {/* Done Button with Confirmation */}
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <button
+                                            type="button"
+                                            className="w-full max-w-[250px] cursor-pointer rounded bg-green-600 p-2 text-white"
+                                            disabled={isSaving}
+                                        >
+                                            Done / Finished
+                                        </button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Mark as Finished?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This will unassign the patient from the ASHA. Are
+                                                you sure you want to continue?
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction
+                                                className="bg-green-600 text-white hover:bg-green-700"
+                                                onClick={async () => {
+                                                    try {
+                                                        setIsSaving(true)
+                                                        if (!patient.id)
+                                                            throw new Error('Patient ID missing')
+
+                                                        await updatePatient(patient.id, {
+                                                            assignedAsha: 'none',
+                                                        })
+                                                        toast.success(
+                                                            'Patient marked as finished and unassigned.'
+                                                        )
+                                                    } catch (err) {
+                                                        console.error(err)
+                                                        toast.error('Failed to update patient.')
+                                                    } finally {
+                                                        setIsSaving(false)
+                                                    }
+                                                }}
+                                            >
+                                                Confirm
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </div>
                         </div>
                     </form>

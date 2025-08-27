@@ -7,11 +7,10 @@ export const InsuranceSchema = z
     })
     .optional()
 
-export const FollowUpSchema = z
-    .object({
-        date: z.string(),
-        remarks: z.string(),
-    })
+export const FollowUpSchema = z.object({
+  date: z.string().optional(),
+  remarks: z.string().optional(),
+})
 
 export const PatientSchema = z
     .object({

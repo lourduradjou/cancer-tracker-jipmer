@@ -8,13 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar'
 import { CalendarIcon } from 'lucide-react'
 import { format } from 'date-fns'
-import {
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-    FormControl,
-} from '@/components/ui/form'
+import { FormField, FormItem, FormLabel, FormMessage, FormControl } from '@/components/ui/form'
 import {
     Select,
     SelectTrigger,
@@ -27,18 +21,7 @@ type Props = {
     form: UseFormReturn<any>
 }
 
-const BLOOD_GROUPS = [
-    'A+',
-    'A-',
-    'B+',
-    'B-',
-    'AB+',
-    'AB-',
-    'O+',
-    'O-',
-    'Bombay (hh)',
-    'Rh-null',
-]
+const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Bombay (hh)', 'Rh-null']
 
 export default function DobOrAgeField({ form }: Props) {
     const { control, watch } = form
@@ -60,9 +43,7 @@ export default function DobOrAgeField({ form }: Props) {
                             <FormControl>
                                 <Checkbox
                                     checked={Boolean(field.value)}
-                                    onCheckedChange={(checked) =>
-                                        field.onChange(Boolean(checked))
-                                    }
+                                    onCheckedChange={(checked) => field.onChange(Boolean(checked))}
                                 />
                             </FormControl>
                             <FormLabel className="text-muted-foreground text-sm">
@@ -80,13 +61,20 @@ export default function DobOrAgeField({ form }: Props) {
                         <FormItem className="w-32">
                             <FormControl>
                                 <Select
-                                    onValueChange={field.onChange}
+                                    onValueChange={(val) =>
+                                        field.onChange(val === 'none' ? null : val)
+                                    }
                                     value={field.value || ''}
                                 >
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Blood Group" />
                                     </SelectTrigger>
                                     <SelectContent>
+                                        {/* Add a 'None' option */}
+                                        <SelectItem key="none" value="none">
+                                            None
+                                        </SelectItem>
+
                                         {BLOOD_GROUPS.map((group) => (
                                             <SelectItem key={group} value={group}>
                                                 {group}
@@ -128,9 +116,7 @@ export default function DobOrAgeField({ form }: Props) {
                                         if (!isNaN(years)) {
                                             const dob = new Date()
                                             dob.setFullYear(dob.getFullYear() - years)
-                                            field.onChange(
-                                                dob.toISOString().split('T')[0]
-                                            )
+                                            field.onChange(dob.toISOString().split('T')[0])
                                         } else {
                                             field.onChange('')
                                         }
@@ -170,19 +156,23 @@ export default function DobOrAgeField({ form }: Props) {
                                             fromYear={1900}
                                             toYear={new Date().getFullYear()}
                                             selected={
-                                                field.value
-                                                    ? new Date(field.value)
-                                                    : undefined
+                                                field.value ? new Date(field.value) : undefined
                                             }
-                                            onSelect={(date) =>
-                                                field.onChange(
-                                                    date
-                                                        ? date
-                                                              .toISOString()
-                                                              .split('T')[0]
-                                                        : ''
+                                            onSelect={(date) => {
+                                                if (!date) {
+                                                    field.onChange('')
+                                                    return
+                                                }
+                                                const year = date.getFullYear()
+                                                const month = String(date.getMonth() + 1).padStart(
+                                                    2,
+                                                    '0'
                                                 )
-                                            }
+                                                const day = String(date.getDate()).padStart(2, '0')
+                                                const formatted = `${year}-${month}-${day}`
+                                                console.log(date, formatted)
+                                                field.onChange(formatted)
+                                            }}
                                         />
                                     </PopoverContent>
                                 </Popover>

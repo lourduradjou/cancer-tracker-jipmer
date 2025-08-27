@@ -13,20 +13,13 @@ import { useFilteredPatients } from '@/hooks/table/useFilteredPatients'
 import { usePagination } from '@/hooks/table/usePagination'
 
 import DeleteEntityDialog from '@/components/dialogs/DeleteEntityDialog'
-import { hospitalFields } from '@/constants/hospital'
-import { patientFields } from '@/constants/patient'
-import { SEARCH_FIELDS } from '@/constants/search-bar'
-import { userFields } from '@/constants/user'
-import { useSearch } from '@/hooks/table/useSearch'
-import { useStats } from '@/hooks/table/useStats'
-import { useTableData } from '@/hooks/table/useTableData'
-import { Hospital } from '@/schema/hospital'
-import { Patient } from '@/schema/patient'
-import { UserDoc } from '@/schema/user'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { hospitalFields, patientFields, SEARCH_FIELDS, userFields } from '@/constants'
+import { useSearch,useStats,useTableData } from '@/hooks'
+import { Hospital, Patient, UserDoc } from '@/schema'
+import { act, useCallback, useEffect, useMemo, useState } from 'react'
 import ViewDetailsDialog from '../dialogs/ViewDetailsDialog'
-import {GenericPagination, GenericRow, GenericToolbar} from './'
-import { useTableStore } from '@/store/table-store'
+import { GenericPagination, GenericRow, GenericToolbar } from './'
+import { useTableStore } from '@/store'
 
 export function GenericTable({
     headers,
@@ -40,15 +33,23 @@ export function GenericTable({
 }) {
     const stableHeaders = useMemo(() => headers, [headers])
     const [rowsPerPage, setRowsPerPage] = useState(8) // Initial default
-    const { user, role, orgId, isLoadingAuth } = useAuth()
+    const { user, role, orgId, isLoadingAuth } = useAuth() as { user: UserDoc | null, role: string, orgId: string, isLoadingAuth: boolean }
+
     const { selectedRow, modal, setSelectedRow, openModal, closeModal } = useTableStore()
+
+    console.log('orgId:', orgId)
+    console.log('role:', role)
+    console.log('isLoading:', isLoadingAuth)
+    console.log('activeTab:', activeTab)
 
     const queryProps = {
         orgId,
-        ashaEmail: role === 'asha' ? user?.email : null,
+        ashaId: role === 'asha' ? user?.id : null,
         enabled: !isLoadingAuth,
-        adminRequiredData: activeTab,
+        requiredData: activeTab,
     }
+
+    console.log('queryProps:', queryProps)
 
     const fieldsMap = {
         patients: patientFields,
@@ -62,6 +63,8 @@ export function GenericTable({
     const fieldsToDisplay = fieldsMap[activeTab]
 
     const { data = [] } = useTableData(queryProps) ?? {}
+
+    console.log('data:', data)
 
     useEffect(() => {
         let resizeTimeout: NodeJS.Timeout

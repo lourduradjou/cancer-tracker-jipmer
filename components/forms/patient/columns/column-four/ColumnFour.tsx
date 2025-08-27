@@ -10,7 +10,7 @@ type RightColumnProps = {
     isEdit?: boolean
 }
 
-export default function ColumnFour({ form, isEdit = false }: RightColumnProps) {
+export function ColumnFour({ form, isEdit = false }: RightColumnProps) {
     const { watch, control } = form
 
     const suspectedCase = watch('suspectedCase')

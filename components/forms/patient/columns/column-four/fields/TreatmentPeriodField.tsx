@@ -48,11 +48,18 @@ export function TreatmentPeriodField({ form }: Props) {
                                     mode="single"
                                     captionLayout="dropdown"
                                     selected={field.value ? new Date(field.value) : undefined}
-                                    onSelect={(date) =>
-                                        field.onChange(
-                                            date ? date.toISOString().split('T')[0] : null
-                                        )
-                                    }
+                                    onSelect={(date) => {
+                                        if (!date) {
+                                            field.onChange(null)
+                                            return
+                                        }
+                                        const year = date.getFullYear()
+                                        const month = String(date.getMonth() + 1).padStart(2, '0')
+                                        const day = String(date.getDate()).padStart(2, '0')
+                                        const formatted = `${year}-${month}-${day}`
+                                        console.log(date, formatted) // debug
+                                        field.onChange(formatted)
+                                    }}
                                 />
                             </PopoverContent>
                         </Popover>
@@ -91,11 +98,17 @@ export function TreatmentPeriodField({ form }: Props) {
                                     mode="single"
                                     captionLayout="dropdown"
                                     selected={field.value ? new Date(field.value) : undefined}
-                                    onSelect={(date) =>
-                                        field.onChange(
-                                            date ? date.toISOString().split('T')[0] : null
-                                        )
-                                    }
+                                    onSelect={(date) => {
+                                        if (!date) {
+                                            field.onChange(null)
+                                            return
+                                        }
+                                        const year = date.getFullYear()
+                                        const month = String(date.getMonth() + 1).padStart(2, '0')
+                                        const day = String(date.getDate()).padStart(2, '0')
+                                        const formatted = `${year}-${month}-${day}`
+                                        field.onChange(formatted)
+                                    }}
                                 />
                             </PopoverContent>
                         </Popover>

@@ -10,17 +10,17 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-//creating an auth context to pass the auth state to all components in the website
+// Creating an auth context to pass the auth state to all components
 const AuthContext = createContext<AuthState | undefined>(undefined)
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const router = useRouter()
     const queryClient = useQueryClient()
-    const currentPath = usePathname()
 
     const [firebaseUser, setFirebaseUser] = useState<FirebaseAuthUser | null>(null)
     const [initialAuthLoading, setInitialAuthLoading] = useState(true)
 
+    // Listen to Firebase Auth changes
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setFirebaseUser(user)
@@ -29,25 +29,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return () => unsubscribe()
     }, [])
 
+    // Fetch the Firestore user document
     const {
-        data: userDoc,
+        data: userDocData,
         isLoading: isLoadingUserRole,
         isError: isErrorUserRole,
         error: userRoleError,
-    } = useQuery<UserDoc, Error>({
+    } = useQuery<{ data: UserDoc; id: string }, Error>({
         queryKey: ['userDoc', firebaseUser?.uid],
         queryFn: async () => {
-            if (!firebaseUser) {
-                throw new Error('No authenticated user to fetch role for.')
-            }
+            if (!firebaseUser) throw new Error('No authenticated user to fetch role for.')
+
             const userEmail = firebaseUser.email!.trim().toLowerCase()
             const userQuery = query(collection(db, 'users'), where('email', '==', userEmail))
             const userSnap = await getDocs(userQuery)
 
-            if (userSnap.empty) {
-                throw new Error('User data not found in Firestore.')
-            }
-            return userSnap.docs[0].data() as UserDoc
+            if (userSnap.empty) throw new Error('User data not found in Firestore.')
+
+            const docData = userSnap.docs[0].data() as UserDoc
+            const docId = userSnap.docs[0].id
+            return { data: docData, id: docId }
         },
         enabled: !!firebaseUser && !initialAuthLoading,
         staleTime: 5 * 60 * 1000,
@@ -55,8 +56,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     })
 
     const isLoadingAuth = Boolean(initialAuthLoading || (firebaseUser && isLoadingUserRole))
-    const role = userDoc?.role || null
-    const orgId = userDoc?.orgId || null
+    const role = userDocData?.data.role || null
+    const orgId = userDocData?.data.orgId || null
+    const userId = userDocData?.id || null
     const error = isErrorUserRole ? userRoleError : null
 
     // Handle user role errors
@@ -80,6 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const authState: AuthState = {
         user: firebaseUser,
+        userId, // ✅ Firestore document ID
         role,
         orgId,
         isLoadingAuth,
@@ -89,6 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return <AuthContext.Provider value={authState}>{children}</AuthContext.Provider>
 }
 
+// Hook to use auth context
 export const useAuth = () => {
     const context = useContext(AuthContext)
     if (context === undefined) throw new Error('useAuth must be used within an AuthProvider')
