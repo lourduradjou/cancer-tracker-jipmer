@@ -15,23 +15,29 @@ import { Input } from '@/components/ui/input'
 import { HospitalFormInputs, HospitalSchema } from '@/schema/hospital'
 import { PhoneInput } from '@/components/ui/phone-input'
 
-interface AddHospitalFormProps {
+interface GenericHospitalFormProps {
+    initialData?: HospitalFormInputs
     onSuccess?: () => void
     onSubmit: (data: HospitalFormInputs) => Promise<void> | void
 }
 
-export default function AddHospitalForm({ onSuccess, onSubmit }: AddHospitalFormProps) {
+export default function GenericHospitalForm({
+    initialData,
+    onSuccess,
+    onSubmit,
+}: GenericHospitalFormProps) {
     const form = useForm<HospitalFormInputs>({
         resolver: zodResolver(HospitalSchema),
         defaultValues: {
             name: '',
             address: '',
             contactNumber: '',
+            ...initialData, // ✅ pre-fill if editing
         },
     })
 
     const handleSubmit = async (data: HospitalFormInputs) => {
-        await onSubmit(data) // use parent handler
+        await onSubmit(data)
         onSuccess?.()
         form.reset()
     }
@@ -78,7 +84,7 @@ export default function AddHospitalForm({ onSuccess, onSubmit }: AddHospitalForm
                                 <PhoneInput
                                     {...field}
                                     placeholder="Enter phone number"
-                                    defaultCountry="IN" // ✅ sets default to India
+                                    defaultCountry="IN"
                                     international
                                 />
                             </FormControl>
@@ -86,6 +92,7 @@ export default function AddHospitalForm({ onSuccess, onSubmit }: AddHospitalForm
                         </FormItem>
                     )}
                 />
+
                 <div className="flex justify-end">
                     <Button type="submit" className="w-full">
                         Save

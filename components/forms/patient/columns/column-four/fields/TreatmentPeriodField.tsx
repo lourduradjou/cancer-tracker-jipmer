@@ -57,7 +57,7 @@ export function TreatmentPeriodField({ form }: Props) {
                                         const month = String(date.getMonth() + 1).padStart(2, '0')
                                         const day = String(date.getDate()).padStart(2, '0')
                                         const formatted = `${year}-${month}-${day}`
-                                        console.log(date, formatted) // debug
+                                        // console.log(date, formatted) // debug
                                         field.onChange(formatted)
                                     }}
                                 />

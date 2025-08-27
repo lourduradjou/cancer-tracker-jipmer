@@ -37,10 +37,10 @@ export function GenericTable({
 
     const { selectedRow, modal, setSelectedRow, openModal, closeModal } = useTableStore()
 
-    console.log('orgId:', orgId)
-    console.log('role:', role)
-    console.log('isLoading:', isLoadingAuth)
-    console.log('activeTab:', activeTab)
+    // console.log('orgId:', orgId)
+    // console.log('role:', role)
+    // console.log('isLoading:', isLoadingAuth)
+    // console.log('activeTab:', activeTab)
 
     const queryProps = {
         orgId,
@@ -49,7 +49,7 @@ export function GenericTable({
         requiredData: activeTab,
     }
 
-    console.log('queryProps:', queryProps)
+    // console.log('queryProps:', queryProps)
 
     const fieldsMap = {
         patients: patientFields,
@@ -206,6 +206,7 @@ export function GenericTable({
                     {paginatedData.length > 0 ? (
                         paginatedData.map((data, index) => (
                             <GenericRow
+                                activeTab={activeTab}
                                 isPatientTab={isPatientTab}
                                 isRemovedPatientsTab={activeTab === 'removedPatients'}
                                 key={index}

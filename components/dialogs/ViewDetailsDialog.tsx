@@ -58,7 +58,7 @@ export default function ViewDetailsDialog({
     // }
     // displayDetail(rowData)
 
-    console.log('fields to display' + fieldsToDisplay)
+    // console.log('fields to display' + fieldsToDisplay)
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="bg-card text-card-foreground max-w-3xl rounded-xl shadow-md">

@@ -17,7 +17,7 @@ import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
 import { checkAadhaarDuplicateUtil } from '@/lib/patient/checkPatientRecord'
 import { PatientSchema, PatientFormInputs } from '@/schema/patient'
-import PatientForm from './PatientForm'
+import GenericPatientForm from './GenericPatientForm'
 import clsx from 'clsx'
 
 interface GenericPatientDialogProps {
@@ -168,7 +168,7 @@ export default function GenericPatientDialog({
                         </DialogTitle>
                     </DialogHeader>
 
-                    <PatientForm
+                    <GenericPatientForm
                         form={form}
                         reset={reset}
                         handleSubmit={handleSubmit}

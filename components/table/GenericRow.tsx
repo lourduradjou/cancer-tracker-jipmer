@@ -1,21 +1,24 @@
 // components/GenericRow.tsx
 'use client'
-import { Eye, Pencil, Trash2, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { db } from '@/firebase'
-import { dobToAgeUtil } from '@/lib/patient/dobToAge'
-import { deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
-import { usePathname } from 'next/navigation'
-import { memo, use, useState } from 'react'
-import { toast } from 'sonner'
-import TransferDialog from '../dialogs/TransferDialog'
-import { DiseasesCell, PhoneCell, StatusCell } from '.'
-import type { Patient } from '@/schema/patient'
-import GenericPatientDialog from '../forms/patient/GenericPatientDialog'
-import { useQueryClient } from '@tanstack/react-query'
 import { formatDobToDDMMYYYY } from '@/lib/patient/dateFormatter'
+import { dobToAgeUtil } from '@/lib/patient/dobToAge'
+import { HospitalFormInputs, UserDoc } from '@/schema'
+import type { Patient } from '@/schema/patient'
+import { useQueryClient } from '@tanstack/react-query'
+import { deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
+import { Eye, Pencil, RotateCcw, Trash2 } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { memo, useState } from 'react'
+import { toast } from 'sonner'
+import { DiseasesCell, PhoneCell, StatusCell } from '.'
 import AshaSearchDialog from '../dialogs/AshaSearchDialog'
+import TransferDialog from '../dialogs/TransferDialog'
+import GenericHospitalDialog from '../forms/hospital/GenericHospitalDialog'
+import GenericPatientDialog from '../forms/patient/GenericPatientDialog'
+import GenericUserDialog from '../forms/user/GenericUserDialog'
 
 type Header = {
     name: string
@@ -29,6 +32,7 @@ type RowDataBase = {
 }
 
 type GenericRowProps = {
+    activeTab: string
     isPatientTab: boolean
     isRemovedPatientsTab?: boolean
     rowData: RowDataBase
@@ -41,6 +45,7 @@ type GenericRowProps = {
 
 export const GenericRow = memo(function GenericRow(props: GenericRowProps) {
     const {
+        activeTab,
         isPatientTab,
         rowData,
         isRemovedPatientsTab,
@@ -73,6 +78,9 @@ export const GenericRow = memo(function GenericRow(props: GenericRowProps) {
 
             case 'patientStatus':
                 return <StatusCell status={value as string} />
+
+            case 'sex':
+                return <span className="capitalize">{value as string}</span>
 
             default:
                 return <span className="">{String(value)}</span>
@@ -130,8 +138,28 @@ export const GenericRow = memo(function GenericRow(props: GenericRowProps) {
                             </Button>
                         }
                         onSuccess={() => {
-                            console.log('Patient updated successfully')
+                            // console.log('Patient updated successfully')
                         }}
+                    />
+                )}
+
+                {activeTab === 'ashas' || activeTab === 'doctors' || activeTab === 'nurses' ? (
+                    <GenericUserDialog
+                        mode="edit"
+                        userType={activeTab}
+                        userData={rowData as UserDoc}
+                        trigger={
+                            <Button size="icon" variant="outline" title="Update">
+                                <Pencil className="h-4 w-4" />
+                            </Button>
+                        }
+                    />
+                ) : null}
+
+                {activeTab === 'hospitals' && (
+                    <GenericHospitalDialog
+                        mode="edit"
+                        hospitalData={rowData as HospitalFormInputs & { id: string }}
                     />
                 )}
 
@@ -180,7 +208,7 @@ export const GenericRow = memo(function GenericRow(props: GenericRowProps) {
                     variant="destructive"
                     className="text-white"
                     onClick={() => onDelete(rowData)}
-                    title="Delete Record"
+                    title="Delete"
                 >
                     <Trash2 className="h-4 w-4" />
                 </Button>

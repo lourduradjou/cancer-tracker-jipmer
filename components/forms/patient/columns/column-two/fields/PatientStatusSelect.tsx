@@ -25,7 +25,7 @@ export default function PatientStatusSelect({ control }: Props) {
                                 <span
                                     className={cn('font-medium', {
                                         'text-green-400': field.value === 'Alive',
-                                        'text-red-400': field.value === 'Death',
+                                        'text-red-400': field.value === 'Not Alive',
                                         'text-blue-400': field.value === 'Not Available',
                                         // 'text-yellow-600': field.value === 'Followup',
                                     })}
@@ -41,8 +41,8 @@ export default function PatientStatusSelect({ control }: Props) {
                         <SelectItem value="Alive">
                             <span className="text-green-400">Alive</span>
                         </SelectItem>
-                        <SelectItem value="Death">
-                            <span className="text-red-400">Death</span>
+                        <SelectItem value="Not Alive">
+                            <span className="text-red-400">Not Alive</span>
                         </SelectItem>
                         <SelectItem value="Not Available">
                             <span className="text-blue-400">Not Available</span>

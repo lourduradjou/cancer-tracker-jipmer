@@ -6,7 +6,7 @@ interface DiseasesCellProps {
 
 export function DiseasesCell({ diseases }: DiseasesCellProps) {
     if (!diseases?.length) {
-        return <span className="text-muted-foreground italic">No diseases listed</span>
+        return <span className="text-muted-foreground italic">Suspected Case</span>
     }
 
     if (diseases.length > 1) {

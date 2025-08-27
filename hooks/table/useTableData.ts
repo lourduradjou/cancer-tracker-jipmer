@@ -35,7 +35,7 @@ export const useTableData = ({
     enabled = true,
     requiredData,
 }: UsePatientsProps) => {
-    console.log('inside custom user hook')
+    // console.log('inside custom user hook')
     const isPatientsEnabled = requiredData === 'patients' ? true : enabled && (!!orgId || !!ashaId)
     const isHospitalsEnabled = enabled && requiredData === 'hospitals'
     const isUsersEnabled =

@@ -23,7 +23,7 @@ export function useStats<TableDataType>({
             stats.total++
 
             if (isPatientTab) {
-                if (row.assignedAsha) stats.assigned++
+                if (row.assignedAsha && row.assignedAsha !== 'none') stats.assigned++
                 else stats.unassigned++
 
                 if ((row.status || '').toLowerCase() === 'alive') stats.alive++
