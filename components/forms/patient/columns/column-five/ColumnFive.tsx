@@ -3,18 +3,21 @@
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { PatientFormInputs } from '@/schema/patient'
 
-export default function ColumnFive({ form, isEdit }: { form: any; isEdit?: boolean }) {
+export function ColumnFive({ form, isEdit }: { form: any; isEdit?: boolean }) {
     const { getValues, setValue } = useFormContext<PatientFormInputs>()
     const patient = getValues()
 
     const [isAddingFollowUp, setIsAddingFollowUp] = useState(false)
     const [newRemark, setNewRemark] = useState('')
     const [savingLocation, setSavingLocation] = useState(false)
+    const [manualLat, setManualLat] = useState<string>('')
+    const [manualLng, setManualLng] = useState<string>('')
 
     /** Save new follow-up (optimistic, in form state) */
     const handleSaveNewFollowUp = () => {
@@ -30,7 +33,7 @@ export default function ColumnFive({ form, isEdit }: { form: any; isEdit?: boole
         setIsAddingFollowUp(false)
     }
 
-    /** Save GPS locally (optimistic) */
+    /** Save GPS from browser */
     const handleSaveLocation = async () => {
         setSavingLocation(true)
         try {
@@ -45,8 +48,6 @@ export default function ColumnFive({ form, isEdit }: { form: any; isEdit?: boole
                         lng: position.coords.longitude,
                         accuracy: position.coords.accuracy,
                     }
-
-                    // 🔹 Save to form state
                     setValue('gpsLocation', coords, { shouldDirty: true })
                     setSavingLocation(false)
                 },
@@ -66,7 +67,19 @@ export default function ColumnFive({ form, isEdit }: { form: any; isEdit?: boole
         }
     }
 
-    /** Final Save — parent form will pick it up */
+    /** Save manually entered lat/lng */
+    const handleSaveManualLocation = () => {
+        if (!manualLat || !manualLng) {
+            alert('Please enter both latitude and longitude')
+            return
+        }
+        const coords = {
+            lat: parseFloat(manualLat),
+            lng: parseFloat(manualLng),
+            accuracy: null,
+        }
+        setValue('gpsLocation', coords, { shouldDirty: true })
+    }
 
     return (
         <div className="flex max-w-lg flex-col gap-4">
@@ -74,7 +87,11 @@ export default function ColumnFive({ form, isEdit }: { form: any; isEdit?: boole
             <div className="w-full space-y-3 pt-2">
                 <div className="flex items-center space-x-4">
                     <Label className="text-base font-medium">Follow-ups </Label>
-                    <Button size="icon" onClick={() => setIsAddingFollowUp(!isAddingFollowUp)}>
+                    <Button
+                        type="button"
+                        size="icon"
+                        onClick={() => setIsAddingFollowUp(!isAddingFollowUp)}
+                    >
                         <Plus className="h-5 w-5" />
                     </Button>
                 </div>
@@ -111,8 +128,16 @@ export default function ColumnFive({ form, isEdit }: { form: any; isEdit?: boole
                                 return dateB.getTime() - dateA.getTime()
                             })
                             .map((followUp, idx) => (
-                                <div key={idx} className="border-primary border-l-2 pl-3 text-sm">
+                                <div
+                                    key={idx}
+                                    className="border-primary mb-2 border-l-2 pl-3 text-sm"
+                                >
                                     <p className="text-muted-foreground">{followUp?.remarks}</p>
+                                    {followUp?.date && (
+                                        <p className="text-muted-foreground text-xs">
+                                            {new Date(followUp.date).toLocaleString()}
+                                        </p>
+                                    )}
                                 </div>
                             ))}
                     </div>
@@ -126,10 +151,37 @@ export default function ColumnFive({ form, isEdit }: { form: any; isEdit?: boole
             </div>
 
             {/* --- GPS Section --- */}
-            <div className="space-y-2 pt-2">
+            <div className="space-y-4 pt-2">
+                {/* Auto GPS */}
                 <Button onClick={handleSaveLocation} disabled={savingLocation}>
-                    {savingLocation ? 'Saving GPS...' : 'Save GPS Location'}
+                    {savingLocation ? 'Saving GPS...' : 'Use Current GPS Location'}
                 </Button>
+
+                {/* Manual Lat/Lng Input */}
+                <div className="space-y-2 rounded-lg border p-3">
+                    <Label className="text-sm">Manual Location Entry</Label>
+                    <div className="flex gap-2">
+                        <Input
+                            type="number"
+                            step="any"
+                            placeholder="Latitude"
+                            value={manualLat}
+                            onChange={(e) => setManualLat(e.target.value)}
+                        />
+                        <Input
+                            type="number"
+                            step="any"
+                            placeholder="Longitude"
+                            value={manualLng}
+                            onChange={(e) => setManualLng(e.target.value)}
+                        />
+                    </div>
+                    <Button size="sm" className="mt-2" onClick={handleSaveManualLocation}>
+                        Save Manual Location
+                    </Button>
+                </div>
+
+                {/* Show Saved Location */}
                 {patient.gpsLocation && (
                     <>
                         <p className="text-muted-foreground text-center text-xs">

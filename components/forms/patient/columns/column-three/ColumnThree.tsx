@@ -10,7 +10,7 @@ type RightColumnProps = {
     isEdit?: boolean
 }
 
-export default function ColumnThree({ form }: RightColumnProps) {
+export function ColumnThree({ form }: RightColumnProps) {
     const { watch, control } = useFormContext()
 
     return (

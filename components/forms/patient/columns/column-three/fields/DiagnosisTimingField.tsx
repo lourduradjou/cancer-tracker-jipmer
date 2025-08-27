@@ -93,7 +93,7 @@ export default function DiagnosisTimingField({ form }: DiagnosisTimingFieldProps
                                     <PopoverTrigger asChild>
                                         <Button
                                             variant="outline"
-                                            className="!bg-background text-muted-foreground w-full  pl-3 text-left font-normal"
+                                            className="!bg-background text-muted-foreground w-full pl-3 text-left font-normal"
                                         >
                                             {field.value ? (
                                                 format(new Date(field.value), 'PPP')
@@ -112,11 +112,21 @@ export default function DiagnosisTimingField({ form }: DiagnosisTimingFieldProps
                                             selected={
                                                 field.value ? new Date(field.value) : undefined
                                             }
-                                            onSelect={(date) =>
-                                                field.onChange(
-                                                    date ? date.toISOString().split('T')[0] : ''
+                                            onSelect={(date) => {
+                                                if (!date) {
+                                                    field.onChange('')
+                                                    return
+                                                }
+                                                const year = date.getFullYear()
+                                                const month = String(date.getMonth() + 1).padStart(
+                                                    2,
+                                                    '0'
                                                 )
-                                            }
+                                                const day = String(date.getDate()).padStart(2, '0')
+                                                const formatted = `${year}-${month}-${day}`
+                                                console.log(date, formatted) // for debugging
+                                                field.onChange(formatted)
+                                            }}
                                         />
                                     </PopoverContent>
                                 </Popover>

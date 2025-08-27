@@ -17,7 +17,7 @@ function cutLastCharacter(str: string | undefined): string | undefined {
 
 type UsePatientsProps = {
     orgId?: string | null
-    ashaEmail?: string | null | undefined
+    ashaId?: string | null | undefined
     enabled?: boolean
     requiredData?:
         | 'ashas'
@@ -31,12 +31,12 @@ type UsePatientsProps = {
 
 export const useTableData = ({
     orgId,
-    ashaEmail,
+    ashaId,
     enabled = true,
     requiredData,
 }: UsePatientsProps) => {
     console.log('inside custom user hook')
-    const isPatientsEnabled = requiredData ? true : enabled && (!!orgId || !!ashaEmail)
+    const isPatientsEnabled = requiredData === 'patients' ? true : enabled && (!!orgId || !!ashaId)
     const isHospitalsEnabled = enabled && requiredData === 'hospitals'
     const isUsersEnabled =
         enabled &&
@@ -89,8 +89,8 @@ export const useTableData = ({
         let queryKeyValue
         if (orgId) {
             queryKeyValue = ['patients', { orgId }]
-        } else if (ashaEmail) {
-            queryKeyValue = ['patients', { ashaEmail }]
+        } else if (ashaId) {
+            queryKeyValue = ['patients', { ashaId }]
         } else {
             queryKeyValue = ['patients']
         }
@@ -105,10 +105,10 @@ export const useTableData = ({
                         collection(db, 'patients'),
                         where('assignedHospital.id', '==', orgId)
                     )
-                } else if (ashaEmail) {
+                } else if (ashaId) {
                     patientsQuery = query(
                         collection(db, 'patients'),
-                        where('assignedAsha', '==', ashaEmail)
+                        where('assignedAsha', '==', ashaId)
                     )
                 } else if (requiredData === 'patients') {
                     patientsQuery = query(collection(db, 'patients'))

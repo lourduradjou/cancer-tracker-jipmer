@@ -13,7 +13,7 @@ interface LeftColumnProps {
     isEdit?: boolean
 }
 
-export default function ColumnOne({ form, isEdit = false }: LeftColumnProps) {
+export function ColumnOne({ form, isEdit = false }: LeftColumnProps) {
     return (
         <div className="flex flex-col gap-4 md:w-1/3">
             <NameField form={form} />

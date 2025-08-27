@@ -12,7 +12,7 @@ type MiddleColumnProps = {
     isEdit?: boolean
 }
 
-export default function ColumnTwo({ form }: MiddleColumnProps) {
+export function ColumnTwo({ form }: MiddleColumnProps) {
     const { register, control } = form
 
     return (

@@ -9,16 +9,19 @@ import { useTableData } from '@/hooks/table/useTableData'
 import { Patient } from '@/schema/patient'
 import { toast } from 'sonner'
 
+
 function AshaPageContent() {
-    const { user, isLoadingAuth } = useAuth()
+    const { user, userId, isLoadingAuth } = useAuth()
 
     // 🔹 Build queryProps like the doctor page
     const queryProps = {
         orgId: null,
-        ashaEmail: user?.email ?? null,
+        ashaId: userId,
         enabled: !isLoadingAuth && !!user?.email,
         requiredData: 'patients' as const,
     }
+
+    console.log('user asha:', user)
 
     const {
         data: patients = [],

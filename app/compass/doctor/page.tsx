@@ -1,7 +1,7 @@
 'use client'
 
 import { GenericTable } from '@/components/table'
-import { PATIENT_TABLE_HEADERS } from '@/constants/headers'
+import { PATIENT_TABLE_HEADERS } from '@/constants'
 import { withAuth } from '@/components/hoc/withAuth'
 import { ROLE_CONFIG } from '@/constants/auth'
 

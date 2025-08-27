@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react'
 import { checkAadhaarDuplicateUtil } from '@/lib/patient/checkPatientRecord'
 import { PatientSchema, PatientFormInputs } from '@/schema/patient'
 import PatientForm from './PatientForm'
+import clsx from 'clsx'
 
 interface GenericPatientDialogProps {
     mode: 'add' | 'edit'
@@ -152,7 +153,14 @@ export default function GenericPatientDialog({
 
                 <DialogContent
                     onInteractOutside={(e) => e.preventDefault()}
-                    className={`max-h-[90vh] ${suspectedCase ? 'min-w-[1020px]' : 'min-w-[1280px]'} overflow-y-auto`}
+                    className={clsx(
+                        'max-h-[90vh] overflow-y-auto',
+                        suspectedCase
+                            ? 'min-w-[1020px]'
+                            : isEdit
+                              ? 'max-w-[1600px] min-w-[1440px]'
+                              : 'min-w-[1280px]'
+                    )}
                 >
                     <DialogHeader>
                         <DialogTitle>

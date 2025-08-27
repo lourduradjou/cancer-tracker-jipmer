@@ -9,8 +9,8 @@ import {
     PATIENT_TABLE_HEADERS,
     ASHA_TABLE_HEADERS,
     REMOVED_PATIENT_TABLE_HEADERS,
-} from '@/constants/headers'
-// import { PatientTable } from '@/components/table'
+} from '@/constants'
+
 import { GenericTable } from '@/components/table'
 import { withAuth } from '@/components/hoc/withAuth'
 import { ROLE_CONFIG } from '@/constants/auth'
