@@ -57,7 +57,7 @@ export default function TransferDialog({
         fetchHospitals()
     }, [])
 
-    console.log('hospitals', hospitals)
+    // console.log('hospitals', hospitals)
 
     const handleTransfer = () => {
         if (selectedHospital) {

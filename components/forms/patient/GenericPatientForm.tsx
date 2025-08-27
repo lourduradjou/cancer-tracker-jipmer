@@ -5,7 +5,7 @@ import { UseFormHandleSubmit, UseFormReset, UseFormReturn } from 'react-hook-for
 import { Button } from '@/components/ui/button'
 import { PatientFormInputs } from '@/schema/patient'
 import { Form } from '@/components/ui/form'
-import { ColumnOne, ColumnTwo, ColumnThree, ColumnFour, ColumnFive } from './'
+import { ColumnOne, ColumnTwo, ColumnThree, ColumnFour, ColumnFive } from '.'
 
 interface PatientFormProps {
     form: UseFormReturn<PatientFormInputs>
@@ -15,7 +15,7 @@ interface PatientFormProps {
     isEdit?: boolean
 }
 
-export default function PatientForm({
+export default function GenericPatientForm({
     form,
     reset,
     handleSubmit,
@@ -32,7 +32,7 @@ export default function PatientForm({
         <Form {...form}>
             <form
                 onSubmit={handleSubmit(onSubmit, (errors) => {
-                    console.log('Validation failed:', errors)
+                    // console.log('Validation failed:', errors)
                 })}
                 className="grid min-w-full gap-6 py-4 select-none"
             >
@@ -49,9 +49,7 @@ export default function PatientForm({
                     {/*COLUMN FOUR */}
                     <ColumnFour form={form} isEdit={isEdit} />
 
-                    {
-                        isEdit && <ColumnFive form={form}/>
-                    }
+                    {isEdit && <ColumnFive form={form} />}
                 </div>
                 <div className="mt-6 flex justify-between gap-2">
                     <Button

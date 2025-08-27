@@ -43,7 +43,7 @@ export default function PatientFormMobile({ patient }: { patient: Patient }) {
     const handleSubmit = form.handleSubmit(
         async (values) => {
             try {
-                console.log('✅ Form submitted with values:', values)
+                // console.log('✅ Form submitted with values:', values)
                 setIsSaving(true)
                 if (!patient.id) throw new Error('Patient ID missing')
 

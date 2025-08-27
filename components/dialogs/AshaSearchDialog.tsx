@@ -21,11 +21,12 @@ import { Check, UserCheck, UserPlus, X } from 'lucide-react'
 import { collection, getDocs, query, where, doc, updateDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { useAuth } from '@/contexts/AuthContext'
 
 type Asha = {
     id: string
     email: string
-    username?: string
+    name?: string
     phoneNumber?: string
 }
 
@@ -35,7 +36,12 @@ interface AshaDialogProps {
     onAssigned?: (ashaId: string | null) => void
 }
 
-export default function AshaSearchDialog({ patientId, assignedAshaId, onAssigned }: AshaDialogProps) {
+export default function AshaSearchDialog({
+    patientId,
+    assignedAshaId,
+    onAssigned,
+}: AshaDialogProps) {
+    const { orgId } = useAuth() // ✅ get orgId from auth
     const [ashas, setAshas] = useState<Asha[]>([])
     const [selectedAsha, setSelectedAsha] = useState<Asha | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
@@ -45,7 +51,19 @@ export default function AshaSearchDialog({ patientId, assignedAshaId, onAssigned
     useEffect(() => {
         const fetchAshas = async () => {
             try {
-                const q = query(collection(db, 'users'), where('role', '==', 'asha'))
+                let q
+                if (orgId) {
+                    // ✅ restrict by orgId if available
+                    q = query(
+                        collection(db, 'users'),
+                        where('role', '==', 'asha'),
+                        where('orgId', '==', orgId)
+                    )
+                } else {
+                    // ✅ fallback to all ashas
+                    q = query(collection(db, 'users'), where('role', '==', 'asha'))
+                }
+
                 const snapshot = await getDocs(q)
                 const ashaList: Asha[] = snapshot.docs.map((doc) => ({
                     id: doc.id,
@@ -57,7 +75,7 @@ export default function AshaSearchDialog({ patientId, assignedAshaId, onAssigned
             }
         }
         fetchAshas()
-    }, [])
+    }, [orgId]) // ✅ refetch if orgId changes
 
     // Preselect current ASHA
     useEffect(() => {
@@ -65,7 +83,7 @@ export default function AshaSearchDialog({ patientId, assignedAshaId, onAssigned
             setSelectedAsha(null)
             return
         }
-        const current = ashas.find(a => a.id === assignedAshaId)
+        const current = ashas.find((a) => a.id === assignedAshaId)
         if (current) setSelectedAsha(current)
     }, [assignedAshaId, ashas])
 
@@ -73,7 +91,7 @@ export default function AshaSearchDialog({ patientId, assignedAshaId, onAssigned
         .filter(
             (asha) =>
                 asha.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                asha.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                asha.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 asha.phoneNumber?.includes(searchTerm)
         )
         .slice(0, 10)
@@ -122,9 +140,9 @@ export default function AshaSearchDialog({ patientId, assignedAshaId, onAssigned
                             <CommandItem onSelect={() => setSelectedAsha(null)}>
                                 <div className="flex w-full items-center justify-between">
                                     <span className="font-medium">Unassign ASHA</span>
-                                    {selectedAsha === null && (
+                                    {/* {selectedAsha === null && (
                                         <X className="h-4 w-4 text-red-600" />
-                                    )}
+                                    )} */}
                                 </div>
                             </CommandItem>
 
@@ -132,15 +150,22 @@ export default function AshaSearchDialog({ patientId, assignedAshaId, onAssigned
                                 <CommandItem key={asha.id} onSelect={() => setSelectedAsha(asha)}>
                                     <div className="flex w-full items-center justify-between">
                                         <div>
-                                            <p className="font-medium">{asha.email}</p>
-                                            {asha.username && (
-                                                <p className="text-muted-foreground text-sm">
-                                                    {asha.username}
-                                                </p>
+                                            {asha.name && (
+                                                <div className="flex space-x-2">
+                                                    <p className="text-muted-foreground text-sm">
+                                                        Name:{' '}
+                                                        <span className="text-foreground">
+                                                            {asha.name}
+                                                        </span>
+                                                    </p>
+                                                    <p className="text-muted-foreground text-sm">
+                                                        Email: {asha.email}
+                                                    </p>
+                                                </div>
                                             )}
                                             {asha.phoneNumber && (
                                                 <p className="text-muted-foreground text-sm">
-                                                    {asha.phoneNumber}
+                                                    PhoneNumber: {asha.phoneNumber}
                                                 </p>
                                             )}
                                         </div>

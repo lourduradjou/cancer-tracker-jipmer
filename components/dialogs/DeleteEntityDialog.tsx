@@ -89,6 +89,8 @@ export default function DeleteEntityDialog<T extends WithIdAndName | null>({
             } else {
                 // direct delete for hospitals/users/removedPatients
                 const coll = mapToFirestoreCollection(collectionName)
+                console.log('coll:', coll)
+                console.log('id:', id)  
                 await deleteDoc(doc(db, coll, id))
             }
 

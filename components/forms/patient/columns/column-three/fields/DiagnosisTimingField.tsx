@@ -124,7 +124,7 @@ export default function DiagnosisTimingField({ form }: DiagnosisTimingFieldProps
                                                 )
                                                 const day = String(date.getDate()).padStart(2, '0')
                                                 const formatted = `${year}-${month}-${day}`
-                                                console.log(date, formatted) // for debugging
+                                                // console.log(date, formatted) // for debugging
                                                 field.onChange(formatted)
                                             }}
                                         />

@@ -19,6 +19,10 @@ export const PATIENT_TABLE_HEADERS = [
         name: 'Status',
         key: 'patientStatus',
     },
+    {
+        name: 'Diagnosed',
+        key: 'diseases'
+    }
 ]
 
 export const DOCTOR_TABLE_HEADERS = [
