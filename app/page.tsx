@@ -8,6 +8,7 @@ export default function RootPage() {
     const router = useRouter()
 
     useEffect(() => {
+        console.log('%cWelcome to JIPMER 🚀', 'color: #0f62fe; font-size:16px; font-weight:bold;')
         router.push('/home')
     }, [router])
 
