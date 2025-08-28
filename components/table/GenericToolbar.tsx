@@ -18,6 +18,7 @@ import GenericHospitalDialog from '../forms/hospital/GenericHospitalDialog'
 import GenericPatientDialog from '../forms/patient/GenericPatientDialog'
 import GenericUserDialog from '../forms/user/GenericUserDialog'
 import { SearchInput } from '../search/SearchInput'
+import { useAuth } from '@/contexts/AuthContext'
 
 export function GenericToolbar({
     activeTab,
@@ -32,6 +33,7 @@ export function GenericToolbar({
 }) {
     const pathname = usePathname()
     const queryClient = useQueryClient()
+    const { role } = useAuth()
 
     const dashboardTitleContent = pathname.includes('/admin') ? (
         'Admin Dashboard'
@@ -78,7 +80,7 @@ export function GenericToolbar({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         {/* Import */}
-                        {activeTab === 'patients' && (
+                        {activeTab === 'patients' && role === 'admin' && (
                             <DropdownMenuItem
                                 onSelect={(e) => {
                                     e.preventDefault() // ✅ stop default closing behavior if needed

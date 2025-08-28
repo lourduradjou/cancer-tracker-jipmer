@@ -126,7 +126,7 @@ export function GenericTable({
     const { paginated: paginatedData, currentPage, totalPages, setCurrentPage } = tableData
 
     const tableStats = useStats({
-        TableData: paginatedData ?? [],
+        TableData: searchedData ?? [],
         isPatientTab,
     })
 
