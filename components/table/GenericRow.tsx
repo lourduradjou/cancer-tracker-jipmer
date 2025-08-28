@@ -19,6 +19,7 @@ import TransferDialog from '../dialogs/TransferDialog'
 import GenericHospitalDialog from '../forms/hospital/GenericHospitalDialog'
 import GenericPatientDialog from '../forms/patient/GenericPatientDialog'
 import GenericUserDialog from '../forms/user/GenericUserDialog'
+import { useAuth } from '@/contexts/AuthContext'
 
 type Header = {
     name: string
@@ -59,6 +60,7 @@ export const GenericRow = memo(function GenericRow(props: GenericRowProps) {
     const isNurse = pathname.startsWith('/nurse')
     const [assignedAshaId, setAssignedAshaId] = useState((rowData as Patient).assignedAsha || '')
     const queryClient = useQueryClient()
+    const { role } = useAuth()
 
     const renderCellContent = (key: string) => {
         const value = rowData[key]
@@ -203,15 +205,17 @@ export const GenericRow = memo(function GenericRow(props: GenericRowProps) {
                         <RotateCcw className="h-4 w-4" />
                     </Button>
                 )}
-                <Button
-                    size="icon"
-                    variant="destructive"
-                    className="text-white"
-                    onClick={() => onDelete(rowData)}
-                    title="Delete"
-                >
-                    <Trash2 className="h-4 w-4" />
-                </Button>
+                {role !== 'nurse' && (
+                    <Button
+                        size="icon"
+                        variant="destructive"
+                        className="text-white"
+                        onClick={() => onDelete(rowData)}
+                        title="Delete"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                )}
             </TableCell>
         </TableRow>
     )
