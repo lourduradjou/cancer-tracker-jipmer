@@ -10,53 +10,53 @@ This README provides a deep dive into the technical architecture, optimizations,
 
 #### HomePage
 
-![App Screenshot](screenshots\home-page.png)
+![App Screenshot](https://github.com/lourduradjou/cancer-tracker-jipmer/blob/main/screenshots/add-doctor-admin.png)
 
 #### Admin Patients View Page (Dark theme)
 
-![App Screenshot](screenshots\patients-view-admin.png)
+![App Screenshot](https://github.com/lourduradjou/cancer-tracker-jipmer/blob/main/screenshots/patients-view-admin.png)
 
 #### Admin Patients View Page (Light theme)
 
-![App Screenshot](screenshots\admin-view-hospital-light-theme.png)
+![App Screenshot](https://github.com/lourduradjou/cancer-tracker-jipmer/blob/main/screenshots/admin-view-hospital-light-theme.png)
 
 
 #### Patients Report
 
-![App Screenshot](screenshots\disease-report.png)
+![App Screenshot](https://github.com/lourduradjou/cancer-tracker-jipmer/blob/main/screenshots/disease-report.png)
 
 
 #### Add Doctor
 
-![App Screenshot](screenshots\add-doctor-admin.png)
+![App Screenshot](https://github.com/lourduradjou/cancer-tracker-jipmer/blob/main/screenshots/add-doctor-admin.png)
 
 #### Add Doctor, (Same for Nurse and Asha with field name changed)
 
-![App Screenshot](screenshots\add-hospital-admin.png)
+![App Screenshot](https://github.com/lourduradjou/cancer-tracker-jipmer/blob/main/screenshots/add-hospital-admin.png)
 
 #### Admin Patient Recover Page
 
-![App Screenshot](screenshots\recover-patient-view-admin.png)
+![App Screenshot](https://github.com/lourduradjou/cancer-tracker-jipmer/blob/main/screenshots/recover-patient-view-admin.png)
 
 #### Doctor View Patients Page
 
-![App Screenshot](screenshots\doctor-view-patients.png)
+![App Screenshot](https://github.com/lourduradjou/cancer-tracker-jipmer/blob/main/screenshots/doctor-view-patients.png)
 
 #### Nurse View Patients Page
 
-![App Screenshot](screenshots\nurse-view-patients.png)
+![App Screenshot](https://github.com/lourduradjou/cancer-tracker-jipmer/blob/main/screenshots/nurse-view-patients.png)
 
 #### Add Patients Form
 
-![App Screenshot](screenshots\add-patient-form.png)
+![App Screenshot](https://github.com/lourduradjou/cancer-tracker-jipmer/blob/main/screenshots/add-patient-form.png)
 
 #### Asha View Patients Page (Mobile View)
 
-![App Screenshot](screenshots\asha-view-patients.png)
+![App Screenshot](https://github.com/lourduradjou/cancer-tracker-jipmer/blob/main/screenshots/asha-view-patients.png)
 
 #### Delete Patient View
 
-![App Screenshot](screenshots\delete-patient-admin-view.png)
+![App Screenshot](https://github.com/lourduradjou/cancer-tracker-jipmer/blob/main/screenshots/delete-patient-admin-view.png)
 
 
 
