@@ -1,0 +1,38 @@
+{
+  "name": "Compass | JIPMER",
+  "short_name": "Compass",
+  "start_url": "/",
+  "display": "standalone",
+  "scope": "/",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/icon512_maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon512_rounded.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+   "screenshots": [
+    {
+      "src": "/screenshots/desktop.png",
+      "sizes": "1873x859",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshots/mobile.png",
+      "sizes": "510x790",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
+}
