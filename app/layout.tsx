@@ -9,6 +9,7 @@ export const metadata = {
     title: 'Compass - JIPMER',
     description:
         'Compass - Jipmer pondy is an app designed to handle, care and help cancer patients.',
+    manifest: '/manifest.json',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
