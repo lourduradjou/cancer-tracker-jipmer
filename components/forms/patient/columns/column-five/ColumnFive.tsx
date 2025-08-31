@@ -8,8 +8,9 @@ import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { PatientFormInputs } from '@/schema/patient'
+import clsx from 'clsx'
 
-export function ColumnFive({ form, isEdit }: { form: any; isEdit?: boolean }) {
+export function ColumnFive({ form, isAsha }: { form: any; isAsha?: boolean }) {
     const { getValues, setValue } = useFormContext<PatientFormInputs>()
     const patient = getValues()
 
@@ -82,7 +83,7 @@ export function ColumnFive({ form, isEdit }: { form: any; isEdit?: boolean }) {
     }
 
     return (
-        <div className="flex max-w-lg flex-col gap-4">
+        <div className={clsx('flex w-full flex-col sm:border-l-2 md:pl-4 gap-4 md:w-1/2 lg:w-1/3', isAsha && 'md:w-2/3 lg:w-full px-2 mx-auto border-none')} >
             {/* --- Follow-Ups Section --- */}
             <div className="w-full space-y-3 pt-2">
                 <div className="flex items-center space-x-4">
@@ -90,9 +91,10 @@ export function ColumnFive({ form, isEdit }: { form: any; isEdit?: boolean }) {
                     <Button
                         type="button"
                         size="icon"
+                        className='w-auto px-2 py-1'
                         onClick={() => setIsAddingFollowUp(!isAddingFollowUp)}
                     >
-                        <Plus className="h-5 w-5" />
+                        <Plus className="h-5 w-5" /> Add
                     </Button>
                 </div>
                 {isAddingFollowUp && (
@@ -112,7 +114,7 @@ export function ColumnFive({ form, isEdit }: { form: any; isEdit?: boolean }) {
                             >
                                 Cancel
                             </Button>
-                            <Button size="sm" onClick={handleSaveNewFollowUp}>
+                            <Button size="sm" variant={'outline'} onClick={handleSaveNewFollowUp}>
                                 Save Follow-up
                             </Button>
                         </div>
@@ -153,7 +155,7 @@ export function ColumnFive({ form, isEdit }: { form: any; isEdit?: boolean }) {
             {/* --- GPS Section --- */}
             <div className="space-y-4 pt-2">
                 {/* Auto GPS */}
-                <Button onClick={handleSaveLocation} disabled={savingLocation}>
+                <Button variant={'outline'} onClick={handleSaveLocation} disabled={savingLocation}>
                     {savingLocation ? 'Saving GPS...' : 'Use Current GPS Location'}
                 </Button>
 
@@ -176,7 +178,7 @@ export function ColumnFive({ form, isEdit }: { form: any; isEdit?: boolean }) {
                             onChange={(e) => setManualLng(e.target.value)}
                         />
                     </div>
-                    <Button size="sm" className="mt-2" onClick={handleSaveManualLocation}>
+                    <Button className="mt-2 w-full" variant="outline" size="sm" onClick={handleSaveManualLocation}>
                         Save Manual Location
                     </Button>
                 </div>
@@ -190,7 +192,8 @@ export function ColumnFive({ form, isEdit }: { form: any; isEdit?: boolean }) {
                         </p>
 
                         <Button
-                            className="bg-blue-600 text-white hover:bg-blue-700"
+                            className="w-full"
+                            variant='outline'
                             onClick={() =>
                                 window.open(
                                     `https://maps.google.com/?q=${patient.gpsLocation!.lat},${patient.gpsLocation!.lng}`,

@@ -61,7 +61,7 @@ function AdminPageContent() {
     return (
         <div className="mx-auto px-4 py-4 lg:max-w-[1240px] xl:max-w-[1400px]">
             {/* Mobile: dropdown */}
-            <div className="mb-4 sm:hidden">
+            <div className="mb-1 sm:hidden">
                 <Select value={activeTab} onValueChange={(val) => handleTabChange(val as typeof activeTab)}>
                     <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a section" />
@@ -86,7 +86,7 @@ function AdminPageContent() {
             </div>
 
             {/* Tablet+ : horizontal buttons */}
-            <div className="hidden sm:flex flex-wrap gap-2 mb-4">
+            <div className="hidden sm:flex flex-wrap gap-2 ">
                 {(
                     [
                         'hospitals',
@@ -100,9 +100,9 @@ function AdminPageContent() {
                     <Button
                         key={tab}
                         onClick={() => handleTabChange(tab)}
-                        variant={'simple'}
-                        className={`uppercase ${
-                            activeTab === tab ? 'bg-muted-foreground/70' : 'bg-border'
+                        variant={'default'}
+                        className={`uppercase text-foreground ${
+                            activeTab === tab ? '' : 'bg-border'
                         }`}
                     >
                         {tabLabels[tab]}
@@ -111,7 +111,7 @@ function AdminPageContent() {
             </div>
 
             {/* Table */}
-            <div className="p-4">
+            <div className="mt-4">
                 <GenericTable headers={selectedHeaders} activeTab={activeTab} />
             </div>
         </div>

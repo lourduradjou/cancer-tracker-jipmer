@@ -4,17 +4,18 @@ import { useFormContext, UseFormReturn } from 'react-hook-form'
 import DiagnosisTimingField from './fields/DiagnosisTimingField'
 import DiseaseMultiSelect from './fields/DiseaseMultiSelect'
 import RationCardSelect from './fields/RationCardSelect'
+import clsx from 'clsx'
 
 type RightColumnProps = {
     form: UseFormReturn<any>
-    isEdit?: boolean
+    isAsha?: boolean
 }
 
-export function ColumnThree({ form }: RightColumnProps) {
+export function ColumnThree({ form, isAsha }: RightColumnProps) {
     const { watch, control } = useFormContext()
 
     return (
-        <div className="flex flex-col gap-4 md:w-1/3">
+        <div className={clsx('flex w-full flex-col gap-4 md:w-1/2 lg:w-1/3', isAsha && 'md:w-2/3 lg:w-full px-2 mx-auto')}>
             <DiseaseMultiSelect sex={watch('sex')} />
 
             <RationCardSelect control={control} />

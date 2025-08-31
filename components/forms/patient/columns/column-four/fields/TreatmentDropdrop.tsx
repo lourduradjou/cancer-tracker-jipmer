@@ -1,80 +1,143 @@
+'use client'
+
 import { Controller, UseFormReturn } from 'react-hook-form'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
+import { Command, CommandGroup, CommandItem } from '@/components/ui/command'
+import { Check, X } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Input } from '@/components/ui/input'
 import { PatientFormInputs } from '@/schema/patient'
 
 interface TreatmentFieldProps {
-    form: UseFormReturn<PatientFormInputs>
-    isEdit?: boolean
+  form: UseFormReturn<PatientFormInputs>
+  isEdit?: boolean
 }
 
+const TREATMENT_OPTIONS = [
+  { value: 'Surgery', label: 'Surgery' },
+  { value: 'Chemotherapy', label: 'Chemotherapy' },
+  { value: 'Radiation', label: 'Radiation' },
+  { value: 'others', label: 'Others (Custom)' },
+]
+
 const TreatmentDropdown = ({ form }: TreatmentFieldProps) => {
-    const { watch, control, setValue } = form
-    const selectedTreatment = watch('treatmentDetails')
+  const { control, watch, setValue } = form
+  const selectedTreatments = watch('treatmentDetails') || []
 
-    return (
-        <div className="w-full space-y-2">
-            <div className="flex items-center gap-2">
-                <Controller
-                    control={control}
-                    name="treatmentDetails"
-                    render={({ field }) => (
-                        <Select value={field.value} onValueChange={(val) => field.onChange(val)}>
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Treatment Type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="surgery">Surgery</SelectItem>
-                                <SelectItem value="chemotherapy">Chemotherapy</SelectItem>
-                                <SelectItem value="radiation">Radiation</SelectItem>
-                                <SelectItem value="others">Others</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    )}
-                />
-
-                {selectedTreatment && (
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                            setValue('treatmentDetails', undefined, { shouldDirty: true })
-                            setValue('otherTreatmentDetails', '', { shouldDirty: true })
-                        }}
-                    >
-                        Clear
-                    </Button>
+  return (
+    <div className="w-full space-y-2">
+      <Controller
+        control={control}
+        name="treatmentDetails"
+        render={({ field }) => (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full flex-wrap justify-start gap-2 min-h-[5.5rem]"
+              >
+                {selectedTreatments.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedTreatments.map((treatment) => (
+                      <div
+                        key={treatment}
+                        className="flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-sm"
+                      >
+                        <span>{treatment}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            const newValues = selectedTreatments.filter((v) => v !== treatment)
+                            field.onChange(newValues)
+                          }}
+                        >
+                          <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  'Select Treatments'
                 )}
-            </div>
+              </Button>
+            </PopoverTrigger>
 
-            {/* Show input box only when "others" is selected */}
-            {selectedTreatment === 'others' && (
-                <Controller
+            <PopoverContent className="w-[300px] p-2">
+              <Command>
+                <CommandGroup>
+                  {TREATMENT_OPTIONS.map((option) => {
+                    const isSelected = selectedTreatments.includes(option.value)
+
+                    return (
+                      <CommandItem
+                        key={option.value}
+                        onSelect={() => {
+                          let newValues = [...selectedTreatments]
+
+                          if (isSelected) {
+                            newValues = newValues.filter((v) => v !== option.value)
+                          } else {
+                            newValues.push(option.value)
+                          }
+
+                          field.onChange(newValues)
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            'mr-2 h-4 w-4',
+                            isSelected ? 'opacity-100' : 'opacity-0'
+                          )}
+                        />
+                        {option.label}
+                      </CommandItem>
+                    )
+                  })}
+                </CommandGroup>
+              </Command>
+
+              {/* When "Others" is selected, show input field */}
+              {selectedTreatments.includes('others') && (
+                <div className="mt-3 space-y-2">
+                  <Controller
                     control={control}
                     name="otherTreatmentDetails"
-                    render={({ field }) => (
-                        <Input
-                            {...field}
-                            placeholder="Please specify the treatment"
-                            onChange={(e) => {
-                                field.onChange(e.target.value)
-                                // Keep syncing
-                                setValue('treatmentDetails', e.target.value, { shouldDirty: true })
-                            }}
-                        />
+                    render={({ field: otherField }) => (
+                      <Input
+                        {...otherField}
+                        placeholder="Please specify other treatment"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && otherField?.value?.trim()) {
+                            e.preventDefault()
+                            const newValue = otherField?.value?.trim()
+
+                            // prevent duplicates
+                            if (!selectedTreatments.includes(newValue)) {
+                              const newValues = selectedTreatments
+                                .filter((v) => v !== 'others') // remove placeholder
+                                .concat(newValue)
+                              setValue('treatmentDetails', newValues, { shouldDirty: true })
+                            }
+
+                            setValue('otherTreatmentDetails', '', { shouldDirty: true })
+                          }
+                        }}
+                      />
                     )}
-                />
-            )}
-        </div>
-    )
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Press Enter to add custom treatment
+                  </p>
+                </div>
+              )}
+            </PopoverContent>
+          </Popover>
+        )}
+      />
+    </div>
+  )
 }
 
 export default TreatmentDropdown

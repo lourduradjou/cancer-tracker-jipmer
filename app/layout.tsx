@@ -9,13 +9,13 @@ export const metadata = {
     title: 'Compass - JIPMER',
     description:
         'Compass - Jipmer pondy is an app designed to handle, care and help cancer patients.',
-    manifest: '/manifest.json',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
+                <link rel="manifest" href="/manifest.json" />
                 {/* <script crossOrigin="anonymous" src="//unpkg.com/react-scan/dist/auto.global.js" /> */}
             </head>
             <body className={inter.className}>

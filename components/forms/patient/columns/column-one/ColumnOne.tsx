@@ -7,15 +7,16 @@ import NameField from './fields/NameField'
 import AadhaarField from './fields/AadhaarField'
 import PhoneNumbersField from './fields/PhoneNumbersField'
 import ReligionDropdown from './fields/ReligionField'
+import clsx from 'clsx'
 
 interface LeftColumnProps {
     form: UseFormReturn<PatientFormInputs>
-    isEdit?: boolean
+    isAsha?: boolean
 }
 
-export function ColumnOne({ form, isEdit = false }: LeftColumnProps) {
+export function ColumnOne({ form, isAsha = false }: LeftColumnProps) {
     return (
-        <div className="flex flex-col gap-4 md:w-1/3">
+        <div className={clsx('flex w-full flex-col gap-4 md:w-1/2 lg:w-1/3', isAsha && 'md:w-2/3 lg:w-full px-2 mx-auto')}>
             <NameField form={form} />
             <ReligionDropdown form={form} />
 

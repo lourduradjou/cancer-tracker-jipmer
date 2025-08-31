@@ -14,12 +14,15 @@ import { usePagination } from '@/hooks/table/usePagination'
 
 import DeleteEntityDialog from '@/components/dialogs/DeleteEntityDialog'
 import { hospitalFields, patientFields, SEARCH_FIELDS, userFields } from '@/constants'
-import { useSearch,useStats,useTableData } from '@/hooks'
+import { useSearch, useStats, useTableData } from '@/hooks'
 import { Hospital, Patient, UserDoc } from '@/schema'
-import { act, useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import ViewDetailsDialog from '../dialogs/ViewDetailsDialog'
 import { GenericPagination, GenericRow, GenericToolbar } from './'
 import { useTableStore } from '@/store'
+import { useResponsiveRows } from '@/hooks/table/useResponsiveRows'
+import { TabDataMap, RowDataBase, ModalType } from '@/types/table/types'
+import { GenericMobileRow } from './GenericMobileRow'
 
 export function GenericTable({
     headers,
@@ -32,15 +35,15 @@ export function GenericTable({
     activeTab: 'ashas' | 'doctors' | 'nurses' | 'hospitals' | 'patients' | 'removedPatients'
 }) {
     const stableHeaders = useMemo(() => headers, [headers])
-    const [rowsPerPage, setRowsPerPage] = useState(8) // Initial default
-    const { user, role, orgId, isLoadingAuth } = useAuth() as { user: UserDoc | null, role: string, orgId: string, isLoadingAuth: boolean }
+    const rowsPerPage = useResponsiveRows()
+    const { user, role, orgId, isLoadingAuth } = useAuth() as {
+        user: UserDoc | null
+        role: string
+        orgId: string
+        isLoadingAuth: boolean
+    }
 
     const { selectedRow, modal, setSelectedRow, openModal, closeModal } = useTableStore()
-
-    // console.log('orgId:', orgId)
-    // console.log('role:', role)
-    // console.log('isLoading:', isLoadingAuth)
-    // console.log('activeTab:', activeTab)
 
     const queryProps = {
         orgId,
@@ -48,8 +51,6 @@ export function GenericTable({
         enabled: !isLoadingAuth,
         requiredData: activeTab,
     }
-
-    // console.log('queryProps:', queryProps)
 
     const fieldsMap = {
         patients: patientFields,
@@ -61,36 +62,7 @@ export function GenericTable({
     } as const
 
     const fieldsToDisplay = fieldsMap[activeTab]
-
     const { data = [] } = useTableData(queryProps) ?? {}
-
-    // console.log('data:', data)
-
-    useEffect(() => {
-        let resizeTimeout: NodeJS.Timeout
-
-        const calculateRows = () => {
-            const windowHeight = window.innerHeight
-            const reservedHeight = 300
-            const rowHeight = 52
-            const usable = windowHeight - reservedHeight
-            const rows = Math.max(4, Math.floor(usable / rowHeight))
-            setRowsPerPage(rows)
-        }
-
-        const handleResize = () => {
-            clearTimeout(resizeTimeout)
-            resizeTimeout = setTimeout(calculateRows, 150) // debounce by 150ms
-        }
-
-        calculateRows()
-        window.addEventListener('resize', handleResize)
-
-        return () => {
-            window.removeEventListener('resize', handleResize)
-            clearTimeout(resizeTimeout)
-        }
-    }, [])
 
     const searchFields = SEARCH_FIELDS[activeTab]
 
@@ -100,16 +72,6 @@ export function GenericTable({
 
     // ✅ Choose correct baseData (patients → filtered first, others → raw data)
     const baseData = isPatientTab ? filteredPatients : (data ?? [])
-
-    type TabDataMap = {
-        patients: Patient
-        hospitals: Hospital
-        doctors: UserDoc
-        nurses: UserDoc
-        ashas: UserDoc
-        removedPatients: Patient
-    }
-
     type ActiveDataType = TabDataMap[typeof activeTab] // infer based on activeTab
 
     const {
@@ -134,59 +96,35 @@ export function GenericTable({
         setCurrentPage(1)
     }, [filteredPatients.length, setCurrentPage])
 
-    // Replace RowDataType with the actual TabDataMap type
-    // In GenericTable component - REPLACE the callback section with this:
+    const handleRowAction = useCallback(
+        (row: RowDataBase, action: ModalType) => {
+            setSelectedRow(row as TabDataMap[typeof activeTab])
+            openModal(action)
+        },
+        [activeTab, setSelectedRow, openModal]
+    )
 
-    type RowDataBase = {
-        id: string | number
-        [key: string]: unknown
+    function getExportData(
+        activeTab: keyof TabDataMap,
+        data: unknown[],
+        filteredPatients: Patient[]
+    ) {
+        if (activeTab === 'patients') return filteredPatients
+        if (activeTab === 'hospitals') return (data ?? []) as Hospital[]
+        return data ?? []
     }
-
-    type HandleViewFn = (d: RowDataBase) => void
-
-    const handleView: HandleViewFn = useCallback(
-        (row) => {
-            setSelectedRow(row as TabDataMap[typeof activeTab])
-            openModal('view')
-        },
-        [activeTab, setSelectedRow, openModal]
-    )
-
-    type HandleUpdateFn = (d: RowDataBase) => void
-
-    const handleUpdate: HandleUpdateFn = useCallback(
-        (row) => {
-            setSelectedRow(row as TabDataMap[typeof activeTab])
-            openModal('update')
-        },
-        [activeTab, setSelectedRow, openModal]
-    )
-
-    type HandleDeleteFn = (d: RowDataBase) => void
-
-    const handleDelete: HandleDeleteFn = useCallback(
-        (row) => {
-            setSelectedRow(row as TabDataMap[typeof activeTab])
-            openModal('delete')
-        },
-        [activeTab, setSelectedRow, openModal]
-    )
 
     return (
         <div className="flex min-h-screen flex-col">
             <GenericToolbar
                 activeTab={activeTab}
-                getExportData={() => {
-                    if (activeTab === 'patients') return filteredPatients
-                    if (activeTab === 'hospitals') return (data ?? []) as Hospital[]
-                    return data ?? [] // doctors, nurses, ashas
-                }}
+                getExportData={() => getExportData(activeTab, data, filteredPatients)}
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
             />
 
             <Table className="border-border flex-1 overflow-auto rounded-md border">
-                <TableHeader className="bg-muted">
+                <TableHeader className="bg-muted hidden sm:table-header-group">
                     <TableRow className="border-border border-b">
                         <TableHead className="border-border w-12 border-r text-center">
                             S/NO
@@ -206,15 +144,15 @@ export function GenericTable({
                     {paginatedData.length > 0 ? (
                         paginatedData.map((data, index) => (
                             <GenericRow
+                                key={data.id}
                                 activeTab={activeTab}
                                 isPatientTab={isPatientTab}
                                 isRemovedPatientsTab={activeTab === 'removedPatients'}
-                                key={index}
                                 rowData={data}
                                 index={(currentPage - 1) * rowsPerPage + index}
-                                onView={handleView}
-                                onUpdate={handleUpdate}
-                                onDelete={handleDelete}
+                                onView={(row) => handleRowAction(row, 'view')}
+                                onUpdate={(row) => handleRowAction(row, 'update')}
+                                onDelete={(row) => handleRowAction(row, 'delete')}
                                 headers={stableHeaders}
                             />
                         ))
@@ -230,6 +168,24 @@ export function GenericTable({
                     )}
                 </TableBody>
             </Table>
+
+            {/* ✅ Mobile rows outside table */}
+            <div className="sm:hidden">
+                {paginatedData.map((data, index) => (
+                    <GenericMobileRow
+                        key={data.id + '-mobile'}
+                        activeTab={activeTab}
+                        isPatientTab={isPatientTab}
+                        isRemovedPatientsTab={activeTab === 'removedPatients'}
+                        rowData={data}
+                        index={(currentPage - 1) * rowsPerPage + index}
+                        onView={(row) => handleRowAction(row, 'view')}
+                        onUpdate={(row) => handleRowAction(row, 'update')}
+                        onDelete={(row) => handleRowAction(row, 'delete')}
+                        headers={stableHeaders}
+                    />
+                ))}
+            </div>
 
             <div className="">
                 <GenericPagination
@@ -249,9 +205,6 @@ export function GenericTable({
                         rowData={selectedRow}
                         fieldsToDisplay={fieldsToDisplay}
                     />
-                    {/* <GenericPatientDialog
-                            mode='edit'
-                        /> */}
                 </>
             )}
             <DeleteEntityDialog

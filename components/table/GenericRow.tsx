@@ -1,222 +1,76 @@
-// components/GenericRow.tsx
 'use client'
-import { Button } from '@/components/ui/button'
 import { TableCell, TableRow } from '@/components/ui/table'
-import { db } from '@/firebase'
-import { formatDobToDDMMYYYY } from '@/lib/patient/dateFormatter'
-import { dobToAgeUtil } from '@/lib/patient/dobToAge'
-import { HospitalFormInputs, UserDoc } from '@/schema'
-import type { Patient } from '@/schema/patient'
-import { useQueryClient } from '@tanstack/react-query'
-import { deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
-import { Eye, Pencil, RotateCcw, Trash2 } from 'lucide-react'
-import { usePathname } from 'next/navigation'
-import { memo, useState } from 'react'
-import { toast } from 'sonner'
-import { DiseasesCell, PhoneCell, StatusCell } from '.'
-import AshaSearchDialog from '../dialogs/AshaSearchDialog'
-import TransferDialog from '../dialogs/TransferDialog'
-import GenericHospitalDialog from '../forms/hospital/GenericHospitalDialog'
-import GenericPatientDialog from '../forms/patient/GenericPatientDialog'
-import GenericUserDialog from '../forms/user/GenericUserDialog'
-import { useAuth } from '@/contexts/AuthContext'
+import { memo } from 'react'
+import { GenericCell } from './GenericCell'
+import { RowActions } from './RowActions'
 
 type Header = {
-    name: string
-    key: string
+  name: string
+  key: string
 }
 
-// Make RowDataBase more flexible to accept any object with an id
 type RowDataBase = {
-    id: string | number
-    [key: string]: unknown
+  id: string | number
+  [key: string]: unknown
 }
 
 type GenericRowProps = {
-    activeTab: string
-    isPatientTab: boolean
-    isRemovedPatientsTab?: boolean
-    rowData: RowDataBase
-    index: number
-    onView: (data: RowDataBase) => void
-    onUpdate: (data: RowDataBase) => void
-    onDelete: (data: RowDataBase) => void
-    headers: Header[]
+  activeTab: string
+  isPatientTab: boolean
+  isRemovedPatientsTab?: boolean
+  rowData: RowDataBase
+  index: number
+  onView: (data: RowDataBase) => void
+  onUpdate: (data: RowDataBase) => void
+  onDelete: (data: RowDataBase) => void
+  headers: Header[]
 }
 
+// ✅ Only the desktop <tr>
 export const GenericRow = memo(function GenericRow(props: GenericRowProps) {
-    const {
-        activeTab,
-        isPatientTab,
-        rowData,
-        isRemovedPatientsTab,
-        index,
-        onView,
-        onUpdate,
-        onDelete,
-        headers,
-    } = props
-    const pathname = usePathname()
-    const isNurse = pathname.startsWith('/nurse')
-    const [assignedAshaId, setAssignedAshaId] = useState((rowData as Patient).assignedAsha || '')
-    const queryClient = useQueryClient()
-    const { role } = useAuth()
+  const {
+    activeTab,
+    isPatientTab,
+    rowData,
+    isRemovedPatientsTab,
+    index,
+    onView,
+    onDelete,
+    headers,
+  } = props
 
-    const renderCellContent = (key: string) => {
-        const value = rowData[key]
+  return (
+    <TableRow
+      key={rowData.id}
+      className="border-border hidden border-b font-light sm:table-row"
+    >
+      <TableCell className="border-border border-r text-center">{index + 1}</TableCell>
 
-        switch (key) {
-            case 'phoneNumber':
-            case 'contactNumber':
-                return <PhoneCell phoneNumbers={value as string[]} isPatientTab={isPatientTab} />
+      {headers.map((header, index) => (
+        <TableCell
+          key={index}
+          className={`border-border border-r text-center ${
+            header.key === 'name' ? 'font-semibold' : ''
+          }`}
+        >
+          <GenericCell
+            value={rowData[header.key]}
+            keyName={header.key}
+            isPatientTab={isPatientTab}
+          />
+        </TableCell>
+      ))}
 
-            case 'dob':
-                return (
-                    <span className="">{dobToAgeUtil(formatDobToDDMMYYYY(value as string))}</span>
-                )
-
-            case 'diseases':
-                return <DiseasesCell diseases={(value as string[]) ?? []} />
-
-            case 'patientStatus':
-                return <StatusCell status={value as string} />
-
-            case 'sex':
-                return <span className="capitalize">{value as string}</span>
-
-            default:
-                return <span className="">{String(value)}</span>
-        }
-    }
-
-    const handleRetrieve = async () => {
-        try {
-            if (!rowData.id) throw new Error('Missing patient ID')
-
-            const patientId = rowData.id.toString()
-
-            // move patient back to "patients"
-            await setDoc(doc(db, 'patients', patientId), {
-                ...rowData,
-                restoredAt: new Date().toISOString(),
-            })
-
-            // delete from "removedPatients"
-            await deleteDoc(doc(db, 'removedPatients', patientId))
-
-            queryClient.invalidateQueries({ queryKey: ['patients'] })
-            queryClient.invalidateQueries({ queryKey: ['removedPatients'] })
-
-            toast.success(`Patient ${rowData.name} retrieved successfully!`)
-        } catch (err) {
-            toast.error('Failed to retrieve patient. Check console.')
-            console.error(err)
-        }
-    }
-
-    return (
-        <TableRow key={rowData.id} className="border-border border-b font-light">
-            <TableCell className="border-border border-r text-center">{index + 1}</TableCell>
-            {headers.map((header, index) => (
-                <TableCell
-                    key={index}
-                    className={`border-border border-r text-center ${header.key === 'name' ? 'font-semibold' : ''}`}
-                >
-                    {renderCellContent(header.key)}
-                </TableCell>
-            ))}
-            <TableCell className="space-x-2 text-center">
-                <Button size="icon" variant="outline" onClick={() => onView(rowData)} title="View">
-                    <Eye className="h-4 w-4" />
-                </Button>
-
-                {isPatientTab && (
-                    <GenericPatientDialog
-                        mode="edit"
-                        patientData={rowData as Patient}
-                        trigger={
-                            <Button size="icon" variant="outline" title="Update">
-                                <Pencil className="h-4 w-4" />
-                            </Button>
-                        }
-                        onSuccess={() => {
-                            // console.log('Patient updated successfully')
-                        }}
-                    />
-                )}
-
-                {activeTab === 'ashas' || activeTab === 'doctors' || activeTab === 'nurses' ? (
-                    <GenericUserDialog
-                        mode="edit"
-                        userType={activeTab}
-                        userData={rowData as UserDoc}
-                        trigger={
-                            <Button size="icon" variant="outline" title="Update">
-                                <Pencil className="h-4 w-4" />
-                            </Button>
-                        }
-                    />
-                ) : null}
-
-                {activeTab === 'hospitals' && (
-                    <GenericHospitalDialog
-                        mode="edit"
-                        hospitalData={rowData as HospitalFormInputs & { id: string }}
-                    />
-                )}
-
-                {isPatientTab && (
-                    <TransferDialog
-                        patient={rowData as Patient}
-                        onTransfer={async (hospitalId, hospitalName) => {
-                            try {
-                                if (!rowData.id) throw new Error('Missing patient document ID')
-                                const patientRef = doc(db, 'patients', rowData.id.toString())
-                                await updateDoc(patientRef, {
-                                    assignedHospital: { id: hospitalId, name: hospitalName },
-                                    assignedAsha: '',
-                                })
-                                toast.success(`Transferred ${rowData.name} to new PHC.`)
-                            } catch (err) {
-                                toast.error('Transfer failed. See console for details.' + err)
-                            }
-                        }}
-                    />
-                )}
-                {/* ✅ ASHA assign button */}
-                {isPatientTab && (
-                    <AshaSearchDialog
-                        patientId={rowData.id.toString()}
-                        assignedAshaId={assignedAshaId}
-                        onAssigned={(ashaId: string | null) =>
-                            setAssignedAshaId(ashaId ? ashaId : '')
-                        }
-                    />
-                )}
-
-                {isRemovedPatientsTab && (
-                    <Button
-                        size="icon"
-                        variant="outline"
-                        className="text-green-600"
-                        onClick={handleRetrieve}
-                        title="Retrieve Patient"
-                    >
-                        <RotateCcw className="h-4 w-4" />
-                    </Button>
-                )}
-                {role !== 'nurse' && (
-                    <Button
-                        size="icon"
-                        variant="destructive"
-                        className="text-white"
-                        onClick={() => onDelete(rowData)}
-                        title="Delete"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                )}
-            </TableCell>
-        </TableRow>
-    )
+      <TableCell className="space-x-2 text-center">
+        <RowActions
+          rowData={rowData}
+          activeTab={activeTab}
+          isPatientTab={isPatientTab}
+          isRemovedPatientsTab={isRemovedPatientsTab}
+          onView={onView}
+          onDelete={onDelete}
+        />
+      </TableCell>
+    </TableRow>
+  )
 })

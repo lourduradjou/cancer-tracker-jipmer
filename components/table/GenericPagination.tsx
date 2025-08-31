@@ -40,15 +40,15 @@ export function GenericPagination({
             <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
                 {/* Stats Section */}
                 {stats && (
-                    <div className="flex w-full justify-between text-sm font-light md:flex-row">
-                        <section className="flex space-x-4">
-                            <div className="border px-2 py-1">Total Patients: {stats.total}</div>
+                    <div className="flex w-full flex-wrap justify-between gap-2 text-xs font-light sm:text-sm md:flex-row">
+                        <section className="flex flex-wrap gap-2 text-center">
+                            <div className="border px-2 py-1">Total: {stats.total}</div>
                             <div className="border px-2 py-1">Male: {stats.male}</div>
                             <div className="border px-2 py-1">Female: {stats.female}</div>
                             <div className="border px-2 py-1">Others: {stats.others}</div>
                         </section>
                         {isPatientTab && (
-                            <section className="flex space-x-4">
+                            <section className="flex flex-wrap gap-2 text-center">
                                 <div className="border px-2 py-1">Assigned: {stats.assigned}</div>
                                 <div className="border px-2 py-1">
                                     Unassigned: {stats.unassigned}

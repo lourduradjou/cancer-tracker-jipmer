@@ -80,8 +80,14 @@ const preprocessPatientRow = async (
     cleaned.suspectedCase = String(row.suspectedCase).toLowerCase() === 'yes'
 
     // Arrays
-    cleaned.diseases = row.diseases
-        ? String(row.diseases)
+    cleaned.diseases = row.disease
+        ? String(row.disease)
+              .split(',')
+              .map((d) => d.trim())
+        : []
+
+    cleaned.treatmentDetails = row.treatmentDetails
+        ? String(row.treatmentDetails)
               .split(',')
               .map((d) => d.trim())
         : []
@@ -106,7 +112,6 @@ const preprocessPatientRow = async (
         hospitalRegistrationId: row.hospitalRegistrationId ?? '',
         stageOfTheCancer: row.stageOfTheCancer ?? '',
         reasonOfRemoval: row.reasonOfRemoval ?? '',
-        treatmentDetails: row.treatmentDetails ?? '',
         otherTreatmentDetails: row.otherTreatmentDetails ?? '',
     })
 

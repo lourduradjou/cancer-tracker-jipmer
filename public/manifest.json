@@ -4,6 +4,8 @@
   "start_url": "/",
   "display": "standalone",
   "scope": "/",
+  "dir": "auto",
+  "lang": "en-US",
   "orientation": "any",
   "background_color": "#ffffff",
   "theme_color": "#000000",
@@ -24,7 +26,7 @@
    "screenshots": [
     {
       "src": "/screenshots/desktop.png",
-      "sizes": "1873x859",
+      "sizes": "1886x857",
       "type": "image/png",
       "form_factor": "wide"
     },
