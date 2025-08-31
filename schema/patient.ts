@@ -2,7 +2,7 @@ import z from 'zod'
 
 export const InsuranceSchema = z
     .object({
-        type: z.enum(['none', 'government', 'private']),
+        type: z.enum(['none', 'Government', 'Private']),
         id: z.string().optional(),
     })
     .optional()
@@ -67,7 +67,7 @@ export const PatientSchema = z
         hospitalRegistrationId: z.string().optional(),
         stageOfTheCancer: z.string().optional(),
         reasonOfRemoval: z.string().optional(),
-        treatmentDetails: z.string().optional(),
+        treatmentDetails: z.array(z.string().optional()).optional(),
         otherTreatmentDetails: z.string().optional(),
         insurance: InsuranceSchema,
     })

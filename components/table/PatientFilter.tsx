@@ -36,12 +36,12 @@ export function PatientFilter() {
                 <PopoverTrigger asChild>
                     <Button className="cursor-pointer" variant="outline">
                         <ListFilter className="mr-1 h-4 w-4" />
-                        Filters
+                        <span className='hidden md:inline'>Filters</span>
                     </Button>
                 </PopoverTrigger>
 
-                <PopoverContent className="w-[650px] px-10 py-4">
-                    <div className="flex flex-wrap gap-6">
+                <PopoverContent className="w-auto px-10 py-6">
+                    <div className="flex flex-col sm:grid sm:grid-cols-2 gap-6">
                         {/* Sex */}
                         <FilterGroup
                             label="Sex"

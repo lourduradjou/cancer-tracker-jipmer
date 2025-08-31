@@ -5,19 +5,20 @@ import { Input } from '@/components/ui/input'
 import TreatmentDropdown from './fields/TreatmentDropdrop'
 import { TreatmentPeriodField } from './fields/TreatmentPeriodField'
 import { FloatingLabelInput } from '@/components/ui/floating-label-input'
+import clsx from 'clsx'
 type RightColumnProps = {
     form: UseFormReturn<any>
-    isEdit?: boolean
+    isAsha?: boolean
 }
 
-export function ColumnFour({ form, isEdit = false }: RightColumnProps) {
+export function ColumnFour({ form, isAsha = false }: RightColumnProps) {
     const { watch, control } = form
 
     const suspectedCase = watch('suspectedCase')
 
     return (
         !suspectedCase && (
-            <div className="mx-1 flex flex-col gap-4 border-l-2 px-4 md:w-1/3">
+            <div className={clsx('flex w-full flex-col sm:border-l-2 md:pl-4 gap-4 md:w-1/2 lg:w-1/3', isAsha && 'md:w-2/3 lg:w-full border-none px-2 mx-auto')} >
                 <TreatmentPeriodField form={form} />
                 <FormField
                     control={control}

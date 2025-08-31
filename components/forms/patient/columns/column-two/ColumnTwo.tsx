@@ -6,17 +6,18 @@ import SexSelect from './fields/SexSelect'
 import PatientStatusSelect from './fields/PatientStatusSelect'
 import { FloatingLabelInput } from '@/components/ui/floating-label-input'
 import { RegistrationDateField } from './fields/RegistrationDateField'
+import clsx from 'clsx'
 
 type MiddleColumnProps = {
     form: UseFormReturn<any>
-    isEdit?: boolean
+    isAsha?: boolean
 }
 
-export function ColumnTwo({ form }: MiddleColumnProps) {
+export function ColumnTwo({ form, isAsha }: MiddleColumnProps) {
     const { register, control } = form
 
     return (
-        <div className="mx-1 flex flex-col gap-4 border-x-2 px-4 md:w-1/3">
+        <div className={clsx('flex flex-col gap-4 md:px-4 sm:border-x-2 md:w-1/2 lg:w-1/3', isAsha && 'md:w-2/3 lg:w-full px-2 mx-auto border-none')}>
             <RegistrationDateField form={form} />
             {/* Address */}
             <FormField

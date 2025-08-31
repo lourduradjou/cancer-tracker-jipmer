@@ -6,13 +6,9 @@ import { Patient } from '@/schema/patient'
 import { UserDoc } from '@/schema/user'
 import { Hospital } from '@/schema/hospital'
 
-// Create a generic type that can be any of your data types
 type RowDataType = Patient | UserDoc | Hospital
-
-// Define a type for the fields to display
 type FieldToDisplay = { label: string; key: string }
 
-// Update the props to be generic and include fieldsToDisplay
 export default function ViewDetailsDialog({
     open,
     onOpenChange,
@@ -50,18 +46,9 @@ export default function ViewDetailsDialog({
         return String(value)
     }
 
-    // function displayDetail(rowData) {
-    //     console.log('inside display fucntion')
-    //     for(let key of fieldsToDisplay) {
-    //         console.log(key.label + ' ' + 'of' + ' ' + rowData[key.key])
-    //     }
-    // }
-    // displayDetail(rowData)
-
-    // console.log('fields to display' + fieldsToDisplay)
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-card text-card-foreground max-w-3xl rounded-xl shadow-md">
+            <DialogContent className="bg-card text-card-foreground rounded-xl shadow-md md:w-1/2 lg:w-1/3">
                 <DialogHeader>
                     {/* Make the title dynamic based on the data */}
                     <DialogTitle className="text-lg font-semibold">
@@ -89,16 +76,7 @@ export default function ViewDetailsDialog({
                                         key={i}
                                         className="border-border bg-muted/20 rounded-lg border p-3"
                                     >
-                                        {/* <Info
-                                            label="Date"
-                                            value={
-                                                typeof f.date === 'object' && f.date !== null && 'seconds' in f.date
-                                                    ? new Date(f.date.seconds * 1000).toLocaleDateString()
-                                                    : new Date(f.date).toLocaleDateString()
-                                            }
-                                        /> */}
                                         <Info label="Remarks" value={f?.remarks ?? 'No remarks'} />
-                                        {/* Add more info from follow-up if needed */}
                                     </li>
                                 ))}
                             </ul>

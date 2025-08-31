@@ -36,11 +36,11 @@ export function GenericToolbar({
     const { role } = useAuth()
 
     const dashboardTitleContent = pathname.includes('/admin') ? (
-        'Admin Dashboard'
+        <h1 className="text-2xl font-bold hidden sm:block">Admin Dashboard</h1>
     ) : pathname.includes('/nurse') ? (
-        <h1 className="text-2xl font-bold">Nurse Dashboard</h1>
+        <h1 className="text-2xl font-bold hidden sm:block">Nurse Dashboard</h1>
     ) : (
-        <h1 className="text-2xl font-bold">Doctor Dashboard</h1>
+        <h1 className="text-2xl font-bold hidden sm:block">Doctor Dashboard</h1>
     )
 
     const handleExportCSV = () => {
@@ -56,7 +56,7 @@ export function GenericToolbar({
     return (
         <div className="mb-4 flex items-center justify-between">
             {dashboardTitleContent}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full justify-center sm:w-auto">
                 {activeTab && (
                     <SearchInput
                         value={searchTerm}

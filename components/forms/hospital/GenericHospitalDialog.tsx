@@ -65,7 +65,7 @@ export default function GenericHospitalDialog({
             variant="outline"
             className="cursor-pointer border-2 !border-green-400 capitalize"
         >
-            <Plus className="h-4 w-4" /> Add Hospital
+            <Plus className="h-4 w-4" /> <span className='hidden sm:block'>Add Hospital</span>
         </Button>
     )
 

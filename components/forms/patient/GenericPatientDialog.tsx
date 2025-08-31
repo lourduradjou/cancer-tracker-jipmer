@@ -62,7 +62,7 @@ export default function GenericPatientDialog({
             suspectedCase: false,
             biopsyNumber: '',
             stageOfTheCancer: '',
-            treatmentDetails: '',
+            treatmentDetails: [],
             otherTreatmentDetails: '',
         },
     })
@@ -70,7 +70,6 @@ export default function GenericPatientDialog({
     const { handleSubmit, reset, watch, setValue } = form
     const aadhaarId = watch('aadhaarId')
     const hasAadhaar = watch('hasAadhaar')
-    const suspectedCase = watch('suspectedCase')
 
     // Initialize form with patient data for edit mode
     useEffect(() => {
@@ -142,7 +141,7 @@ export default function GenericPatientDialog({
         </Button>
     ) : (
         <Button variant="outline" className="cursor-pointer border-2 !border-green-400">
-            <Plus className="h-4 w-4" /> Add Patient
+            <Plus className="h-4 w-4" /> <span className="hidden sm:block">Add Patient</span>
         </Button>
     )
 
@@ -154,12 +153,7 @@ export default function GenericPatientDialog({
                 <DialogContent
                     onInteractOutside={(e) => e.preventDefault()}
                     className={clsx(
-                        'max-h-[90vh] overflow-y-auto',
-                        suspectedCase
-                            ? 'min-w-[1020px]'
-                            : isEdit
-                              ? 'max-w-[1600px] min-w-[1440px]'
-                              : 'min-w-[1280px]'
+                        'max-h-[90vh] w-full max-w-[95vw] overflow-y-auto sm:max-w-[640px] md:max-w-[768px] lg:max-w-[1024px] 2xl:max-w-[90vw]'
                     )}
                 >
                     <DialogHeader>

@@ -20,7 +20,7 @@ export const PATIENT_TABLE_HEADERS = [
         key: 'patientStatus',
     },
     {
-        name: 'Diagnosed',
+        name: 'Diseases',
         key: 'diseases'
     }
 ]

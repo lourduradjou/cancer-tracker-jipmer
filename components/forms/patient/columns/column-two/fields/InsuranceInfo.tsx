@@ -24,7 +24,7 @@ export default function InsuranceInfo({ form }: InsuranceInfoProps) {
                 <Select
                     value={insuranceType}
                     onValueChange={(val) =>
-                        form.setValue('insurance.type', val as 'none' | 'private' | 'government')
+                        form.setValue('insurance.type', val as 'none' | 'Private' | 'Government')
                     }
                 >
                     <SelectTrigger className="text-muted-foreground w-full text-sm font-medium">
@@ -36,8 +36,8 @@ export default function InsuranceInfo({ form }: InsuranceInfoProps) {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="none">None</SelectItem>
-                        <SelectItem value="private">Private</SelectItem>
-                        <SelectItem value="government">Government</SelectItem>
+                        <SelectItem value="Private">Private</SelectItem>
+                        <SelectItem value="Government">Government</SelectItem>
                     </SelectContent>
                 </Select>
             </div>

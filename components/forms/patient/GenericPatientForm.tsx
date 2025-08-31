@@ -1,6 +1,5 @@
 'use client'
 
-import { X } from 'lucide-react'
 import { UseFormHandleSubmit, UseFormReset, UseFormReturn } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { PatientFormInputs } from '@/schema/patient'
@@ -26,6 +25,8 @@ export default function GenericPatientForm({
         formState: { errors },
     } = form
 
+    console.log(errors)
+
     // ---------- UI ----------
     return (
         // keep this a form to preserve semantics, but don't submit here
@@ -36,18 +37,18 @@ export default function GenericPatientForm({
                 })}
                 className="grid min-w-full gap-6 py-4 select-none"
             >
-                <div className="flex w-full flex-col gap-6 md:flex-row">
+                <div className="flex w-full flex-col gap-6 md:flex-row ">
                     {/* COLUMN ONE*/}
-                    <ColumnOne form={form} isEdit={isEdit} />
+                    <ColumnOne form={form} />
 
                     {/* COLUMN TWO */}
-                    <ColumnTwo form={form} isEdit={isEdit} />
+                    <ColumnTwo form={form} />
 
                     {/*COLUMN THREE */}
-                    <ColumnThree form={form} isEdit={isEdit} />
+                    <ColumnThree form={form} />
 
                     {/*COLUMN FOUR */}
-                    <ColumnFour form={form} isEdit={isEdit} />
+                    <ColumnFour form={form} />
 
                     {isEdit && <ColumnFive form={form} />}
                 </div>
@@ -58,7 +59,7 @@ export default function GenericPatientForm({
                         type="button"
                         className="h-12 w-[20%] border-red-500 text-red-600"
                     >
-                        <X className="h-4 w-4" /> Clear
+                        Clear
                     </Button>
                     <Button type="submit" className="h-12 w-[80%]" name="Save">
                         {isEdit ? 'Update' : 'Save'}
