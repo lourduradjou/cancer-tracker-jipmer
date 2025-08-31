@@ -1,19 +1,17 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import { auth, db } from '@/firebase'
-import { signOut } from 'firebase/auth'
 import { collection, getDocs, query, where } from 'firebase/firestore'
-import { Menu } from 'lucide-react'
+import { Menu, Sun, User } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ModeToggle } from '../ui/toggle'
+import SignOutButton from './SignOutButton'
+
 
 export default function Navbar() {
     const [username, setUsername] = useState<string | null>(null)
     const [menuOpen, setMenuOpen] = useState(false)
-    const router = useRouter()
 
     useEffect(() => {
         const fetchUsername = async () => {
@@ -35,17 +33,14 @@ export default function Navbar() {
         fetchUsername()
     }, [])
 
-    const handleSignOut = async () => {
-        await signOut(auth)
-        router.push('/login')
-    }
-
     return (
         <nav className="bg-background flex items-center justify-between border-b px-4 py-3 shadow md:px-8">
+            {/* Logo */}
             <Link href="/" className="text-2xl font-bold text-green-600">
                 Compass
             </Link>
 
+            {/* Hamburger */}
             <div className="md:hidden">
                 <button
                     onClick={() => setMenuOpen(!menuOpen)}
@@ -55,29 +50,33 @@ export default function Navbar() {
                 </button>
             </div>
 
-            <div
-                className={`${
-                    menuOpen ? 'block' : 'hidden'
-                } w-full md:flex md:w-auto md:items-center md:space-x-4`}
-            >
+            {/* Desktop Menu */}
+            <div className="hidden md:flex items-center gap-4">
                 <ModeToggle />
-
-                <div className="flex flex-col md:flex-row md:items-center md:space-x-4">
-                    {/* {username && (
-                        <span className="text-foreground mb-2 font-medium capitalize select-none md:mb-0">
-                            Hello, {username}
-                        </span>
-                    )} */}
-
-                    <Button
-                        variant="destructive"
-                        onClick={handleSignOut}
-                        className="w-full cursor-pointer md:w-auto"
-                    >
-                        Sign Out
-                    </Button>
-                </div>
+                {/* {username && (
+                    <span className="flex items-center gap-2 text-foreground font-medium capitalize select-none">
+                        <User className="h-4 w-4" /> {username}
+                    </span>
+                )} */}
+                <SignOutButton />
             </div>
+
+            {/* Mobile Dropdown */}
+            {menuOpen && (
+                <div className="absolute top-16 rounded-md right-0 z-50 min-w-[160px] bg-background border-t shadow-md md:hidden">
+                    <div className="flex flex-col justify-center items-center p-4 gap-3">
+                        <ModeToggle/>
+
+                        {/* {username && (
+                            <span className="flex items-center gap-2 text-foreground font-medium capitalize">
+                                <User className="h-4 w-4" /> {username}
+                            </span>
+                        )} */}
+
+                        <SignOutButton className="w-full" />
+                    </div>
+                </div>
+            )}
         </nav>
     )
 }
