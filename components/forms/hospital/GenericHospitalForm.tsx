@@ -51,7 +51,7 @@ export default function GenericHospitalForm({
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Hospital Name</FormLabel>
-                            <FormControl>
+                            <FormControl className='border-red-400'>
                                 <Input placeholder="Enter hospital name" {...field} />
                             </FormControl>
                             <FormMessage />
@@ -65,7 +65,7 @@ export default function GenericHospitalForm({
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Address</FormLabel>
-                            <FormControl>
+                            <FormControl className='border-red-400'>
                                 <Input placeholder="Enter hospital address" {...field} />
                             </FormControl>
                             <FormMessage />

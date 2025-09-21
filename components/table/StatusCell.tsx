@@ -9,9 +9,9 @@ export function StatusCell({ status }: StatusCellProps) {
 
     const colorClass =
         statusLower === 'alive'
-            ? 'bg-border text-green-600'
-            : statusLower === 'death'
-              ? 'bg-border text-red-600'
+            ? 'bg-border text-green-500'
+            : statusLower === 'not alive'
+              ? 'bg-border text-red-400'
               : statusLower === 'ongoing'
                 ? 'bg-border text-blue-600'
                 : statusLower === 'followup'

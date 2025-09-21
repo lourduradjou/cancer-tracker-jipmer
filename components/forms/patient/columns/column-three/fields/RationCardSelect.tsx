@@ -24,7 +24,7 @@ export default function RationCardSelect({ control }: RationCardSelectProps) {
                         Ration Card Color
                     </SelectLabel>
                     <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full text-muted-foreground mb-1 text-sm">
                             <SelectValue placeholder="Ration Card Color" />
                         </SelectTrigger>
                         <SelectContent>

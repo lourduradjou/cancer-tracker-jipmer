@@ -48,7 +48,7 @@ export function ColumnTwo({ form, isAsha }: MiddleColumnProps) {
             <SexSelect control={control} />
 
             {/* Status */}
-            <PatientStatusSelect control={control} />
+            <PatientStatusSelect control={control} form={form}/>
         </div>
     )
 }
