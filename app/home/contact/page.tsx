@@ -6,7 +6,7 @@ export default function ContactPage() {
             <TypographyH2>Contact Us</TypographyH2>
 
             <TypographyP className="mb-4">
-                For any queries or technical issues related to the COMPASS Portal, please reach out
+                For any queries or technical issues related to the PuduCan Portal, please reach out
                 to us using the following contact information:
             </TypographyP>
             <div className="bg-sidebar-accent space-y-4 rounded p-4 shadow">
@@ -30,7 +30,7 @@ export default function ContactPage() {
 
                 <div>
                     <TypographyP className="font-semibold">Email:</TypographyP>
-                    <TypographyMuted>compass-support@jipmer.edu.in</TypographyMuted>
+                    <TypographyMuted>PuduCan-support@jipmer.edu.in</TypographyMuted>
                 </div>
 
                 <div>

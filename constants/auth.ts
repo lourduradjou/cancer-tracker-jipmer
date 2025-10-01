@@ -1,8 +1,8 @@
 export const ROLE_REDIRECTS = {
-    nurse: '/compass/nurse',
-    doctor: '/compass/doctor',
-    asha: '/compass/asha',
-    admin: '/compass/admin',
+    nurse: '/PuduCan/nurse',
+    doctor: '/PuduCan/doctor',
+    asha: '/PuduCan/asha',
+    admin: '/PuduCan/admin',
 } as const
 
 type Role = keyof typeof ROLE_REDIRECTS

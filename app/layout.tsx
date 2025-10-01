@@ -6,9 +6,9 @@ import Providers from '@/components/layout/Providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-    title: 'Compass - JIPMER',
+    title: 'PuduCan',
     description:
-        'Compass - Jipmer pondy is an app designed to handle, care and help cancer patients.',
+        'PuduCan is an app designed to handle, care and help cancer patients of puducherry, pondicherry, karaikal, mahe. To manage the government and primary phc schools',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {

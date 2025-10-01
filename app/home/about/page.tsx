@@ -4,10 +4,10 @@ import { Suspense } from 'react'
 export default function AboutPage() {
     return (
         <div className="mx-auto mt-10 max-w-[1400px]">
-            <TypographyH2 className="mb-4 text-2xl font-bold">About COMPASS</TypographyH2>
+            <TypographyH2 className="mb-4 text-2xl font-bold">About PuduCan</TypographyH2>
 
             <TypographyMuted>
-                The COMPASS project aims to improve patient-reported outcomes and care experiences
+                The PuduCan project aims to improve patient-reported outcomes and care experiences
                 across thecancer care continuum in India through a Community-Oriented Model of
                 Patient Navigation System.This hybrid implementation study addresses the rising
                 cancer burden in India, where fragmented carepathways and late diagnoses contribute

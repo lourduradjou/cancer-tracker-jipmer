@@ -41,10 +41,10 @@ export default function LoginPage() {
     useEffect(() => {
         if (!isLoadingAuth && user && role) {
             const roleRoutes: Record<string, string> = {
-                admin: '/compass/admin',
-                asha: '/compass/asha',
-                nurse: '/compass/nurse',
-                doctor: '/compass/doctor',
+                admin: '/PuduCan/admin',
+                asha: '/PuduCan/asha',
+                nurse: '/PuduCan/nurse',
+                doctor: '/PuduCan/doctor',
             }
 
             const targetRoute = roleRoutes[role] || '/dashboard'

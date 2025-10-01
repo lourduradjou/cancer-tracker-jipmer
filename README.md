@@ -1,6 +1,6 @@
-# 🩺 COMPASS - Patient Management Dashboard
+# 🩺 PuduCan - Patient Management Dashboard
 
-A modern healthcare dashboard built with **Next.js**, **Firebase**, and **Tailwind CSS**. This platform is designed to help ASHA workers, nurses, and doctors manage patient records efficiently as part of the **COMPASS project**, a national study led by JIPMER to improve cancer care.
+A modern healthcare dashboard built with **Next.js**, **Firebase**, and **Tailwind CSS**. This platform is designed to help ASHA workers, nurses, and doctors manage patient records efficiently as part of the **PuduCan project**, a national study led by JIPMER to improve cancer care.
 
 This README provides a deep dive into the technical architecture, optimizations, and features of the application.
 

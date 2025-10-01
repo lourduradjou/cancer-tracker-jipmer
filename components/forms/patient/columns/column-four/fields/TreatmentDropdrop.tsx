@@ -35,7 +35,7 @@ const TreatmentDropdown = ({ form }: TreatmentFieldProps) => {
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="w-full flex-wrap justify-start gap-2 min-h-[5.5rem]"
+                className="w-full flex-wrap justify-start gap-2 min-h-[5.5rem] text-muted-foreground mb-1 text-sm"
               >
                 {selectedTreatments.length > 0 ? (
                   <div className="flex flex-wrap gap-2">

@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx'
 import Papa from 'papaparse'
-import { collection, addDoc, getDocs } from 'firebase/firestore'
+import { collection, addDoc, getDocs, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/firebase'
 import { getCollectionName } from '@/lib/common/getCollectionName'
 import { PatientSchema } from '@/schema/patient'
@@ -99,14 +99,14 @@ const preprocessPatientRow = async (
         bloodGroup: row.bloodGroup ?? '',
         religion: row.religion ?? '',
         patientStatus: row.patientStatus ?? 'Alive',
-        treatmentStatus: row.treatmentStatus ?? 'Ongoing',
+        // treatmentStatus: row.treatmentStatus ?? 'Ongoing',
         diagnosedDate: String(row.diagnosedDate) ?? '',
         diagnosedYearsAgo: row.diagnosedYearsAgo ?? '',
         hospitalRegistrationDate: String(row.hospitalRegistrationDate) ?? '',
         treatmentStartDate: String(row.treatmentStartDate) ?? '',
         treatmentEndDate: String(row.treatmentEndDate) ?? '',
         biopsyNumber: row.biopsyNumber ?? '',
-        transferred: row.transferred === 'yes',
+        transferred: row.transferred === 'true',
         transferredFrom: row.transferredFrom ?? '',
         hbcrID: row.hbcrID ?? '',
         hospitalRegistrationId: row.hospitalRegistrationId ?? '',
@@ -160,7 +160,10 @@ const uploadToFirestore = async (rows: any[], activeTab: string, queryClient: an
                 continue
             }
 
-            await addDoc(colRef, parsed.data)
+            await addDoc(colRef, {
+                ...parsed.data,
+                createdAt: serverTimestamp(),
+            })
             successCount++
         }
 

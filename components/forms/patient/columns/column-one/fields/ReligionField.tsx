@@ -28,10 +28,10 @@ const ReligionDropdown: React.FC<ReligionDropdownProps> = ({ form: { control } }
                         Religion
                     </SelectLabel>
                     <Select value={field.value} onValueChange={(val) => field.onChange(val)}>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full text-muted-foreground mb-1 text-sm">
                             <SelectValue placeholder="Select Religion" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="text-muted-foreground mb-1 text-sm">
                             <SelectItem value="hinduism">Hinduism</SelectItem>
                             <SelectItem value="islam">Islam</SelectItem>
                             <SelectItem value="christianity">Christianity</SelectItem>

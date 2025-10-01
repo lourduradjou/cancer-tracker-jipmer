@@ -8,8 +8,8 @@ export const InsuranceSchema = z
     .optional()
 
 export const FollowUpSchema = z.object({
-  date: z.string().optional(),
-  remarks: z.string().optional(),
+    date: z.string().optional(),
+    remarks: z.string().optional(),
 })
 
 export const PatientSchema = z
@@ -24,6 +24,7 @@ export const PatientSchema = z
             .max(100, "Name length can't exceed 100 characters")
             .regex(/^[A-Za-z\s]*$/, 'Name must only contain letters and spaces')
             .optional(),
+        createdAt: z.any().optional(),
         phoneNumber: z.array(z.string().optional()).optional(),
         sex: z.enum(['male', 'female', 'other'], {
             message: 'Please select a sex.',
@@ -45,10 +46,12 @@ export const PatientSchema = z
                 lat: z.number().optional(),
                 lng: z.number().optional(),
             })
-            .optional().nullable(),
+            .optional()
+            .nullable(),
         followUps: z.array(FollowUpSchema).optional(),
         patientStatus: z.enum(['Alive', 'Not Alive', 'Not Available']).optional(),
-        treatmentStatus: z.enum(['Ongoing', 'FollowUp', 'Stopped', 'Not Available']).optional(),
+        patientDeathDate: z.string().optional(),
+        // treatmentStatus: z.enum(['Ongoing', 'FollowUp', 'Stopped', 'Not Available']).optional(),
         aabhaId: z.string().optional(),
         diagnosedDate: z.string().optional(),
         diagnosedYearsAgo: z.string().optional(),
@@ -108,7 +111,28 @@ export const PatientSchema = z
             path: ['treatmentEndDate'],
         }
     )
+    .refine(
+        (data) => {
+            if (!data.patientDeathDate) return true // optional field
+            const death = new Date(data.patientDeathDate)
+            const today = new Date()
 
+            // must not be in future
+            if (death > today) return false
+
+            // must not be before dob
+            if (data.dob) {
+                const dob = new Date(data.dob)
+                if (death < dob) return false
+            }
+
+            return true
+        },
+        {
+            message: 'Death date must be after date of birth and not in the future.',
+            path: ['patientDeathDate'],
+        }
+    )
 export type PatientFormInputs = z.infer<typeof PatientSchema>
 
 // This type is for fetched data from the database, which always has an ID

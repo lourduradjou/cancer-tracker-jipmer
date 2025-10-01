@@ -121,6 +121,7 @@ export function GenericTable({
                 getExportData={() => getExportData(activeTab, data, filteredPatients)}
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
+                searchFields={SEARCH_FIELDS[activeTab]}
             />
 
             <Table className="border-border flex-1 overflow-auto rounded-md border">

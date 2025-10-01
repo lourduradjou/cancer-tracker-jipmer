@@ -69,17 +69,9 @@ export function useFilteredPatients(patients: Patient[] = []): Patient[] {
                 )
             })
             .sort((a, b) => {
-                if (
-                    a.patientStatus?.toLowerCase() === 'alive' &&
-                    b.patientStatus?.toLowerCase() !== 'alive'
-                )
-                    return -1
-                if (
-                    a.patientStatus?.toLowerCase() !== 'alive' &&
-                    b.patientStatus?.toLowerCase() === 'alive'
-                )
-                    return 1
-                return 0
+                const aTime = a.createdAt?.toMillis?.() ?? 0
+                const bTime = b.createdAt?.toMillis?.() ?? 0
+                return bTime - aTime // ✅ newest first
             })
     }, [patients, searchTerm, sexes, diseases, statuses, rationColors, age, assigned, transfer])
 }

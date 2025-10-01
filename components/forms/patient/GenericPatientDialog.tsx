@@ -12,13 +12,15 @@ import {
 } from '@/components/ui/dialog'
 import { Plus, Pencil } from 'lucide-react'
 import { db } from '@/firebase'
-import { addDoc, collection, doc, updateDoc } from 'firebase/firestore'
+import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
 import { checkAadhaarDuplicateUtil } from '@/lib/patient/checkPatientRecord'
 import { PatientSchema, PatientFormInputs } from '@/schema/patient'
 import GenericPatientForm from './GenericPatientForm'
 import clsx from 'clsx'
+import { useQueryClient } from '@tanstack/react-query'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface GenericPatientDialogProps {
     mode: 'add' | 'edit'
@@ -35,6 +37,8 @@ export default function GenericPatientDialog({
 }: GenericPatientDialogProps) {
     const [open, setOpen] = useState(false)
     const isEdit = mode === 'edit'
+    const queryClient = useQueryClient()
+    const {orgId} = useAuth()
 
     const form = useForm<PatientFormInputs>({
         resolver: zodResolver(PatientSchema),
@@ -51,6 +55,7 @@ export default function GenericPatientDialog({
             aabhaId: '',
             rationCardColor: 'none',
             religion: 'none',
+            bloodGroup: '',
             diseases: [],
             assignedHospital: { id: '', name: '' },
             diagnosedYearsAgo: '',
@@ -58,6 +63,7 @@ export default function GenericPatientDialog({
             treatmentStartDate: null,
             treatmentEndDate: null,
             patientStatus: 'Alive',
+            patientDeathDate: '',
             hasAadhaar: true,
             suspectedCase: false,
             biopsyNumber: '',
@@ -121,9 +127,19 @@ export default function GenericPatientDialog({
                 toast.success('Patient updated successfully.')
             } else {
                 // Add new patient
-                await addDoc(collection(db, 'patients'), data)
+                await addDoc(collection(db, 'patients'), {
+                    ...data,
+                    createdAt: serverTimestamp(), // ✅ Firestore timestamp
+                })
                 toast.success('Patient added successfully.')
                 localStorage.removeItem('addPatientFormData')
+            }
+
+            // queryClient.invalidateQueries({ queryKey: ['patients'] })
+            if (orgId) {
+                queryClient.invalidateQueries({ queryKey: ['patients', orgId] })
+            } else {
+                queryClient.invalidateQueries({ queryKey: ['patients'] })
             }
 
             setOpen(false)

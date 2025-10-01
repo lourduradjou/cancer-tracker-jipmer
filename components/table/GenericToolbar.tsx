@@ -25,11 +25,13 @@ export function GenericToolbar({
     getExportData,
     searchTerm,
     setSearchTerm,
+    searchFields,
 }: {
     activeTab: 'ashas' | 'hospitals' | 'doctors' | 'nurses' | 'patients' | 'removedPatients'
     getExportData: () => any[]
     searchTerm: string
     setSearchTerm: (val: string) => void
+    searchFields: readonly string[]
 }) {
     const pathname = usePathname()
     const queryClient = useQueryClient()
@@ -61,7 +63,7 @@ export function GenericToolbar({
                     <SearchInput
                         value={searchTerm}
                         onChange={setSearchTerm}
-                        placeholder={`Search ${activeTab}...`}
+                        placeholder={`Search ${activeTab} via ${searchFields.join(', ')}`}
                     />
                 )}
                 {activeTab === 'patients' && <PatientFilter />}
@@ -88,7 +90,7 @@ export function GenericToolbar({
                                     document.getElementById('file-upload')?.click()
                                 }}
                             >
-                                Import
+                                Import Patients
                             </DropdownMenuItem>
                         )}
                         <input
