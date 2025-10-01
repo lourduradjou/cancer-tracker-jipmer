@@ -37,7 +37,7 @@ export default function Navbar() {
         <nav className="bg-background flex items-center justify-between border-b px-4 py-3 shadow md:px-8">
             {/* Logo */}
             <Link href="/" className="text-2xl font-bold text-green-600">
-                Compass
+                PuduCan
             </Link>
 
             {/* Hamburger */}

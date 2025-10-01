@@ -107,6 +107,6 @@ describe('LoginPage (Integration)', () => {
 
         render(<LoginPage />)
 
-        expect(push).toHaveBeenCalledWith('/compass/doctor')
+        expect(push).toHaveBeenCalledWith('/PuduCan/doctor')
     })
 })

@@ -11,7 +11,7 @@ export default function ReportsPage() {
             <TypographyH2 className="mb-4 text-2xl font-bold">Reports & Dashboards</TypographyH2>
 
             <TypographyMuted className="mb-6">
-                Below is a summary of available reports and statistics collected through the COMPASS
+                Below is a summary of available reports and statistics collected through the PuduCan
                 portal across various PHCs and hospitals.
             </TypographyMuted>
 

@@ -1,18 +1,18 @@
 export const NAV_LINKS = [
     {
         name: 'Doctor',
-        path: '/compass/doctor',
+        path: '/PuduCan/doctor',
     },
     {
         name: 'Nurse',
-        path: '/compass/nurse',
+        path: '/PuduCan/nurse',
     },
     {
         name: 'Asha',
-        path: '/compass/asha',
+        path: '/PuduCan/asha',
     },
     {
         name: 'Admin',
-        path: '/compass/admin',
+        path: '/PuduCan/admin',
     },
 ]
