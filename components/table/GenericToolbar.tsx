@@ -33,7 +33,7 @@ export function GenericToolbar({
     isSearching,
 }: {
     activeTab: 'ashas' | 'hospitals' | 'doctors' | 'nurses' | 'patients' | 'removedPatients'
-    getExportData: () => any[]
+    getExportData: () => unknown[]
     searchTerm: string
     setSearchTerm: (val: string) => void
     searchFields: readonly string[]
@@ -44,7 +44,7 @@ export function GenericToolbar({
     const queryClient = useQueryClient()
     const { role, orgName } = useAuth()
 
-    const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+    const [, setMobileFilterOpen] = useState(false)
     const [mobileAddOpen, setMobileAddOpen] = useState(false)
     const searchInputRef = useRef<HTMLInputElement>(null)
     const [shortcutDialogOpen, setShortcutDialogOpen] = useState(false)

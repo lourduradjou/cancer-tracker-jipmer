@@ -75,6 +75,7 @@ export function buildRoleScopedSearchQueries(
     const primaryField = 'name'
     const prefixEnd = `${term}\uf8ff`
 
+    // v1 search is prefix-only and case-sensitive, so last-name matches will not be found.
     const primaryQuery = query(
         scopedCollectionQuery,
         where(primaryField, '>=', term),
@@ -107,12 +108,22 @@ export function buildRoleScopedSearchQueries(
     if (tab === 'hospitals') {
         return {
             primaryQuery,
-            secondaryQuery: query(scopedCollectionQuery, where('contactNumber', '==', term)),
+            secondaryQuery: query(
+                scopedCollectionQuery,
+                where('contactNumber', '>=', term),
+                where('contactNumber', '<=', prefixEnd),
+                orderBy('contactNumber')
+            ),
         }
     }
 
     return {
         primaryQuery,
-        secondaryQuery: query(scopedCollectionQuery, where('phoneNumber', '==', term)),
+        secondaryQuery: query(
+            scopedCollectionQuery,
+            where('phoneNumber', '>=', term),
+            where('phoneNumber', '<=', prefixEnd),
+            orderBy('phoneNumber')
+        ),
     }
 }

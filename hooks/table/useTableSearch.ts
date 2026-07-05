@@ -120,17 +120,21 @@ export function useTableSearch<T extends RowWithId>({
 
         if (!term) {
             requestIdRef.current += 1
-            setCursorStack([null])
-            setSearchRows([])
-            setLastVisibleDoc(null)
-            setLastPrimaryCount(0)
-            setLastPageSizeUsed(0)
-            setIsSearching(false)
+            queueMicrotask(() => {
+                setCursorStack([null])
+                setSearchRows([])
+                setLastVisibleDoc(null)
+                setLastPrimaryCount(0)
+                setLastPageSizeUsed(0)
+                setIsSearching(false)
+            })
             return
         }
 
-        setCursorStack([null])
-        void fetchSearchPage(term, null, true)
+        queueMicrotask(() => {
+            setCursorStack([null])
+            void fetchSearchPage(term, null, true)
+        })
     }, [throttledSearchTerm, activeTab, scope.orgId, scope.ashaId, fetchSearchPage])
 
     const hasNextSearchPage = useMemo(() => {

@@ -3,12 +3,14 @@ import WelcomeBanner from '@/components/dashboard/WelcomeBanner'
 import { withAuth } from '@/components/hoc/withAuth'
 import PatientFormMobile from '@/components/asha/PatientFormMobile'
 import Loading from '@/components/ui/loading'
+import { SearchInput } from '@/components/search/SearchInput'
 import { ROLE_CONFIG } from '@/constants/auth'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTableSearch } from '@/hooks/table/useTableSearch'
 import { useTableData } from '@/hooks/table/useTableData'
 import { Patient } from '@/schema/patient'
 import { toast } from 'sonner'
-
+import { useMemo } from 'react'
 
 function AshaPageContent() {
     const { user, userId, orgName, isLoadingAuth } = useAuth()
@@ -30,6 +32,19 @@ function AshaPageContent() {
         isError: boolean
     }
 
+    const { 
+        filteredRows: searchedPatients, 
+        searchTerm, 
+        setSearchTerm, 
+        isSearching, 
+        isSearchActive, 
+    } = useTableSearch({ 
+        rows: patients, 
+        activeTab: 'patients', 
+        scope: { orgId: null, ashaId: userId }, 
+    }) 
+
+    const patientsToDisplay = useMemo(() => searchedPatients, [searchedPatients]) 
 
     if (isLoading || isLoadingAuth) {
         return (
@@ -56,6 +71,17 @@ function AshaPageContent() {
             <WelcomeBanner />
         </div>
 
+        <div className="mb-4 flex justify-center">
+            <div className="w-full max-w-md">
+                <SearchInput
+                    value={searchTerm}
+                    onChange={setSearchTerm}
+                    placeholder="Search patients..."
+                    isSearching={isSearching}
+                />
+            </div>
+        </div>
+
         <h1 className="mb-1 text-center text-xl font-bold">
             Your Assigned Patients
         </h1>
@@ -63,13 +89,13 @@ function AshaPageContent() {
             <p className="mb-4 text-center text-sm text-zinc-500 dark:text-zinc-400">{orgName}</p>
         )}
 
-        {patients.length === 0 ? (
+        {patientsToDisplay.length === 0 ? (
             <p className="text-center text-sm">
                 No patients assigned to you.
             </p>
         ) : (
             <div className="mx-auto flex flex-col items-center gap-4 overflow-auto">
-                {patients.map((patient: Patient) => (
+                {patientsToDisplay.map((patient: Patient) => (
                     <PatientFormMobile
                         key={patient.id}
                         patient={patient}

@@ -16,7 +16,7 @@ import DeleteEntityDialog from '@/components/dialogs/DeleteEntityDialog'
 import { hospitalFields, patientFields, SEARCH_FIELDS, userFields } from '@/constants'
 import { useTableSearch, useStats, useTableData } from '@/hooks'
 import { Hospital, Patient, UserDoc } from '@/schema'
-import { use, useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import ViewDetailsDialog from '../dialogs/ViewDetailsDialog'
 import { GenericPagination, GenericRow, GenericToolbar } from './'
 import { useTableStore } from '@/store'
@@ -92,6 +92,7 @@ export function GenericTable({
         filteredRows: searchedData,
         searchTerm,
         setSearchTerm,
+            isSearching,
         isSearchActive,
         searchCurrentPage,
         searchTotalPages,
@@ -153,7 +154,7 @@ export function GenericTable({
             setSelectedRow(row as TabDataMap[typeof activeTab])
             openModal(action)
         },
-        [activeTab, setSelectedRow, openModal]
+        [setSelectedRow, openModal]
     )
 
     function getExportData(
@@ -217,6 +218,7 @@ export function GenericTable({
                 setSearchTerm={setSearchTerm}
                 searchFields={SEARCH_FIELDS[activeTab]}
                 isLoading={isLoading || isLoadingAuth}
+                isSearching={isSearching}
             />
 
             <BulkActionBar
@@ -409,8 +411,8 @@ export function GenericTable({
                 ids={selectedIdsArray()}
                 rowsData={displayData as Record<string, unknown>[]}
                 onClose={() => {
-                    closeModal(),
-                        clearSelection()
+                    closeModal()
+                    clearSelection()
                 }}
 
             />
