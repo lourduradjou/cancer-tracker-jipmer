@@ -30,19 +30,21 @@ export function GenericToolbar({
     setSearchTerm,
     searchFields,
     isLoading,
+    isSearching,
 }: {
     activeTab: 'ashas' | 'hospitals' | 'doctors' | 'nurses' | 'patients' | 'removedPatients'
-    getExportData: () => any[]
+    getExportData: () => Record<string, unknown>[]
     searchTerm: string
     setSearchTerm: (val: string) => void
     searchFields: readonly string[]
     isLoading?: boolean
+    isSearching?: boolean
 }) {
     const pathname = usePathname()
     const queryClient = useQueryClient()
     const { role, orgName } = useAuth()
 
-    const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+    const [, setMobileFilterOpen] = useState(false)
     const [mobileAddOpen, setMobileAddOpen] = useState(false)
     const searchInputRef = useRef<HTMLInputElement>(null)
     const [shortcutDialogOpen, setShortcutDialogOpen] = useState(false)
@@ -92,6 +94,7 @@ export function GenericToolbar({
                                 value={searchTerm}
                                 onChange={setSearchTerm}
                                 placeholder={`Search ${activeTab}...`}
+                                isSearching={isSearching} 
                             />
                         </div>
                     )}
@@ -166,7 +169,7 @@ export function GenericToolbar({
                                 </DropdownMenuItem>
 
                                 {activeTab === 'patients' && (
-                                    <DropdownMenuItem onClick={() => generateDiseasePDF(getExportData())}>
+                                    <DropdownMenuItem onClick={() => generateDiseasePDF(getExportData() as Parameters<typeof generateDiseasePDF>[0])}>
                                         Generate Report
                                     </DropdownMenuItem>
                                 )}
@@ -185,6 +188,7 @@ export function GenericToolbar({
                                 value={searchTerm}
                                 onChange={setSearchTerm}
                                 placeholder={`Search ${activeTab} via ${searchFields.join(', ')}`}
+                                isSearching={isSearching}
                             />
                         </div>
                     )}
@@ -245,7 +249,7 @@ export function GenericToolbar({
                                 </DropdownMenuItem>
 
                                 {activeTab === 'patients' && (
-                                    <DropdownMenuItem onClick={() => generateDiseasePDF(getExportData())}>
+                                    <DropdownMenuItem onClick={() => generateDiseasePDF(getExportData() as Parameters<typeof generateDiseasePDF>[0])}>
                                         Generate Report
                                     </DropdownMenuItem>
                                 )}
