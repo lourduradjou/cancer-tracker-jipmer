@@ -14,7 +14,7 @@ import { usePagination } from '@/hooks/table/usePagination'
 
 import DeleteEntityDialog from '@/components/dialogs/DeleteEntityDialog'
 import { hospitalFields, patientFields, SEARCH_FIELDS, userFields } from '@/constants'
-import { useSearch, useStats, useTableData } from '@/hooks'
+import { useTableSearch, useStats, useTableData } from '@/hooks'
 import { Hospital, Patient, UserDoc } from '@/schema'
 import { use, useCallback, useEffect, useMemo } from 'react'
 import ViewDetailsDialog from '../dialogs/ViewDetailsDialog'
@@ -87,13 +87,23 @@ export function GenericTable({
 
     // ✅ Choose correct baseData (patients → filtered first, others → raw data)
     const baseData = isPatientTab ? filteredPatients : (data ?? [])
-    type ActiveDataType = TabDataMap[typeof activeTab] // infer based on activeTab
 
-    const {
+        const {
         filteredRows: searchedData,
         searchTerm,
         setSearchTerm,
-    } = useSearch<ActiveDataType>(baseData, searchFields)
+        isSearchActive,
+        searchCurrentPage,
+        searchTotalPages,
+        goToSearchPage,
+    } = useTableSearch({
+        rows: baseData as TabDataMap[typeof activeTab][],
+        activeTab,
+        scope: {
+            orgId: role === 'admin' ? null : orgId,
+            ashaId: role === 'asha' ? user?.id ?? null : null,
+        },
+    }) 
 
     // ✅ Apply sorting after search
     const { sorting, toggle, sortedData } = useSorting(searchedData)
@@ -104,6 +114,8 @@ export function GenericTable({
     const tableData = usePagination<(typeof dataToPaginate)[number]>(dataToPaginate, rowsPerPage)
 
     const { paginated: paginatedData, currentPage, totalPages, setCurrentPage } = tableData
+    const displayData = isSearchActive ? dataToPaginate : paginatedData
+    const displayPage = isSearchActive ? searchCurrentPage : currentPage
 
     const tableStats = useStats({
         TableData: searchedData ?? [],
@@ -154,7 +166,7 @@ export function GenericTable({
         return data ?? []
     }
 
-    const currentPageIds = useMemo(() => paginatedData.map((row) => row.id), [paginatedData])
+    const currentPageIds = useMemo(() => displayData.map((row) => row.id), [displayData])
     const allCurrentSelected = currentPageIds.length > 0 && currentPageIds.every((id) => selectedIds.has(id))
     const someCurrentPageSelected = !allCurrentSelected && currentPageIds.some((id) => selectedIds.has(id))
 
@@ -312,15 +324,15 @@ export function GenericTable({
                                 <TableSkeleton />
                             </TableCell>
                         </TableRow>
-                    ) : paginatedData.length > 0 ? (
-                        paginatedData.map((data, index) => (
+                    ) : displayData.length > 0 ? (
+                        displayData.map((data, index) => ( 
                             <GenericRow
                                 key={data.id}
                                 activeTab={activeTab}
                                 isPatientTab={isPatientTab}
                                 isRemovedPatientsTab={activeTab === 'removedPatients'}
                                 rowData={data}
-                                index={(currentPage - 1) * rowsPerPage + index}
+                                index={(displayPage - 1) * rowsPerPage + index}
                                 onView={(row) => handleRowAction(row, 'view')}
                                 onUpdate={(row) => handleRowAction(row, 'update')}
                                 onDelete={(row) => handleRowAction(row, 'delete')}
@@ -344,14 +356,14 @@ export function GenericTable({
 
             {/* ✅ Mobile rows outside table */}
             <div className="sm:hidden">
-                {paginatedData.map((data, index) => (
+                {displayData.map((data, index) => ( 
                     <GenericMobileRow
                         key={data.id + '-mobile'}
                         activeTab={activeTab}
                         isPatientTab={isPatientTab}
                         isRemovedPatientsTab={activeTab === 'removedPatients'}
                         rowData={data}
-                        index={(currentPage - 1) * rowsPerPage + index}
+                        index={(displayPage - 1) * rowsPerPage + index}
                         onView={(row) => handleRowAction(row, 'view')}
                         onUpdate={(row) => handleRowAction(row, 'update')}
                         onDelete={(row) => handleRowAction(row, 'delete')}
@@ -364,9 +376,9 @@ export function GenericTable({
 
             <div className="">
                 <GenericPagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
+                    currentPage={isSearchActive ? searchCurrentPage : currentPage}
+                    totalPages={isSearchActive ? searchTotalPages : totalPages}
+                    onPageChange={isSearchActive ? goToSearchPage : setCurrentPage}
                     stats={tableStats} // only show stats for patients
                     isPatientTab={isPatientTab}
                     isLoading={isLoading || isLoadingAuth}
@@ -395,7 +407,7 @@ export function GenericTable({
                 open={modal === 'bulkDelete'}
                 collectionName={activeTab}
                 ids={selectedIdsArray()}
-                rowsData={paginatedData as Record<string, any>[]}
+                rowsData={displayData as Record<string, unknown>[]}
                 onClose={() => {
                     closeModal(),
                         clearSelection()
