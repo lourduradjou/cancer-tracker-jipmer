@@ -84,6 +84,13 @@ export function GenericTable({
     const isHospitalTab = activeTab == 'hospitals'
     const patients = (data as Patient[]) ?? []
     const filteredPatients = useFilteredPatients(isPatientTab ? patients : [])
+    const scope = useMemo(
+        () => ({
+            orgId: role === 'admin' ? null : orgId,
+            ashaId: role === 'asha' ? (user?.id ?? null) : null,
+        }),
+        [role, orgId, user?.id]
+    )
 
     // ✅ Choose correct baseData (patients → filtered first, others → raw data)
     const baseData = isPatientTab ? filteredPatients : (data ?? [])
@@ -100,10 +107,7 @@ export function GenericTable({
     } = useTableSearch({
         rows: baseData as TabDataMap[typeof activeTab][],
         activeTab,
-        scope: {
-            orgId: role === 'admin' ? null : orgId,
-            ashaId: role === 'asha' ? user?.id ?? null : null,
-        },
+        scope,
     }) 
 
     // ✅ Apply sorting after search
@@ -161,10 +165,10 @@ export function GenericTable({
         activeTab: keyof TabDataMap,
         data: unknown[],
         filteredPatients: Patient[]
-    ) {
-        if (activeTab === 'patients') return filteredPatients
-        if (activeTab === 'hospitals') return (data ?? []) as Hospital[]
-        return data ?? []
+    ): Record<string, unknown>[] {
+        if (activeTab === 'patients') return filteredPatients as unknown as Record<string, unknown>[]
+        if (activeTab === 'hospitals') return (data ?? []) as Record<string, unknown>[]
+        return (data ?? []) as Record<string, unknown>[]
     }
 
     const currentPageIds = useMemo(() => displayData.map((row) => row.id), [displayData])

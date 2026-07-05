@@ -33,7 +33,7 @@ export function GenericToolbar({
     isSearching,
 }: {
     activeTab: 'ashas' | 'hospitals' | 'doctors' | 'nurses' | 'patients' | 'removedPatients'
-    getExportData: () => unknown[]
+    getExportData: () => Record<string, unknown>[]
     searchTerm: string
     setSearchTerm: (val: string) => void
     searchFields: readonly string[]
@@ -169,7 +169,7 @@ export function GenericToolbar({
                                 </DropdownMenuItem>
 
                                 {activeTab === 'patients' && (
-                                    <DropdownMenuItem onClick={() => generateDiseasePDF(getExportData())}>
+                                    <DropdownMenuItem onClick={() => generateDiseasePDF(getExportData() as Parameters<typeof generateDiseasePDF>[0])}>
                                         Generate Report
                                     </DropdownMenuItem>
                                 )}
@@ -249,7 +249,7 @@ export function GenericToolbar({
                                 </DropdownMenuItem>
 
                                 {activeTab === 'patients' && (
-                                    <DropdownMenuItem onClick={() => generateDiseasePDF(getExportData())}>
+                                    <DropdownMenuItem onClick={() => generateDiseasePDF(getExportData() as Parameters<typeof generateDiseasePDF>[0])}>
                                         Generate Report
                                     </DropdownMenuItem>
                                 )}

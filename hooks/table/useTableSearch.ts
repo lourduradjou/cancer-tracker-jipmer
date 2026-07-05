@@ -44,6 +44,12 @@ export function useTableSearch<T extends RowWithId>({
 
     const isSearchActive = throttledSearchTerm.trim().length > 0
 
+    // NOTE: this depends on the whole `scope` object, not scope.orgId/scope.ashaId
+    // individually. That's only safe because the sole caller (GenericTable.tsx)
+    // passes a useMemo'd scope. If useTableSearch ever gets a second caller,
+    // that caller MUST memoize its own scope object the same way, or this
+    // will reintroduce the infinite-render-loop bug fixed in GenericTable.tsx.
+
     const fetchSearchPage = useCallback(
         async (term: string, cursor: DocumentSnapshot | null, includeSecondary: boolean) => {
             const trimmedTerm = term.trim()
