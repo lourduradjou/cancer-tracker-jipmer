@@ -30,6 +30,7 @@ export function GenericToolbar({
     setSearchTerm,
     searchFields,
     isLoading,
+    isSearching,
 }: {
     activeTab: 'ashas' | 'hospitals' | 'doctors' | 'nurses' | 'patients' | 'removedPatients'
     getExportData: () => any[]
@@ -37,6 +38,7 @@ export function GenericToolbar({
     setSearchTerm: (val: string) => void
     searchFields: readonly string[]
     isLoading?: boolean
+    isSearching?: boolean
 }) {
     const pathname = usePathname()
     const queryClient = useQueryClient()
@@ -92,6 +94,7 @@ export function GenericToolbar({
                                 value={searchTerm}
                                 onChange={setSearchTerm}
                                 placeholder={`Search ${activeTab}...`}
+                                isSearching={isSearching} 
                             />
                         </div>
                     )}
@@ -185,6 +188,7 @@ export function GenericToolbar({
                                 value={searchTerm}
                                 onChange={setSearchTerm}
                                 placeholder={`Search ${activeTab} via ${searchFields.join(', ')}`}
+                                isSearching={isSearching}
                             />
                         </div>
                     )}

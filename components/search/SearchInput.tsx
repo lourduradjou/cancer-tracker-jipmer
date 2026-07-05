@@ -1,15 +1,16 @@
 import { forwardRef } from 'react'
 import { Input } from '@/components/ui/input'
-import { Search } from 'lucide-react'
+import { Loader2, Search } from 'lucide-react'
 
 interface SearchInputProps {
     value: string
     onChange: (val: string) => void
     placeholder?: string
+    isSearching?: boolean
 }
 
 export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
-    ({ value, onChange, placeholder = 'Search...' }, ref) => {
+    ({ value, onChange, placeholder = 'Search...', isSearching = false }, ref) => {
         return (
             <div className="relative w-full md:w-[500px]">
                 <Search
@@ -23,8 +24,15 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
                     onChange={(e) => onChange(e.target.value)}
                     placeholder={placeholder}
                     aria-label="Search"
-                    className="w-full pl-8"
+                    className="w-full pr-8 pl-8"
                 />
+
+                {isSearching && ( 
+                    <Loader2 
+                        className="text-muted-foreground absolute top-1/2 right-2 h-4 w-4 -translate-y-1/2 animate-spin" 
+                        aria-hidden="true" 
+                    /> 
+                )}
             </div>
         )
     }
