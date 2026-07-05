@@ -5,6 +5,7 @@ import { FormControl, FormField, FormItem, FormMessage, FormLabel } from '@/comp
 import TreatmentDropdown from './fields/TreatmentDropdrop'
 import { TreatmentPeriodField } from './fields/TreatmentPeriodField'
 import { FloatingLabelInput } from '@/components/ui/floating-label-input'
+import { PatientFormInputs } from '@/schema/patient'
 import {
     Select,
     SelectTrigger,
@@ -15,7 +16,7 @@ import {
 import clsx from 'clsx'
 
 type RightColumnProps = {
-    form: UseFormReturn<any>
+    form: UseFormReturn<PatientFormInputs>
     isAsha?: boolean
 }
 
@@ -31,7 +32,7 @@ export function ColumnFour({ form, isAsha = false }: RightColumnProps) {
                 
                 <FormField
                     control={control}
-                    name="hospitalRegistrationNumber"
+                    name="hospitalRegistrationId"
                     render={({ field }) => (
                         <FormItem>
                             <FormControl>
@@ -65,27 +66,57 @@ export function ColumnFour({ form, isAsha = false }: RightColumnProps) {
                 />
 
                 {/* Stage of the Cancer */}
-                <FormField
-                    control={control}
-                    name="stageOfTheCancer"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormControl>
-                                <FloatingLabelInput
-                                    label="Enter Stage of the Cancer"
-                                    autoComplete="off"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                {/* Biopsy Number */}
                 <div className="flex flex-col gap-2">
                     <FormLabel className="text-muted-foreground text-sm">Stage of the Cancer</FormLabel>
-                    {/* ... (Stage and Sub-stage fields remain the same) ... */}
+
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <FormField
+                            control={control}
+                            name="stageOfTheCancer.stage"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <Select onValueChange={field.onChange} value={field.value || ''}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select stage" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="Stage 0">Stage 0</SelectItem>
+                                                <SelectItem value="Stage I">Stage I</SelectItem>
+                                                <SelectItem value="Stage II">Stage II</SelectItem>
+                                                <SelectItem value="Stage III">Stage III</SelectItem>
+                                                <SelectItem value="Stage IV">Stage IV</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={control}
+                            name="stageOfTheCancer.subStage"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <Select onValueChange={field.onChange} value={field.value || ''}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select sub-stage" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="A">A</SelectItem>
+                                                <SelectItem value="B">B</SelectItem>
+                                                <SelectItem value="C">C</SelectItem>
+                                                <SelectItem value="D">D</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                 </div>
 
                 <FormField
@@ -98,6 +129,7 @@ export function ColumnFour({ form, isAsha = false }: RightColumnProps) {
                                     label="Biopsy Number (If Applicable)"
                                     autoComplete="off"
                                     {...field}
+                                    value={field.value ?? ''}
                                 />
                             </FormControl>
                             <FormMessage />
