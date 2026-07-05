@@ -32,6 +32,11 @@ function AshaPageContent() {
         isError: boolean
     }
 
+    const searchScope = useMemo(
+        () => ({ orgId: null, ashaId: userId ?? null }),
+        [userId]
+    )
+
     const { 
         filteredRows: searchedPatients, 
         searchTerm, 
@@ -41,7 +46,7 @@ function AshaPageContent() {
     } = useTableSearch({ 
         rows: patients, 
         activeTab: 'patients', 
-        scope: { orgId: null, ashaId: userId }, 
+        scope: searchScope, 
     }) 
 
     const patientsToDisplay = useMemo(() => searchedPatients, [searchedPatients]) 
