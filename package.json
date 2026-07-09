@@ -94,7 +94,7 @@
         "babel-loader": "^10.1.1",
         "dotenv": "^17.4.2",
         "eslint": "^9",
-        "eslint-config-next": "16.2.7",
+        "eslint-config-next": "16.2.10",
         "eslint-plugin-storybook": "9.0.18",
         "jsdom": "^29.1.1",
         "playwright": "1.60.0",
