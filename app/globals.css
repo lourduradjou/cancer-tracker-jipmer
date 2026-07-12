@@ -155,3 +155,157 @@
 .animate-fadeIn {
     animation: fadeIn 0.3s ease forwards;
 }
+
+/* ==========================================================
+   Responsive Utilities
+   Append at the end of globals.css
+   ========================================================== */
+
+/* Prevent horizontal scrolling */
+html,
+body {
+  overflow-x: hidden;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---------- Mobile Devices (0px - 480px) ---------- */
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+
+  body {
+    line-height: 1.6;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 8vw, 2.5rem);
+  }
+
+  h2 {
+    font-size: clamp(1.6rem, 6vw, 2rem);
+  }
+
+  h3 {
+    font-size: 1.35rem;
+  }
+
+  p {
+    font-size: 0.95rem;
+  }
+
+  section,
+  main {
+    padding-inline: 1rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 100%;
+    padding-inline: 1rem;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    min-height: 44px;
+  }
+
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .flex-row {
+    flex-direction: column !important;
+  }
+
+  .gap-8 {
+    gap: 1rem !important;
+  }
+
+  .gap-10,
+  .gap-12 {
+    gap: 1.5rem !important;
+  }
+}
+
+/* ---------- Tablets (481px - 768px) ---------- */
+@media (min-width: 481px) and (max-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+
+  .container {
+    width: 100%;
+    padding-inline: 1.5rem;
+  }
+
+  section,
+  main {
+    padding-inline: 1.5rem;
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 6vw, 3rem);
+  }
+
+  h2 {
+    font-size: 2rem;
+  }
+
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .gap-10,
+  .gap-12 {
+    gap: 2rem !important;
+  }
+}
+
+/* ---------- Small Laptops (769px - 992px) ---------- */
+@media (min-width: 769px) and (max-width: 992px) {
+  .container {
+    width: 92%;
+    margin-inline: auto;
+  }
+
+  section,
+  main {
+    padding-inline: 2rem;
+  }
+
+  h1 {
+    font-size: 3.2rem;
+  }
+
+  h2 {
+    font-size: 2.5rem;
+  }
+
+  .grid-4 {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .gap-12 {
+    gap: 2.5rem !important;
+  }
+}
+
